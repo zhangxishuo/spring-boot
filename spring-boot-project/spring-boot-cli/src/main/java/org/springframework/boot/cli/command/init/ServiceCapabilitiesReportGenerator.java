@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -78,8 +78,7 @@ class ServiceCapabilitiesReportGenerator {
 		return report.toString();
 	}
 
-	private void reportAvailableDependencies(InitializrServiceMetadata metadata,
-			StringBuilder report) {
+	private void reportAvailableDependencies(InitializrServiceMetadata metadata, StringBuilder report) {
 		report.append("Available dependencies:").append(NEW_LINE);
 		report.append("-----------------------").append(NEW_LINE);
 		List<Dependency> dependencies = getSortedDependencies(metadata);
@@ -98,12 +97,10 @@ class ServiceCapabilitiesReportGenerator {
 		return dependencies;
 	}
 
-	private void reportAvailableProjectTypes(InitializrServiceMetadata metadata,
-			StringBuilder report) {
+	private void reportAvailableProjectTypes(InitializrServiceMetadata metadata, StringBuilder report) {
 		report.append("Available project types:").append(NEW_LINE);
 		report.append("------------------------").append(NEW_LINE);
-		SortedSet<Entry<String, ProjectType>> entries = new TreeSet<>(
-				Comparator.comparing(Entry::getKey));
+		SortedSet<Entry<String, ProjectType>> entries = new TreeSet<>(Comparator.comparing(Entry::getKey));
 		entries.addAll(metadata.getProjectTypes().entrySet());
 		for (Entry<String, ProjectType> entry : entries) {
 			ProjectType type = entry.getValue();
@@ -132,16 +129,14 @@ class ServiceCapabilitiesReportGenerator {
 		report.append("]");
 	}
 
-	private void reportDefaults(StringBuilder report,
-			InitializrServiceMetadata metadata) {
+	private void reportDefaults(StringBuilder report, InitializrServiceMetadata metadata) {
 		report.append("Defaults:").append(NEW_LINE);
 		report.append("---------").append(NEW_LINE);
 		List<String> defaultsKeys = new ArrayList<>(metadata.getDefaults().keySet());
 		Collections.sort(defaultsKeys);
 		for (String defaultsKey : defaultsKeys) {
 			String defaultsValue = metadata.getDefaults().get(defaultsKey);
-			report.append(defaultsKey).append(": ").append(defaultsValue)
-					.append(NEW_LINE);
+			report.append(defaultsKey).append(": ").append(defaultsValue).append(NEW_LINE);
 		}
 	}
 

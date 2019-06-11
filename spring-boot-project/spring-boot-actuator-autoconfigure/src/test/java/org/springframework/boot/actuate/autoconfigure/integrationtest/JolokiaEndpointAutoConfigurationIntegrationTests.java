@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,8 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.endpoint.EndpointAutoConfiguration;
@@ -48,7 +47,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -57,55 +55,51 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Stephane Nicoll
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = "management.endpoints.web.exposure.include=jolokia")
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT,
+		properties = "management.endpoints.web.exposure.include=jolokia")
 @DirtiesContext
-public class JolokiaEndpointAutoConfigurationIntegrationTests {
+class JolokiaEndpointAutoConfigurationIntegrationTests {
 
 	@Autowired
 	private TestRestTemplate restTemplate;
 
 	@Test
-	public void jolokiaIsExposed() {
-		ResponseEntity<String> response = this.restTemplate
-				.getForEntity("/actuator/jolokia", String.class);
+	void jolokiaIsExposed() {
+		ResponseEntity<String> response = this.restTemplate.getForEntity("/actuator/jolokia", String.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).contains("\"agent\"");
 		assertThat(response.getBody()).contains("\"request\":{\"type\"");
 	}
 
 	@Test
-	public void search() {
-		ResponseEntity<String> response = this.restTemplate
-				.getForEntity("/actuator/jolokia/search/java.lang:*", String.class);
+	void search() {
+		ResponseEntity<String> response = this.restTemplate.getForEntity("/actuator/jolokia/search/java.lang:*",
+				String.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).contains("GarbageCollector");
 	}
 
 	@Test
-	public void read() {
-		ResponseEntity<String> response = this.restTemplate.getForEntity(
-				"/actuator/jolokia/read/java.lang:type=Memory", String.class);
+	void read() {
+		ResponseEntity<String> response = this.restTemplate.getForEntity("/actuator/jolokia/read/java.lang:type=Memory",
+				String.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).contains("NonHeapMemoryUsage");
 	}
 
 	@Test
-	public void list() {
-		ResponseEntity<String> response = this.restTemplate.getForEntity(
-				"/actuator/jolokia/list/java.lang/type=Memory/attr", String.class);
+	void list() {
+		ResponseEntity<String> response = this.restTemplate
+				.getForEntity("/actuator/jolokia/list/java.lang/type=Memory/attr", String.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).contains("NonHeapMemoryUsage");
 	}
 
 	@Configuration(proxyBeanMethods = false)
 	@MinimalWebConfiguration
-	@Import({ JacksonAutoConfiguration.class,
-			HttpMessageConvertersAutoConfiguration.class,
-			JolokiaEndpointAutoConfiguration.class, EndpointAutoConfiguration.class,
-			WebEndpointAutoConfiguration.class,
-			ServletManagementContextAutoConfiguration.class,
-			ManagementContextAutoConfiguration.class,
+	@Import({ JacksonAutoConfiguration.class, HttpMessageConvertersAutoConfiguration.class,
+			JolokiaEndpointAutoConfiguration.class, EndpointAutoConfiguration.class, WebEndpointAutoConfiguration.class,
+			ServletManagementContextAutoConfiguration.class, ManagementContextAutoConfiguration.class,
 			ServletEndpointManagementContextConfiguration.class })
 	protected static class Application {
 
@@ -114,9 +108,8 @@ public class JolokiaEndpointAutoConfigurationIntegrationTests {
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
-	@Import({ ServletWebServerFactoryAutoConfiguration.class,
-			DispatcherServletAutoConfiguration.class, ValidationAutoConfiguration.class,
-			WebMvcAutoConfiguration.class, JacksonAutoConfiguration.class,
+	@Import({ ServletWebServerFactoryAutoConfiguration.class, DispatcherServletAutoConfiguration.class,
+			ValidationAutoConfiguration.class, WebMvcAutoConfiguration.class, JacksonAutoConfiguration.class,
 			ErrorMvcAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class })
 	protected @interface MinimalWebConfiguration {
 

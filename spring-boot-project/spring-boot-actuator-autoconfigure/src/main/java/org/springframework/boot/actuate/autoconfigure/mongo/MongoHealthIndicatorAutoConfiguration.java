@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,13 +48,12 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 @AutoConfigureBefore(HealthIndicatorAutoConfiguration.class)
 @AutoConfigureAfter({ MongoAutoConfiguration.class, MongoDataAutoConfiguration.class,
 		MongoReactiveHealthIndicatorAutoConfiguration.class })
-public class MongoHealthIndicatorAutoConfiguration extends
-		CompositeHealthIndicatorConfiguration<MongoHealthIndicator, MongoTemplate> {
+public class MongoHealthIndicatorAutoConfiguration
+		extends CompositeHealthIndicatorConfiguration<MongoHealthIndicator, MongoTemplate> {
 
 	@Bean
 	@ConditionalOnMissingBean(name = "mongoHealthIndicator")
-	public HealthIndicator mongoHealthIndicator(
-			Map<String, MongoTemplate> mongoTemplates) {
+	public HealthIndicator mongoHealthIndicator(Map<String, MongoTemplate> mongoTemplates) {
 		return createHealthIndicator(mongoTemplates);
 	}
 

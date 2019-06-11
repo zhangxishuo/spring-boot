@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -29,7 +29,7 @@
 		<testcontainers.version>1.10.6</testcontainers.version>
 		<testng.version>6.14.3</testng.version>
 		<dependency-management-plugin.version>1.0.6.RELEASE</dependency-management-plugin.version>
-		<spring-doc-resources.version>0.1.0.RELEASE</spring-doc-resources.version>
+		<spring-doc-resources.version>0.1.2.RELEASE</spring-doc-resources.version>
 	</properties>
 	<scm>
 		<url>https://github.com/spring-projects/spring-boot</url>
@@ -74,16 +74,6 @@
 				<groupId>org.sonatype.sisu</groupId>
 				<artifactId>sisu-inject-plexus</artifactId>
 				<version>2.6.0</version>
-			</dependency>
-			<dependency>
-				<groupId>com.squareup.okhttp3</groupId>
-				<artifactId>okhttp</artifactId>
-				<version>3.11.0</version>
-			</dependency>
-			<dependency>
-				<groupId>com.squareup.okhttp3</groupId>
-				<artifactId>mockwebserver</artifactId>
-				<version>3.9.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.vaadin.external.google</groupId>
@@ -248,8 +238,24 @@
 	<dependencies>
 		<!-- Generally Useful Test Dependencies -->
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.hamcrest</groupId>
+					<artifactId>hamcrest-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -264,7 +270,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-library</artifactId>
+			<artifactId>hamcrest</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -294,6 +300,13 @@
 					<groupId>org.asciidoctor</groupId>
 					<artifactId>asciidoctor-maven-plugin</artifactId>
 					<version>1.5.7.1</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.asciidoctor</groupId>
+							<artifactId>asciidoctorj</artifactId>
+							<version>1.5.8</version>
+						</dependency>
+					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -575,6 +588,8 @@
 							<rules>
 								<bannedDependencies>
 									<excludes>
+										<exclude>com.zaxxer:HikariCP-*</exclude>
+										<exclude>org.hamcrest:hamcrest-*</exclude>
 										<exclude>javax.*:*:*</exclude>
 									</excludes>
 									<includes>

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -50,11 +50,11 @@ public class SampleAtmosphereApplication {
 		// to be mapped to '/chat'
 		AtmosphereServlet atmosphereServlet = new AtmosphereServlet();
 		atmosphereServlet.framework().setHandlersPath("/");
-		ServletRegistrationBean<AtmosphereServlet> registration = new ServletRegistrationBean<>(
-				atmosphereServlet, "/chat/*");
+		ServletRegistrationBean<AtmosphereServlet> registration = new ServletRegistrationBean<>(atmosphereServlet,
+				"/chat/*");
 		registration.addInitParameter("org.atmosphere.cpr.packages", "sample");
-		registration.addInitParameter("org.atmosphere.interceptor.HeartbeatInterceptor"
-				+ ".clientHeartbeatFrequencyInSeconds", "10");
+		registration.addInitParameter(
+				"org.atmosphere.interceptor.HeartbeatInterceptor" + ".clientHeartbeatFrequencyInSeconds", "10");
 		registration.setLoadOnStartup(0);
 		// Need to occur before the EmbeddedAtmosphereInitializer
 		registration.setOrder(Ordered.HIGHEST_PRECEDENCE);

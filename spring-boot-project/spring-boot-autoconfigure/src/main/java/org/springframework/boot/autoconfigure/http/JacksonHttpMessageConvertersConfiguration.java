@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,15 +41,16 @@ class JacksonHttpMessageConvertersConfiguration {
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(ObjectMapper.class)
 	@ConditionalOnBean(ObjectMapper.class)
-	@ConditionalOnProperty(name = HttpMessageConvertersAutoConfiguration.PREFERRED_MAPPER_PROPERTY, havingValue = "jackson", matchIfMissing = true)
+	@ConditionalOnProperty(name = HttpMessageConvertersAutoConfiguration.PREFERRED_MAPPER_PROPERTY,
+			havingValue = "jackson", matchIfMissing = true)
 	protected static class MappingJackson2HttpMessageConverterConfiguration {
 
 		@Bean
-		@ConditionalOnMissingBean(value = MappingJackson2HttpMessageConverter.class, ignoredType = {
-				"org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter",
-				"org.springframework.data.rest.webmvc.alps.AlpsJsonHttpMessageConverter" })
-		public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter(
-				ObjectMapper objectMapper) {
+		@ConditionalOnMissingBean(value = MappingJackson2HttpMessageConverter.class,
+				ignoredType = {
+						"org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter",
+						"org.springframework.data.rest.webmvc.alps.AlpsJsonHttpMessageConverter" })
+		public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter(ObjectMapper objectMapper) {
 			return new MappingJackson2HttpMessageConverter(objectMapper);
 		}
 
@@ -64,8 +65,7 @@ class JacksonHttpMessageConvertersConfiguration {
 		@ConditionalOnMissingBean
 		public MappingJackson2XmlHttpMessageConverter mappingJackson2XmlHttpMessageConverter(
 				Jackson2ObjectMapperBuilder builder) {
-			return new MappingJackson2XmlHttpMessageConverter(
-					builder.createXmlMapper(true).build());
+			return new MappingJackson2XmlHttpMessageConverter(builder.createXmlMapper(true).build());
 		}
 
 	}

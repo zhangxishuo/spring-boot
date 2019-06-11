@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,8 @@ package org.springframework.boot.test.mock.mockito;
 
 import java.util.Arrays;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Service;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -40,19 +40,19 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Test {@link SpyBean} when mixed with Spring AOP.
+ * Test {@link SpyBean @SpyBean} when mixed with Spring AOP.
  *
  * @author Phillip Webb
  * @see <a href="https://github.com/spring-projects/spring-boot/issues/5837">5837</a>
  */
-@RunWith(SpringRunner.class)
-public class SpyBeanWithAopProxyTests {
+@ExtendWith(SpringExtension.class)
+class SpyBeanWithAopProxyTests {
 
 	@SpyBean
 	private DateService dateService;
 
 	@Test
-	public void verifyShouldUseProxyTarget() throws Exception {
+	void verifyShouldUseProxyTarget() throws Exception {
 		Long d1 = this.dateService.getDate(false);
 		Thread.sleep(200);
 		Long d2 = this.dateService.getDate(false);

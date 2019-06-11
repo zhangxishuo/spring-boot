@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@
 
 package org.springframework.boot.actuate.autoconfigure.endpoint.web.documentation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.actuate.integration.IntegrationGraphEndpoint;
 import org.springframework.context.annotation.Bean;
@@ -35,19 +35,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Tim Ysewyn
  */
-public class IntegrationGraphEndpointDocumentationTests
-		extends MockMvcEndpointDocumentationTests {
+class IntegrationGraphEndpointDocumentationTests extends MockMvcEndpointDocumentationTests {
 
 	@Test
-	public void graph() throws Exception {
+	void graph() throws Exception {
 		this.mockMvc.perform(get("/actuator/integrationgraph")).andExpect(status().isOk())
 				.andDo(MockMvcRestDocumentation.document("integrationgraph/graph"));
 	}
 
 	@Test
-	public void rebuild() throws Exception {
-		this.mockMvc.perform(post("/actuator/integrationgraph"))
-				.andExpect(status().isNoContent())
+	void rebuild() throws Exception {
+		this.mockMvc.perform(post("/actuator/integrationgraph")).andExpect(status().isNoContent())
 				.andDo(MockMvcRestDocumentation.document("integrationgraph/rebuild"));
 	}
 
@@ -62,8 +60,7 @@ public class IntegrationGraphEndpointDocumentationTests
 		}
 
 		@Bean
-		public IntegrationGraphEndpoint endpoint(
-				IntegrationGraphServer integrationGraphServer) {
+		public IntegrationGraphEndpoint endpoint(IntegrationGraphServer integrationGraphServer) {
 			return new IntegrationGraphEndpoint(integrationGraphServer);
 		}
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,13 +57,11 @@ public class GsonAutoConfiguration {
 	}
 
 	@Bean
-	public StandardGsonBuilderCustomizer standardGsonBuilderCustomizer(
-			GsonProperties gsonProperties) {
+	public StandardGsonBuilderCustomizer standardGsonBuilderCustomizer(GsonProperties gsonProperties) {
 		return new StandardGsonBuilderCustomizer(gsonProperties);
 	}
 
-	static final class StandardGsonBuilderCustomizer
-			implements GsonBuilderCustomizer, Ordered {
+	static final class StandardGsonBuilderCustomizer implements GsonBuilderCustomizer, Ordered {
 
 		private final GsonProperties properties;
 
@@ -80,22 +78,17 @@ public class GsonAutoConfiguration {
 		public void customize(GsonBuilder builder) {
 			GsonProperties properties = this.properties;
 			PropertyMapper map = PropertyMapper.get().alwaysApplyingWhenNonNull();
-			map.from(properties::getGenerateNonExecutableJson)
-					.toCall(builder::generateNonExecutableJson);
+			map.from(properties::getGenerateNonExecutableJson).toCall(builder::generateNonExecutableJson);
 			map.from(properties::getExcludeFieldsWithoutExposeAnnotation)
 					.toCall(builder::excludeFieldsWithoutExposeAnnotation);
-			map.from(properties::getSerializeNulls).toCall(builder::serializeNulls);
-			map.from(properties::getEnableComplexMapKeySerialization)
-					.toCall(builder::enableComplexMapKeySerialization);
-			map.from(properties::getDisableInnerClassSerialization)
-					.toCall(builder::disableInnerClassSerialization);
-			map.from(properties::getLongSerializationPolicy)
-					.to(builder::setLongSerializationPolicy);
+			map.from(properties::getSerializeNulls).whenTrue().toCall(builder::serializeNulls);
+			map.from(properties::getEnableComplexMapKeySerialization).toCall(builder::enableComplexMapKeySerialization);
+			map.from(properties::getDisableInnerClassSerialization).toCall(builder::disableInnerClassSerialization);
+			map.from(properties::getLongSerializationPolicy).to(builder::setLongSerializationPolicy);
 			map.from(properties::getFieldNamingPolicy).to(builder::setFieldNamingPolicy);
 			map.from(properties::getPrettyPrinting).toCall(builder::setPrettyPrinting);
 			map.from(properties::getLenient).toCall(builder::setLenient);
-			map.from(properties::getDisableHtmlEscaping)
-					.toCall(builder::disableHtmlEscaping);
+			map.from(properties::getDisableHtmlEscaping).toCall(builder::disableHtmlEscaping);
 			map.from(properties::getDateFormat).to(builder::setDateFormat);
 		}
 

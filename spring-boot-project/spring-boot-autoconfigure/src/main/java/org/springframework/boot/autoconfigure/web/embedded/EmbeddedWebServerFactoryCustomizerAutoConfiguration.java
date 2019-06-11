@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -54,8 +54,8 @@ public class EmbeddedWebServerFactoryCustomizerAutoConfiguration {
 	public static class TomcatWebServerFactoryCustomizerConfiguration {
 
 		@Bean
-		public TomcatWebServerFactoryCustomizer tomcatWebServerFactoryCustomizer(
-				Environment environment, ServerProperties serverProperties) {
+		public TomcatWebServerFactoryCustomizer tomcatWebServerFactoryCustomizer(Environment environment,
+				ServerProperties serverProperties) {
 			return new TomcatWebServerFactoryCustomizer(environment, serverProperties);
 		}
 
@@ -69,8 +69,8 @@ public class EmbeddedWebServerFactoryCustomizerAutoConfiguration {
 	public static class JettyWebServerFactoryCustomizerConfiguration {
 
 		@Bean
-		public JettyWebServerFactoryCustomizer jettyWebServerFactoryCustomizer(
-				Environment environment, ServerProperties serverProperties) {
+		public JettyWebServerFactoryCustomizer jettyWebServerFactoryCustomizer(Environment environment,
+				ServerProperties serverProperties) {
 			return new JettyWebServerFactoryCustomizer(environment, serverProperties);
 		}
 
@@ -84,8 +84,8 @@ public class EmbeddedWebServerFactoryCustomizerAutoConfiguration {
 	public static class UndertowWebServerFactoryCustomizerConfiguration {
 
 		@Bean
-		public UndertowWebServerFactoryCustomizer undertowWebServerFactoryCustomizer(
-				Environment environment, ServerProperties serverProperties) {
+		public UndertowWebServerFactoryCustomizer undertowWebServerFactoryCustomizer(Environment environment,
+				ServerProperties serverProperties) {
 			return new UndertowWebServerFactoryCustomizer(environment, serverProperties);
 		}
 
@@ -99,8 +99,8 @@ public class EmbeddedWebServerFactoryCustomizerAutoConfiguration {
 	public static class NettyWebServerFactoryCustomizerConfiguration {
 
 		@Bean
-		public NettyWebServerFactoryCustomizer nettyWebServerFactoryCustomizer(
-				Environment environment, ServerProperties serverProperties) {
+		public NettyWebServerFactoryCustomizer nettyWebServerFactoryCustomizer(Environment environment,
+				ServerProperties serverProperties) {
 			return new NettyWebServerFactoryCustomizer(environment, serverProperties);
 		}
 

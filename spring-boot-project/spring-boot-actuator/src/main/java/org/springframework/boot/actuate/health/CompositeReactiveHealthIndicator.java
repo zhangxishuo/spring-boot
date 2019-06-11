@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -53,8 +53,8 @@ public class CompositeReactiveHealthIndicator implements ReactiveHealthIndicator
 			ReactiveHealthIndicatorRegistry registry) {
 		this.registry = registry;
 		this.healthAggregator = healthAggregator;
-		this.timeoutCompose = (mono) -> (this.timeout != null) ? mono.timeout(
-				Duration.ofMillis(this.timeout), Mono.just(this.timeoutHealth)) : mono;
+		this.timeoutCompose = (mono) -> (this.timeout != null)
+				? mono.timeout(Duration.ofMillis(this.timeout), Mono.just(this.timeoutHealth)) : mono;
 	}
 
 	/**
@@ -66,11 +66,9 @@ public class CompositeReactiveHealthIndicator implements ReactiveHealthIndicator
 	 * {@code timeout}
 	 * @return this instance
 	 */
-	public CompositeReactiveHealthIndicator timeoutStrategy(long timeout,
-			Health timeoutHealth) {
+	public CompositeReactiveHealthIndicator timeoutStrategy(long timeout, Health timeoutHealth) {
 		this.timeout = timeout;
-		this.timeoutHealth = (timeoutHealth != null) ? timeoutHealth
-				: Health.unknown().build();
+		this.timeoutHealth = (timeoutHealth != null) ? timeoutHealth : Health.unknown().build();
 		return this;
 	}
 
@@ -80,11 +78,9 @@ public class CompositeReactiveHealthIndicator implements ReactiveHealthIndicator
 
 	@Override
 	public Mono<Health> health() {
-		return Flux.fromIterable(this.registry.getAll().entrySet())
-				.flatMap((entry) -> Mono.zip(Mono.just(entry.getKey()),
-						entry.getValue().health().compose(this.timeoutCompose)))
-				.collectMap(Tuple2::getT1, Tuple2::getT2)
-				.map(this.healthAggregator::aggregate);
+		return Flux.fromIterable(this.registry.getAll().entrySet()).flatMap(
+				(entry) -> Mono.zip(Mono.just(entry.getKey()), entry.getValue().health().compose(this.timeoutCompose)))
+				.collectMap(Tuple2::getT1, Tuple2::getT2).map(this.healthAggregator::aggregate);
 	}
 
 }

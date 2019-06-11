@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -50,17 +50,14 @@ public class HttpWebServiceMessageSenderBuilderSimpleIntegrationTests {
 
 	@Test
 	public void buildWithCustomTimeouts() {
-		WebServiceMessageSender messageSender = this.builder
-				.setConnectTimeout(Duration.ofSeconds(5))
+		WebServiceMessageSender messageSender = this.builder.setConnectTimeout(Duration.ofSeconds(5))
 				.setReadTimeout(Duration.ofSeconds(2)).build();
-		SimpleClientHttpRequestFactory requestFactory = assertSimpleClientRequestFactory(
-				messageSender);
+		SimpleClientHttpRequestFactory requestFactory = assertSimpleClientRequestFactory(messageSender);
 		assertThat(requestFactory).hasFieldOrPropertyWithValue("connectTimeout", 5000);
 		assertThat(requestFactory).hasFieldOrPropertyWithValue("readTimeout", 2000);
 	}
 
-	private SimpleClientHttpRequestFactory assertSimpleClientRequestFactory(
-			WebServiceMessageSender messageSender) {
+	private SimpleClientHttpRequestFactory assertSimpleClientRequestFactory(WebServiceMessageSender messageSender) {
 		assertThat(messageSender).isInstanceOf(ClientHttpRequestMessageSender.class);
 		ClientHttpRequestMessageSender sender = (ClientHttpRequestMessageSender) messageSender;
 		ClientHttpRequestFactory requestFactory = sender.getRequestFactory();

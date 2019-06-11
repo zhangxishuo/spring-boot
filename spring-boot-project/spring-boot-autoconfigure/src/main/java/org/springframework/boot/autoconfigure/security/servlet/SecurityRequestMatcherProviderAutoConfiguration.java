@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,8 +46,7 @@ public class SecurityRequestMatcherProviderAutoConfiguration {
 
 		@Bean
 		@ConditionalOnClass(DispatcherServlet.class)
-		public RequestMatcherProvider requestMatcherProvider(
-				HandlerMappingIntrospector introspector) {
+		public RequestMatcherProvider requestMatcherProvider(HandlerMappingIntrospector introspector) {
 			return new MvcRequestMatcherProvider(introspector);
 		}
 
@@ -60,8 +59,7 @@ public class SecurityRequestMatcherProviderAutoConfiguration {
 	public static class JerseyRequestMatcherConfiguration {
 
 		@Bean
-		public RequestMatcherProvider requestMatcherProvider(
-				JerseyApplicationPath applicationPath) {
+		public RequestMatcherProvider requestMatcherProvider(JerseyApplicationPath applicationPath) {
 			return new JerseyRequestMatcherProvider(applicationPath);
 		}
 

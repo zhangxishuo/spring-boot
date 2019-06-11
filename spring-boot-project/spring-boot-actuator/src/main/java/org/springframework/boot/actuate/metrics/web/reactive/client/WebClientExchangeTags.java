@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,15 +37,13 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 public final class WebClientExchangeTags {
 
-	private static final String URI_TEMPLATE_ATTRIBUTE = WebClient.class.getName()
-			+ ".uriTemplate";
+	private static final String URI_TEMPLATE_ATTRIBUTE = WebClient.class.getName() + ".uriTemplate";
 
 	private static final Tag IO_ERROR = Tag.of("status", "IO_ERROR");
 
 	private static final Tag CLIENT_ERROR = Tag.of("status", "CLIENT_ERROR");
 
-	private static final Pattern PATTERN_BEFORE_PATH = Pattern
-			.compile("^https?://[^/]+/");
+	private static final Pattern PATTERN_BEFORE_PATH = Pattern.compile("^https?://[^/]+/");
 
 	private static final Tag CLIENT_NAME_NONE = Tag.of("clientName", "none");
 
@@ -80,8 +78,7 @@ public final class WebClientExchangeTags {
 	 * @return the uri tag
 	 */
 	public static Tag uri(ClientRequest request) {
-		String uri = (String) request.attribute(URI_TEMPLATE_ATTRIBUTE)
-				.orElseGet(() -> request.url().getPath());
+		String uri = (String) request.attribute(URI_TEMPLATE_ATTRIBUTE).orElseGet(() -> request.url().getPath());
 		return Tag.of("uri", extractPath(uri));
 	}
 

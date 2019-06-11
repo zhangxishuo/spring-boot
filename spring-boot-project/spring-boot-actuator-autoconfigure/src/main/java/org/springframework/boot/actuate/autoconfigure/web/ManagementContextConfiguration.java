@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,8 +35,9 @@ import org.springframework.core.annotation.Order;
  * {@code org.springframework.boot.actuate.autoconfigure.web.ManagementContextConfiguration}
  * key.
  * <p>
- * {@code ManagementContextConfiguration} classes can be ordered using {@link Order}.
- * Ordering by implementing {@link Ordered} is not supported and will have no effect.
+ * {@code ManagementContextConfiguration} classes can be ordered using
+ * {@link Order @Order}. Ordering by implementing {@link Ordered} is not supported and
+ * will have no effect.
  *
  * @author Phillip Webb
  * @author Andy Wilkinson

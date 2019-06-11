@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,7 +40,7 @@ import org.springframework.data.neo4j.repository.support.Neo4jRepositoryFactoryB
  * {@link Neo4jRepository}.
  * <p>
  * Once in effect, the auto-configuration is the equivalent of enabling Neo4j repositories
- * using the {@link EnableNeo4jRepositories} annotation.
+ * using the {@link EnableNeo4jRepositories @EnableNeo4jRepositories} annotation.
  *
  * @author Dave Syer
  * @author Oliver Gierke
@@ -50,10 +50,10 @@ import org.springframework.data.neo4j.repository.support.Neo4jRepositoryFactoryB
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ Neo4jSession.class, Neo4jRepository.class })
-@ConditionalOnMissingBean({ Neo4jRepositoryFactoryBean.class,
-		Neo4jRepositoryConfigurationExtension.class })
-@ConditionalOnProperty(prefix = "spring.data.neo4j.repositories", name = "enabled", havingValue = "true", matchIfMissing = true)
-@Import(Neo4jRepositoriesAutoConfigureRegistrar.class)
+@ConditionalOnMissingBean({ Neo4jRepositoryFactoryBean.class, Neo4jRepositoryConfigurationExtension.class })
+@ConditionalOnProperty(prefix = "spring.data.neo4j.repositories", name = "enabled", havingValue = "true",
+		matchIfMissing = true)
+@Import(Neo4jRepositoriesRegistrar.class)
 @AutoConfigureAfter(Neo4jDataAutoConfiguration.class)
 public class Neo4jRepositoriesAutoConfiguration {
 

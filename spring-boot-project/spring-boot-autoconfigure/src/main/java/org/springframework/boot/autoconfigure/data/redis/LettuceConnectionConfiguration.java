@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -65,20 +65,17 @@ class LettuceConnectionConfiguration extends RedisConnectionConfiguration {
 	public LettuceConnectionFactory redisConnectionFactory(
 			ObjectProvider<LettuceClientConfigurationBuilderCustomizer> builderCustomizers,
 			ClientResources clientResources) throws UnknownHostException {
-		LettuceClientConfiguration clientConfig = getLettuceClientConfiguration(
-				builderCustomizers, clientResources,
+		LettuceClientConfiguration clientConfig = getLettuceClientConfiguration(builderCustomizers, clientResources,
 				getProperties().getLettuce().getPool());
 		return createLettuceConnectionFactory(clientConfig);
 	}
 
-	private LettuceConnectionFactory createLettuceConnectionFactory(
-			LettuceClientConfiguration clientConfiguration) {
+	private LettuceConnectionFactory createLettuceConnectionFactory(LettuceClientConfiguration clientConfiguration) {
 		if (getSentinelConfig() != null) {
 			return new LettuceConnectionFactory(getSentinelConfig(), clientConfiguration);
 		}
 		if (getClusterConfiguration() != null) {
-			return new LettuceConnectionFactory(getClusterConfiguration(),
-					clientConfiguration);
+			return new LettuceConnectionFactory(getClusterConfiguration(), clientConfiguration);
 		}
 		return new LettuceConnectionFactory(getStandaloneConfig(), clientConfiguration);
 	}
@@ -92,8 +89,7 @@ class LettuceConnectionConfiguration extends RedisConnectionConfiguration {
 			customizeConfigurationFromUrl(builder);
 		}
 		builder.clientResources(clientResources);
-		builderCustomizers.orderedStream()
-				.forEach((customizer) -> customizer.customize(builder));
+		builderCustomizers.orderedStream().forEach((customizer) -> customizer.customize(builder));
 		return builder.build();
 	}
 
@@ -114,17 +110,14 @@ class LettuceConnectionConfiguration extends RedisConnectionConfiguration {
 		}
 		if (getProperties().getLettuce() != null) {
 			RedisProperties.Lettuce lettuce = getProperties().getLettuce();
-			if (lettuce.getShutdownTimeout() != null
-					&& !lettuce.getShutdownTimeout().isZero()) {
-				builder.shutdownTimeout(
-						getProperties().getLettuce().getShutdownTimeout());
+			if (lettuce.getShutdownTimeout() != null && !lettuce.getShutdownTimeout().isZero()) {
+				builder.shutdownTimeout(getProperties().getLettuce().getShutdownTimeout());
 			}
 		}
 		return builder;
 	}
 
-	private void customizeConfigurationFromUrl(
-			LettuceClientConfiguration.LettuceClientConfigurationBuilder builder) {
+	private void customizeConfigurationFromUrl(LettuceClientConfiguration.LettuceClientConfigurationBuilder builder) {
 		ConnectionInfo connectionInfo = parseUrl(getProperties().getUrl());
 		if (connectionInfo.isUseSsl()) {
 			builder.useSsl();
@@ -137,8 +130,7 @@ class LettuceConnectionConfiguration extends RedisConnectionConfiguration {
 	private static class PoolBuilderFactory {
 
 		public LettuceClientConfigurationBuilder createBuilder(Pool properties) {
-			return LettucePoolingClientConfiguration.builder()
-					.poolConfig(getPoolConfig(properties));
+			return LettucePoolingClientConfiguration.builder().poolConfig(getPoolConfig(properties));
 		}
 
 		private GenericObjectPoolConfig<?> getPoolConfig(Pool properties) {
@@ -146,6 +138,9 @@ class LettuceConnectionConfiguration extends RedisConnectionConfiguration {
 			config.setMaxTotal(properties.getMaxActive());
 			config.setMaxIdle(properties.getMaxIdle());
 			config.setMinIdle(properties.getMinIdle());
+			if (properties.getTimeBetweenEvictionRuns() != null) {
+				config.setTimeBetweenEvictionRunsMillis(properties.getTimeBetweenEvictionRuns().toMillis());
+			}
 			if (properties.getMaxWait() != null) {
 				config.setMaxWaitMillis(properties.getMaxWait().toMillis());
 			}

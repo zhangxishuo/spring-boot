@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -80,8 +80,7 @@ public class AuthenticationAuditListener extends AbstractAuthenticationAuditList
 		if (event.getAuthentication().getDetails() != null) {
 			data.put("details", event.getAuthentication().getDetails());
 		}
-		publish(new AuditEvent(event.getAuthentication().getName(),
-				AUTHENTICATION_FAILURE, data));
+		publish(new AuditEvent(event.getAuthentication().getName(), AUTHENTICATION_FAILURE, data));
 	}
 
 	private void onAuthenticationSuccessEvent(AuthenticationSuccessEvent event) {
@@ -89,14 +88,12 @@ public class AuthenticationAuditListener extends AbstractAuthenticationAuditList
 		if (event.getAuthentication().getDetails() != null) {
 			data.put("details", event.getAuthentication().getDetails());
 		}
-		publish(new AuditEvent(event.getAuthentication().getName(),
-				AUTHENTICATION_SUCCESS, data));
+		publish(new AuditEvent(event.getAuthentication().getName(), AUTHENTICATION_SUCCESS, data));
 	}
 
 	private static class WebAuditListener {
 
-		public void process(AuthenticationAuditListener listener,
-				AbstractAuthenticationEvent input) {
+		public void process(AuthenticationAuditListener listener, AbstractAuthenticationEvent input) {
 			if (listener != null) {
 				AuthenticationSwitchUserEvent event = (AuthenticationSwitchUserEvent) input;
 				Map<String, Object> data = new HashMap<>();
@@ -106,8 +103,7 @@ public class AuthenticationAuditListener extends AbstractAuthenticationAuditList
 				if (event.getTargetUser() != null) {
 					data.put("target", event.getTargetUser().getUsername());
 				}
-				listener.publish(new AuditEvent(event.getAuthentication().getName(),
-						AUTHENTICATION_SWITCH, data));
+				listener.publish(new AuditEvent(event.getAuthentication().getName(), AUTHENTICATION_SWITCH, data));
 			}
 
 		}

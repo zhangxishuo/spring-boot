@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,14 +19,13 @@ package org.springframework.boot.autoconfigure.data.mongo;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.TestAutoConfigurationPackage;
 import org.springframework.boot.autoconfigure.data.mongo.city.CityRepository;
 import org.springframework.boot.autoconfigure.data.mongo.city.ReactiveCityRepository;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
-import org.springframework.boot.autoconfigure.mongo.MongoAutoConfigurationTests;
 import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -46,29 +45,27 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class MongoReactiveAndBlockingRepositoriesAutoConfigurationTests {
+class MongoReactiveAndBlockingRepositoriesAutoConfigurationTests {
 
 	private AnnotationConfigApplicationContext context;
 
-	@After
+	@AfterEach
 	public void close() {
 		this.context.close();
 	}
 
 	@Test
-	public void shouldCreateInstancesForReactiveAndBlockingRepositories() {
+	void shouldCreateInstancesForReactiveAndBlockingRepositories() {
 		this.context = new AnnotationConfigApplicationContext();
-		TestPropertyValues.of("spring.datasource.initialization-mode:never")
-				.applyTo(this.context);
-		this.context.register(BlockingAndReactiveConfiguration.class,
-				BaseConfiguration.class);
+		TestPropertyValues.of("spring.datasource.initialization-mode:never").applyTo(this.context);
+		this.context.register(BlockingAndReactiveConfiguration.class, BaseConfiguration.class);
 		this.context.refresh();
 		assertThat(this.context.getBean(CityRepository.class)).isNotNull();
 		assertThat(this.context.getBean(ReactiveCityRepository.class)).isNotNull();
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@TestAutoConfigurationPackage(MongoAutoConfigurationTests.class)
+	@TestAutoConfigurationPackage(MongoAutoConfiguration.class)
 	@EnableMongoRepositories(basePackageClasses = ReactiveCityRepository.class)
 	@EnableReactiveMongoRepositories(basePackageClasses = ReactiveCityRepository.class)
 	protected static class BlockingAndReactiveConfiguration {
@@ -86,12 +83,9 @@ public class MongoReactiveAndBlockingRepositoriesAutoConfigurationTests {
 		@Override
 		public String[] selectImports(AnnotationMetadata importingClassMetadata) {
 			List<String> names = new ArrayList<>();
-			for (Class<?> type : new Class<?>[] { MongoAutoConfiguration.class,
-					MongoReactiveAutoConfiguration.class,
-					MongoDataAutoConfiguration.class,
-					MongoRepositoriesAutoConfiguration.class,
-					MongoReactiveDataAutoConfiguration.class,
-					MongoReactiveRepositoriesAutoConfiguration.class }) {
+			for (Class<?> type : new Class<?>[] { MongoAutoConfiguration.class, MongoReactiveAutoConfiguration.class,
+					MongoDataAutoConfiguration.class, MongoRepositoriesAutoConfiguration.class,
+					MongoReactiveDataAutoConfiguration.class, MongoReactiveRepositoriesAutoConfiguration.class }) {
 				names.add(type.getName());
 			}
 			return StringUtils.toStringArray(names);

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,8 +40,7 @@ import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 @Configuration(proxyBeanMethods = false)
 @EnableAutoConfiguration
 @EnableWebSocket
-public class SampleJettyWebSocketsApplication extends SpringBootServletInitializer
-		implements WebSocketConfigurer {
+public class SampleJettyWebSocketsApplication extends SpringBootServletInitializer implements WebSocketConfigurer {
 
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {

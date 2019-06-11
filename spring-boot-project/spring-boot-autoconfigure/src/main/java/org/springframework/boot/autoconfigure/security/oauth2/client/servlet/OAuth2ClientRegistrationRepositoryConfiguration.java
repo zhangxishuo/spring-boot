@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,8 +32,8 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 
 /**
- * {@link Configuration} used to map {@link OAuth2ClientProperties} to client
- * registrations.
+ * {@link Configuration @Configuration} used to map {@link OAuth2ClientProperties} to
+ * client registrations.
  *
  * @author Madhura Bhave
  */
@@ -44,11 +44,9 @@ class OAuth2ClientRegistrationRepositoryConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean(ClientRegistrationRepository.class)
-	public InMemoryClientRegistrationRepository clientRegistrationRepository(
-			OAuth2ClientProperties properties) {
+	public InMemoryClientRegistrationRepository clientRegistrationRepository(OAuth2ClientProperties properties) {
 		List<ClientRegistration> registrations = new ArrayList<>(
-				OAuth2ClientPropertiesRegistrationAdapter
-						.getClientRegistrations(properties).values());
+				OAuth2ClientPropertiesRegistrationAdapter.getClientRegistrations(properties).values());
 		return new InMemoryClientRegistrationRepository(registrations);
 	}
 

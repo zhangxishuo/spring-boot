@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.boot.autoconfigure.mongo.embedded;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.stream.Collectors;
 
@@ -30,10 +31,9 @@ import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.config.store.IDownloadConfig;
 import org.bson.Document;
-import org.junit.After;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,14 +57,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Andy Wilkinson
  * @author Stephane Nicoll
  */
-public class EmbeddedMongoAutoConfigurationTests {
-
-	@Rule
-	public final TemporaryFolder temp = new TemporaryFolder();
+class EmbeddedMongoAutoConfigurationTests {
 
 	private AnnotationConfigApplicationContext context;
 
-	@After
+	@AfterEach
 	public void close() {
 		if (this.context != null) {
 			this.context.close();
@@ -72,79 +69,74 @@ public class EmbeddedMongoAutoConfigurationTests {
 	}
 
 	@Test
-	public void defaultVersion() {
+	void defaultVersion() {
 		assertVersionConfiguration(null, "3.5.5");
 	}
 
 	@Test
-	public void customVersion() {
+	void customVersion() {
 		String version = Version.V3_4_15.asInDownloadPath();
 		assertVersionConfiguration(version, version);
 	}
 
 	@Test
-	public void customUnknownVersion() {
+	void customUnknownVersion() {
 		assertVersionConfiguration("3.4.1", "3.4.1");
 	}
 
 	@Test
-	public void customFeatures() {
-		EnumSet<Feature> features = EnumSet.of(Feature.TEXT_SEARCH, Feature.SYNC_DELAY,
-				Feature.ONLY_WITH_SSL, Feature.NO_HTTP_INTERFACE_ARG);
+	void customFeatures() {
+		EnumSet<Feature> features = EnumSet.of(Feature.TEXT_SEARCH, Feature.SYNC_DELAY, Feature.ONLY_WITH_SSL,
+				Feature.NO_HTTP_INTERFACE_ARG);
 		if (isWindows()) {
 			features.add(Feature.ONLY_WINDOWS_2008_SERVER);
 		}
-		load("spring.mongodb.embedded.features=" + String.join(", ",
-				features.stream().map(Feature::name).collect(Collectors.toList())));
+		load("spring.mongodb.embedded.features="
+				+ String.join(", ", features.stream().map(Feature::name).collect(Collectors.toList())));
 		assertThat(this.context.getBean(EmbeddedMongoProperties.class).getFeatures())
 				.containsExactlyElementsOf(features);
 	}
 
 	@Test
-	public void useRandomPortByDefault() {
+	void useRandomPortByDefault() {
 		load();
 		assertThat(this.context.getBeansOfType(MongoClient.class)).hasSize(1);
 		MongoClient client = this.context.getBean(MongoClient.class);
-		Integer mongoPort = Integer
-				.valueOf(this.context.getEnvironment().getProperty("local.mongo.port"));
-		assertThat(client.getAddress().getPort()).isEqualTo(mongoPort);
+		Integer mongoPort = Integer.valueOf(this.context.getEnvironment().getProperty("local.mongo.port"));
+		assertThat(getPort(client)).isEqualTo(mongoPort);
 	}
 
 	@Test
-	public void specifyPortToZeroAllocateRandomPort() {
+	void specifyPortToZeroAllocateRandomPort() {
 		load("spring.data.mongodb.port=0");
 		assertThat(this.context.getBeansOfType(MongoClient.class)).hasSize(1);
 		MongoClient client = this.context.getBean(MongoClient.class);
-		Integer mongoPort = Integer
-				.valueOf(this.context.getEnvironment().getProperty("local.mongo.port"));
-		assertThat(client.getAddress().getPort()).isEqualTo(mongoPort);
+		Integer mongoPort = Integer.valueOf(this.context.getEnvironment().getProperty("local.mongo.port"));
+		assertThat(getPort(client)).isEqualTo(mongoPort);
 	}
 
 	@Test
-	public void randomlyAllocatedPortIsAvailableWhenCreatingMongoClient() {
+	void randomlyAllocatedPortIsAvailableWhenCreatingMongoClient() {
 		load(MongoClientConfiguration.class);
 		MongoClient client = this.context.getBean(MongoClient.class);
-		Integer mongoPort = Integer
-				.valueOf(this.context.getEnvironment().getProperty("local.mongo.port"));
-		assertThat(client.getAddress().getPort()).isEqualTo(mongoPort);
+		Integer mongoPort = Integer.valueOf(this.context.getEnvironment().getProperty("local.mongo.port"));
+		assertThat(getPort(client)).isEqualTo(mongoPort);
 	}
 
 	@Test
-	public void portIsAvailableInParentContext() {
+	void portIsAvailableInParentContext() {
 		try (ConfigurableApplicationContext parent = new AnnotationConfigApplicationContext()) {
 			parent.refresh();
 			this.context = new AnnotationConfigApplicationContext();
 			this.context.setParent(parent);
-			this.context.register(EmbeddedMongoAutoConfiguration.class,
-					MongoClientConfiguration.class);
+			this.context.register(EmbeddedMongoAutoConfiguration.class, MongoClientConfiguration.class);
 			this.context.refresh();
-			assertThat(parent.getEnvironment().getProperty("local.mongo.port"))
-					.isNotNull();
+			assertThat(parent.getEnvironment().getProperty("local.mongo.port")).isNotNull();
 		}
 	}
 
 	@Test
-	public void defaultStorageConfiguration() {
+	void defaultStorageConfiguration() {
 		load(MongoClientConfiguration.class);
 		Storage replication = this.context.getBean(IMongodConfig.class).replication();
 		assertThat(replication.getOplogSize()).isEqualTo(0);
@@ -153,63 +145,55 @@ public class EmbeddedMongoAutoConfigurationTests {
 	}
 
 	@Test
-	public void mongoWritesToCustomDatabaseDir() throws IOException {
-		File customDatabaseDir = this.temp.newFolder("custom-database-dir");
+	void mongoWritesToCustomDatabaseDir(@TempDir Path temp) throws IOException {
+		File customDatabaseDir = new File(temp.toFile(), "custom-database-dir");
 		FileSystemUtils.deleteRecursively(customDatabaseDir);
-		load("spring.mongodb.embedded.storage.databaseDir="
-				+ customDatabaseDir.getPath());
+		load("spring.mongodb.embedded.storage.databaseDir=" + customDatabaseDir.getPath());
 		assertThat(customDatabaseDir).isDirectory();
 		assertThat(customDatabaseDir.listFiles()).isNotEmpty();
 	}
 
 	@Test
-	public void customOpLogSizeIsAppliedToConfiguration() {
+	void customOpLogSizeIsAppliedToConfiguration() {
 		load("spring.mongodb.embedded.storage.oplogSize=1024KB");
-		assertThat(this.context.getBean(IMongodConfig.class).replication().getOplogSize())
-				.isEqualTo(1);
+		assertThat(this.context.getBean(IMongodConfig.class).replication().getOplogSize()).isEqualTo(1);
 	}
 
 	@Test
-	public void customOpLogSizeUsesMegabytesPerDefault() {
+	void customOpLogSizeUsesMegabytesPerDefault() {
 		load("spring.mongodb.embedded.storage.oplogSize=10");
-		assertThat(this.context.getBean(IMongodConfig.class).replication().getOplogSize())
-				.isEqualTo(10);
+		assertThat(this.context.getBean(IMongodConfig.class).replication().getOplogSize()).isEqualTo(10);
 	}
 
 	@Test
-	public void customReplicaSetNameIsAppliedToConfiguration() {
+	void customReplicaSetNameIsAppliedToConfiguration() {
 		load("spring.mongodb.embedded.storage.replSetName=testing");
-		assertThat(
-				this.context.getBean(IMongodConfig.class).replication().getReplSetName())
-						.isEqualTo("testing");
+		assertThat(this.context.getBean(IMongodConfig.class).replication().getReplSetName()).isEqualTo("testing");
 	}
 
 	@Test
-	public void customizeDownloadConfiguration() {
+	void customizeDownloadConfiguration() {
 		load(DownloadConfigBuilderCustomizerConfiguration.class);
 		IRuntimeConfig runtimeConfig = this.context.getBean(IRuntimeConfig.class);
-		IDownloadConfig downloadConfig = (IDownloadConfig) new DirectFieldAccessor(
-				runtimeConfig.getArtifactStore()).getPropertyValue("downloadConfig");
+		IDownloadConfig downloadConfig = (IDownloadConfig) new DirectFieldAccessor(runtimeConfig.getArtifactStore())
+				.getPropertyValue("downloadConfig");
 		assertThat(downloadConfig.getUserAgent()).isEqualTo("Test User Agent");
 	}
 
 	@Test
-	public void shutdownHookIsNotRegistered() {
+	void shutdownHookIsNotRegistered() {
 		load();
-		assertThat(this.context.getBean(MongodExecutable.class).isRegisteredJobKiller())
-				.isFalse();
+		assertThat(this.context.getBean(MongodExecutable.class).isRegisteredJobKiller()).isFalse();
 	}
 
-	private void assertVersionConfiguration(String configuredVersion,
-			String expectedVersion) {
+	private void assertVersionConfiguration(String configuredVersion, String expectedVersion) {
 		this.context = new AnnotationConfigApplicationContext();
 		TestPropertyValues.of("spring.data.mongodb.port=0").applyTo(this.context);
 		if (configuredVersion != null) {
-			TestPropertyValues.of("spring.mongodb.embedded.version=" + configuredVersion)
-					.applyTo(this.context);
+			TestPropertyValues.of("spring.mongodb.embedded.version=" + configuredVersion).applyTo(this.context);
 		}
-		this.context.register(MongoAutoConfiguration.class,
-				MongoDataAutoConfiguration.class, EmbeddedMongoAutoConfiguration.class);
+		this.context.register(MongoAutoConfiguration.class, MongoDataAutoConfiguration.class,
+				EmbeddedMongoAutoConfiguration.class);
 		this.context.refresh();
 		MongoTemplate mongo = this.context.getBean(MongoTemplate.class);
 		Document buildInfo = mongo.executeCommand("{ buildInfo: 1 }");
@@ -237,6 +221,13 @@ public class EmbeddedMongoAutoConfigurationTests {
 		return File.separatorChar == '\\';
 	}
 
+	@SuppressWarnings("deprecation")
+	private int getPort(MongoClient client) {
+		// At some point we'll probably need to use reflection to find the address but for
+		// now, we can use the deprecated getAddress method.
+		return client.getAddress().getPort();
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	static class MongoClientConfiguration {
 
@@ -252,8 +243,7 @@ public class EmbeddedMongoAutoConfigurationTests {
 
 		@Bean
 		public DownloadConfigBuilderCustomizer testDownloadConfigBuilderCustomizer() {
-			return (downloadConfigBuilder) -> downloadConfigBuilder
-					.userAgent("Test User Agent");
+			return (downloadConfigBuilder) -> downloadConfigBuilder.userAgent("Test User Agent");
 		}
 
 	}

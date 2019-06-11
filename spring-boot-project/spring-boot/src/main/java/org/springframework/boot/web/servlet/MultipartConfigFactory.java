@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -78,8 +78,8 @@ public class MultipartConfigFactory {
 		long maxFileSizeBytes = convertToBytes(this.maxFileSize, -1);
 		long maxRequestSizeBytes = convertToBytes(this.maxRequestSize, -1);
 		long fileSizeThresholdBytes = convertToBytes(this.fileSizeThreshold, 0);
-		return new MultipartConfigElement(this.location, maxFileSizeBytes,
-				maxRequestSizeBytes, (int) fileSizeThresholdBytes);
+		return new MultipartConfigElement(this.location, maxFileSizeBytes, maxRequestSizeBytes,
+				(int) fileSizeThresholdBytes);
 	}
 
 	/**

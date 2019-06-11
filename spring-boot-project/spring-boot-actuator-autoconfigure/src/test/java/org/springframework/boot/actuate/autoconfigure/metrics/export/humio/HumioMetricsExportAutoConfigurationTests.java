@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,7 @@ import io.micrometer.core.instrument.Clock;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
 import io.micrometer.humio.HumioConfig;
 import io.micrometer.humio.HumioMeterRegistry;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -35,62 +35,51 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Andy Wilkinson
  */
-public class HumioMetricsExportAutoConfigurationTests {
+class HumioMetricsExportAutoConfigurationTests {
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-			.withConfiguration(
-					AutoConfigurations.of(HumioMetricsExportAutoConfiguration.class));
+			.withConfiguration(AutoConfigurations.of(HumioMetricsExportAutoConfiguration.class));
 
 	@Test
-	public void backsOffWithoutAClock() {
-		this.contextRunner.run((context) -> assertThat(context)
-				.doesNotHaveBean(HumioMeterRegistry.class));
+	void backsOffWithoutAClock() {
+		this.contextRunner.run((context) -> assertThat(context).doesNotHaveBean(HumioMeterRegistry.class));
 	}
 
 	@Test
-	public void autoConfiguresConfigAndMeterRegistry() {
-		this.contextRunner.withUserConfiguration(BaseConfiguration.class)
-				.run((context) -> assertThat(context)
-						.hasSingleBean(HumioMeterRegistry.class)
-						.hasSingleBean(HumioConfig.class));
+	void autoConfiguresConfigAndMeterRegistry() {
+		this.contextRunner.withUserConfiguration(BaseConfiguration.class).run((context) -> assertThat(context)
+				.hasSingleBean(HumioMeterRegistry.class).hasSingleBean(HumioConfig.class));
 	}
 
 	@Test
-	public void autoConfigurationCanBeDisabled() {
+	void autoConfigurationCanBeDisabled() {
 		this.contextRunner.withUserConfiguration(BaseConfiguration.class)
 				.withPropertyValues("management.metrics.export.humio.enabled=false")
-				.run((context) -> assertThat(context)
-						.doesNotHaveBean(HumioMeterRegistry.class)
+				.run((context) -> assertThat(context).doesNotHaveBean(HumioMeterRegistry.class)
 						.doesNotHaveBean(HumioConfig.class));
 	}
 
 	@Test
-	public void allowsCustomConfigToBeUsed() {
-		this.contextRunner.withUserConfiguration(CustomConfigConfiguration.class)
-				.run((context) -> assertThat(context)
-						.hasSingleBean(HumioMeterRegistry.class)
-						.hasSingleBean(HumioConfig.class).hasBean("customConfig"));
+	void allowsCustomConfigToBeUsed() {
+		this.contextRunner.withUserConfiguration(CustomConfigConfiguration.class).run((context) -> assertThat(context)
+				.hasSingleBean(HumioMeterRegistry.class).hasSingleBean(HumioConfig.class).hasBean("customConfig"));
 	}
 
 	@Test
-	public void allowsCustomRegistryToBeUsed() {
-		this.contextRunner.withUserConfiguration(CustomRegistryConfiguration.class)
-				.run((context) -> assertThat(context)
-						.hasSingleBean(HumioMeterRegistry.class).hasBean("customRegistry")
-						.hasSingleBean(HumioConfig.class));
+	void allowsCustomRegistryToBeUsed() {
+		this.contextRunner.withUserConfiguration(CustomRegistryConfiguration.class).run((context) -> assertThat(context)
+				.hasSingleBean(HumioMeterRegistry.class).hasBean("customRegistry").hasSingleBean(HumioConfig.class));
 	}
 
 	@Test
-	public void stopsMeterRegistryWhenContextIsClosed() {
-		this.contextRunner.withUserConfiguration(BaseConfiguration.class)
-				.run((context) -> {
-					HumioMeterRegistry registry = context
-							.getBean(HumioMeterRegistry.class);
-					new JvmMemoryMetrics().bindTo(registry);
-					assertThat(registry.isClosed()).isFalse();
-					context.close();
-					assertThat(registry.isClosed()).isTrue();
-				});
+	void stopsMeterRegistryWhenContextIsClosed() {
+		this.contextRunner.withUserConfiguration(BaseConfiguration.class).run((context) -> {
+			HumioMeterRegistry registry = context.getBean(HumioMeterRegistry.class);
+			new JvmMemoryMetrics().bindTo(registry);
+			assertThat(registry.isClosed()).isFalse();
+			context.close();
+			assertThat(registry.isClosed()).isTrue();
+		});
 	}
 
 	@Configuration(proxyBeanMethods = false)

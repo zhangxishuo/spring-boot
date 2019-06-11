@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,17 +46,14 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(WebClient.class)
-@AutoConfigureAfter({ CodecsAutoConfiguration.class,
-		ClientHttpConnectorAutoConfiguration.class })
+@AutoConfigureAfter({ CodecsAutoConfiguration.class, ClientHttpConnectorAutoConfiguration.class })
 public class WebClientAutoConfiguration {
 
 	private final WebClient.Builder webClientBuilder;
 
-	public WebClientAutoConfiguration(
-			ObjectProvider<WebClientCustomizer> customizerProvider) {
+	public WebClientAutoConfiguration(ObjectProvider<WebClientCustomizer> customizerProvider) {
 		this.webClientBuilder = WebClient.builder();
-		customizerProvider.orderedStream()
-				.forEach((customizer) -> customizer.customize(this.webClientBuilder));
+		customizerProvider.orderedStream().forEach((customizer) -> customizer.customize(this.webClientBuilder));
 	}
 
 	@Bean
@@ -73,8 +70,7 @@ public class WebClientAutoConfiguration {
 		@Bean
 		@ConditionalOnMissingBean
 		@Order(0)
-		public WebClientCodecCustomizer exchangeStrategiesCustomizer(
-				List<CodecCustomizer> codecCustomizers) {
+		public WebClientCodecCustomizer exchangeStrategiesCustomizer(List<CodecCustomizer> codecCustomizers) {
 			return new WebClientCodecCustomizer(codecCustomizers);
 		}
 

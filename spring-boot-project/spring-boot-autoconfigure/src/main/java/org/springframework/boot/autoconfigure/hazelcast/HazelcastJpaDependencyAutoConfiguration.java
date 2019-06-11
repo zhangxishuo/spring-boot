@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,10 +40,8 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
  * @since 1.3.2
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass({ HazelcastInstance.class,
-		LocalContainerEntityManagerFactoryBean.class })
-@AutoConfigureAfter({ HazelcastAutoConfiguration.class,
-		HibernateJpaAutoConfiguration.class })
+@ConditionalOnClass({ HazelcastInstance.class, LocalContainerEntityManagerFactoryBean.class })
+@AutoConfigureAfter({ HazelcastAutoConfiguration.class, HibernateJpaAutoConfiguration.class })
 public class HazelcastJpaDependencyAutoConfiguration {
 
 	@Bean

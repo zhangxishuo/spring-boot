@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,7 @@
 
 package org.springframework.boot.test.autoconfigure.web.reactive.webclient;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration;
@@ -25,54 +24,54 @@ import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfigura
 import org.springframework.boot.autoconfigure.mustache.MustacheAutoConfiguration;
 import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration;
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.autoconfigure.AutoConfigurationImportedCondition.importedAutoConfiguration;
 
 /**
- * Tests for the auto-configuration imported by {@link WebFluxTest}.
+ * Tests for the auto-configuration imported by {@link WebFluxTest @WebFluxTest}.
  *
  * @author Stephane Nicoll
  * @author Artsiom Yudovin
+ * @author Ali Dehghani
  */
-@RunWith(SpringRunner.class)
 @WebFluxTest
-public class WebFluxTestAutoConfigurationIntegrationTests {
+class WebFluxTestAutoConfigurationIntegrationTests {
 
 	@Autowired
 	private ApplicationContext applicationContext;
 
 	@Test
-	public void messageSourceAutoConfigurationIsImported() {
-		assertThat(this.applicationContext)
-				.has(importedAutoConfiguration(MessageSourceAutoConfiguration.class));
+	void messageSourceAutoConfigurationIsImported() {
+		assertThat(this.applicationContext).has(importedAutoConfiguration(MessageSourceAutoConfiguration.class));
 	}
 
 	@Test
-	public void validationAutoConfigurationIsImported() {
-		assertThat(this.applicationContext)
-				.has(importedAutoConfiguration(ValidationAutoConfiguration.class));
+	void validationAutoConfigurationIsImported() {
+		assertThat(this.applicationContext).has(importedAutoConfiguration(ValidationAutoConfiguration.class));
 	}
 
 	@Test
-	public void mustacheAutoConfigurationIsImported() {
-		assertThat(this.applicationContext)
-				.has(importedAutoConfiguration(MustacheAutoConfiguration.class));
+	void mustacheAutoConfigurationIsImported() {
+		assertThat(this.applicationContext).has(importedAutoConfiguration(MustacheAutoConfiguration.class));
 	}
 
 	@Test
-	public void freemarkerAutoConfigurationIsImported() {
-		assertThat(this.applicationContext)
-				.has(importedAutoConfiguration(FreeMarkerAutoConfiguration.class));
+	void freeMarkerAutoConfigurationIsImported() {
+		assertThat(this.applicationContext).has(importedAutoConfiguration(FreeMarkerAutoConfiguration.class));
 	}
 
 	@Test
-	public void thymeleafAutoConfigurationIsImported() {
-		assertThat(this.applicationContext)
-				.has(importedAutoConfiguration(ThymeleafAutoConfiguration.class));
+	void thymeleafAutoConfigurationIsImported() {
+		assertThat(this.applicationContext).has(importedAutoConfiguration(ThymeleafAutoConfiguration.class));
+	}
+
+	@Test
+	void errorWebFluxAutoConfigurationIsImported() {
+		assertThat(this.applicationContext).has(importedAutoConfiguration(ErrorWebFluxAutoConfiguration.class));
 	}
 
 }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -55,20 +55,19 @@ class JsonbHttpMessageConvertersConfiguration {
 
 	}
 
-	private static class PreferJsonbOrMissingJacksonAndGsonCondition
-			extends AnyNestedCondition {
+	private static class PreferJsonbOrMissingJacksonAndGsonCondition extends AnyNestedCondition {
 
 		PreferJsonbOrMissingJacksonAndGsonCondition() {
 			super(ConfigurationPhase.REGISTER_BEAN);
 		}
 
-		@ConditionalOnProperty(name = HttpMessageConvertersAutoConfiguration.PREFERRED_MAPPER_PROPERTY, havingValue = "jsonb")
+		@ConditionalOnProperty(name = HttpMessageConvertersAutoConfiguration.PREFERRED_MAPPER_PROPERTY,
+				havingValue = "jsonb")
 		static class JsonbPreferred {
 
 		}
 
-		@ConditionalOnMissingBean({ MappingJackson2HttpMessageConverter.class,
-				GsonHttpMessageConverter.class })
+		@ConditionalOnMissingBean({ MappingJackson2HttpMessageConverter.class, GsonHttpMessageConverter.class })
 		static class JacksonAndGsonMissing {
 
 		}

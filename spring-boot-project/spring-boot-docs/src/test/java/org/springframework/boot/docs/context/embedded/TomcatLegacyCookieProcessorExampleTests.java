@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,7 @@ package org.springframework.boot.docs.context.embedded;
 
 import org.apache.catalina.Context;
 import org.apache.tomcat.util.http.LegacyCookieProcessor;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.docs.context.embedded.TomcatLegacyCookieProcessorExample.LegacyCookieProcessorConfiguration;
@@ -36,16 +36,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Andy Wilkinson
  */
-public class TomcatLegacyCookieProcessorExampleTests {
+class TomcatLegacyCookieProcessorExampleTests {
 
 	@Test
-	public void cookieProcessorIsCustomized() {
+	void cookieProcessorIsCustomized() {
 		ServletWebServerApplicationContext applicationContext = (ServletWebServerApplicationContext) new SpringApplication(
 				TestConfiguration.class, LegacyCookieProcessorConfiguration.class).run();
-		Context context = (Context) ((TomcatWebServer) applicationContext.getWebServer())
-				.getTomcat().getHost().findChildren()[0];
-		assertThat(context.getCookieProcessor())
-				.isInstanceOf(LegacyCookieProcessor.class);
+		Context context = (Context) ((TomcatWebServer) applicationContext.getWebServer()).getTomcat().getHost()
+				.findChildren()[0];
+		assertThat(context.getCookieProcessor()).isInstanceOf(LegacyCookieProcessor.class);
 	}
 
 	@Configuration(proxyBeanMethods = false)

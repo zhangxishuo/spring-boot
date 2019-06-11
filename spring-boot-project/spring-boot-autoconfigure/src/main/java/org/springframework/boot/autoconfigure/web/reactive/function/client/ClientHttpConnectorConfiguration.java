@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,9 @@
 package org.springframework.boot.autoconfigure.web.reactive.function.client;
 
 import java.util.function.Function;
+
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -51,10 +54,8 @@ class ClientHttpConnectorConfiguration {
 		}
 
 		@Bean
-		public ReactorClientHttpConnector reactorClientHttpConnector(
-				ReactorResourceFactory reactorResourceFactory) {
-			return new ReactorClientHttpConnector(reactorResourceFactory,
-					Function.identity());
+		public ReactorClientHttpConnector reactorClientHttpConnector(ReactorResourceFactory reactorResourceFactory) {
+			return new ReactorClientHttpConnector(reactorResourceFactory, Function.identity());
 		}
 
 	}
@@ -71,10 +72,10 @@ class ClientHttpConnectorConfiguration {
 		}
 
 		@Bean
-		public JettyClientHttpConnector jettyClientHttpConnector(
-				JettyResourceFactory jettyResourceFactory) {
-			return new JettyClientHttpConnector(jettyResourceFactory, (httpClient) -> {
-			});
+		public JettyClientHttpConnector jettyClientHttpConnector(JettyResourceFactory jettyResourceFactory) {
+			SslContextFactory sslContextFactory = new SslContextFactory.Client();
+			HttpClient httpClient = new HttpClient(sslContextFactory);
+			return new JettyClientHttpConnector(httpClient, jettyResourceFactory);
 		}
 
 	}

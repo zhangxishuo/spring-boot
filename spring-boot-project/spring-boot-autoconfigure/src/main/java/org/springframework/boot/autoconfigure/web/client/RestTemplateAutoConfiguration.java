@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,16 +52,14 @@ public class RestTemplateAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public RestTemplateBuilder restTemplateBuilder(
-			ObjectProvider<HttpMessageConverters> messageConverters,
+	public RestTemplateBuilder restTemplateBuilder(ObjectProvider<HttpMessageConverters> messageConverters,
 			ObjectProvider<RestTemplateCustomizer> restTemplateCustomizers) {
 		RestTemplateBuilder builder = new RestTemplateBuilder();
 		HttpMessageConverters converters = messageConverters.getIfUnique();
 		if (converters != null) {
 			builder = builder.messageConverters(converters.getConverters());
 		}
-		List<RestTemplateCustomizer> customizers = restTemplateCustomizers.orderedStream()
-				.collect(Collectors.toList());
+		List<RestTemplateCustomizer> customizers = restTemplateCustomizers.orderedStream().collect(Collectors.toList());
 		if (!customizers.isEmpty()) {
 			builder = builder.customizers(customizers);
 		}

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.actuate.endpoint.EndpointId;
@@ -54,58 +54,46 @@ import org.springframework.web.cors.CorsConfiguration;
  *
  * @author Madhura Bhave
  */
-public class MvcEndpointRequestIntegrationTests
-		extends AbstractEndpointRequestIntegrationTests {
+class MvcEndpointRequestIntegrationTests extends AbstractEndpointRequestIntegrationTests {
 
 	@Test
-	public void toLinksWhenServletPathSetShouldMatch() {
-		getContextRunner().withPropertyValues("spring.mvc.servlet.path=/admin")
-				.run((context) -> {
-					WebTestClient webTestClient = getWebTestClient(context);
-					webTestClient.get().uri("/admin/actuator/").exchange().expectStatus()
-							.isOk();
-					webTestClient.get().uri("/admin/actuator").exchange().expectStatus()
-							.isOk();
-				});
+	void toLinksWhenServletPathSetShouldMatch() {
+		getContextRunner().withPropertyValues("spring.mvc.servlet.path=/admin").run((context) -> {
+			WebTestClient webTestClient = getWebTestClient(context);
+			webTestClient.get().uri("/admin/actuator/").exchange().expectStatus().isOk();
+			webTestClient.get().uri("/admin/actuator").exchange().expectStatus().isOk();
+		});
 	}
 
 	@Test
-	public void toEndpointWhenServletPathSetShouldMatch() {
-		getContextRunner().withPropertyValues("spring.mvc.servlet.path=/admin")
-				.run((context) -> {
-					WebTestClient webTestClient = getWebTestClient(context);
-					webTestClient.get().uri("/admin/actuator/e1").exchange()
-							.expectStatus().isOk();
-				});
+	void toEndpointWhenServletPathSetShouldMatch() {
+		getContextRunner().withPropertyValues("spring.mvc.servlet.path=/admin").run((context) -> {
+			WebTestClient webTestClient = getWebTestClient(context);
+			webTestClient.get().uri("/admin/actuator/e1").exchange().expectStatus().isOk();
+		});
 	}
 
 	@Test
-	public void toAnyEndpointWhenServletPathSetShouldMatch() {
-		getContextRunner().withPropertyValues("spring.mvc.servlet.path=/admin",
-				"spring.security.user.password=password").run((context) -> {
+	void toAnyEndpointWhenServletPathSetShouldMatch() {
+		getContextRunner()
+				.withPropertyValues("spring.mvc.servlet.path=/admin", "spring.security.user.password=password")
+				.run((context) -> {
 					WebTestClient webTestClient = getWebTestClient(context);
-					webTestClient.get().uri("/admin/actuator/e2").exchange()
-							.expectStatus().isUnauthorized();
-					webTestClient.get().uri("/admin/actuator/e2")
-							.header("Authorization", getBasicAuth()).exchange()
+					webTestClient.get().uri("/admin/actuator/e2").exchange().expectStatus().isUnauthorized();
+					webTestClient.get().uri("/admin/actuator/e2").header("Authorization", getBasicAuth()).exchange()
 							.expectStatus().isOk();
 				});
 	}
 
 	@Override
 	protected WebApplicationContextRunner getContextRunner() {
-		return new WebApplicationContextRunner(
-				AnnotationConfigServletWebServerApplicationContext::new)
-						.withUserConfiguration(WebMvcEndpointConfiguration.class,
-								SecurityConfiguration.class, BaseConfiguration.class)
-						.withConfiguration(AutoConfigurations.of(
-								SecurityAutoConfiguration.class,
-								UserDetailsServiceAutoConfiguration.class,
-								WebMvcAutoConfiguration.class,
-								SecurityRequestMatcherProviderAutoConfiguration.class,
-								JacksonAutoConfiguration.class,
-								HttpMessageConvertersAutoConfiguration.class,
-								DispatcherServletAutoConfiguration.class));
+		return new WebApplicationContextRunner(AnnotationConfigServletWebServerApplicationContext::new)
+				.withUserConfiguration(WebMvcEndpointConfiguration.class, SecurityConfiguration.class,
+						BaseConfiguration.class)
+				.withConfiguration(AutoConfigurations.of(SecurityAutoConfiguration.class,
+						UserDetailsServiceAutoConfiguration.class, WebMvcAutoConfiguration.class,
+						SecurityRequestMatcherProviderAutoConfiguration.class, JacksonAutoConfiguration.class,
+						HttpMessageConvertersAutoConfiguration.class, DispatcherServletAutoConfiguration.class));
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -125,18 +113,13 @@ public class MvcEndpointRequestIntegrationTests
 
 		@Bean
 		public WebMvcEndpointHandlerMapping webEndpointServletHandlerMapping() {
-			List<String> mediaTypes = Arrays.asList(MediaType.APPLICATION_JSON_VALUE,
-					ActuatorMediaType.V2_JSON);
-			EndpointMediaTypes endpointMediaTypes = new EndpointMediaTypes(mediaTypes,
-					mediaTypes);
-			WebEndpointDiscoverer discoverer = new WebEndpointDiscoverer(
-					this.applicationContext, new ConversionServiceParameterValueMapper(),
-					endpointMediaTypes, Arrays.asList(EndpointId::toString),
-					Collections.emptyList(), Collections.emptyList());
-			return new WebMvcEndpointHandlerMapping(new EndpointMapping("/actuator"),
-					discoverer.getEndpoints(), endpointMediaTypes,
-					new CorsConfiguration(),
-					new EndpointLinksResolver(discoverer.getEndpoints()));
+			List<String> mediaTypes = Arrays.asList(MediaType.APPLICATION_JSON_VALUE, ActuatorMediaType.V2_JSON);
+			EndpointMediaTypes endpointMediaTypes = new EndpointMediaTypes(mediaTypes, mediaTypes);
+			WebEndpointDiscoverer discoverer = new WebEndpointDiscoverer(this.applicationContext,
+					new ConversionServiceParameterValueMapper(), endpointMediaTypes,
+					Arrays.asList(EndpointId::toString), Collections.emptyList(), Collections.emptyList());
+			return new WebMvcEndpointHandlerMapping(new EndpointMapping("/actuator"), discoverer.getEndpoints(),
+					endpointMediaTypes, new CorsConfiguration(), new EndpointLinksResolver(discoverer.getEndpoints()));
 		}
 
 	}

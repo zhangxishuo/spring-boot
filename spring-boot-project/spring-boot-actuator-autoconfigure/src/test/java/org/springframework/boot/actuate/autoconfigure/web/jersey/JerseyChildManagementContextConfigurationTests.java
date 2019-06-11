@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -53,29 +53,25 @@ public class JerseyChildManagementContextConfigurationTests {
 	@Test
 	public void autoConfigurationIsConditionalOnServletWebApplication() {
 		ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-				.withConfiguration(AutoConfigurations
-						.of(JerseySameManagementContextConfiguration.class));
-		contextRunner.run((context) -> assertThat(context)
-				.doesNotHaveBean(JerseySameManagementContextConfiguration.class));
+				.withConfiguration(AutoConfigurations.of(JerseySameManagementContextConfiguration.class));
+		contextRunner
+				.run((context) -> assertThat(context).doesNotHaveBean(JerseySameManagementContextConfiguration.class));
 	}
 
 	@Test
 	public void autoConfigurationIsConditionalOnClassResourceConfig() {
 		this.contextRunner.withClassLoader(new FilteredClassLoader(ResourceConfig.class))
-				.run((context) -> assertThat(context)
-						.doesNotHaveBean(JerseySameManagementContextConfiguration.class));
+				.run((context) -> assertThat(context).doesNotHaveBean(JerseySameManagementContextConfiguration.class));
 	}
 
 	@Test
 	public void resourceConfigIsCustomizedWithResourceConfigCustomizerBean() {
-		this.contextRunner.withUserConfiguration(CustomizerConfiguration.class)
-				.run((context) -> {
-					assertThat(context).hasSingleBean(ResourceConfig.class);
-					ResourceConfig config = context.getBean(ResourceConfig.class);
-					ResourceConfigCustomizer customizer = context
-							.getBean(ResourceConfigCustomizer.class);
-					verify(customizer).customize(config);
-				});
+		this.contextRunner.withUserConfiguration(CustomizerConfiguration.class).run((context) -> {
+			assertThat(context).hasSingleBean(ResourceConfig.class);
+			ResourceConfig config = context.getBean(ResourceConfig.class);
+			ResourceConfigCustomizer customizer = context.getBean(ResourceConfigCustomizer.class);
+			verify(customizer).customize(config);
+		});
 	}
 
 	@Test
@@ -90,16 +86,14 @@ public class JerseyChildManagementContextConfigurationTests {
 	@SuppressWarnings("unchecked")
 	public void servletRegistrationBeanIsAutoConfigured() {
 		this.contextRunner.run((context) -> {
-			ServletRegistrationBean<ServletContainer> bean = context
-					.getBean(ServletRegistrationBean.class);
+			ServletRegistrationBean<ServletContainer> bean = context.getBean(ServletRegistrationBean.class);
 			assertThat(bean.getUrlMappings()).containsExactly("/*");
 		});
 	}
 
 	@Test
 	public void resourceConfigCustomizerBeanIsNotRequired() {
-		this.contextRunner.run(
-				(context) -> assertThat(context).hasSingleBean(ResourceConfig.class));
+		this.contextRunner.run((context) -> assertThat(context).hasSingleBean(ResourceConfig.class));
 	}
 
 	@Configuration(proxyBeanMethods = false)

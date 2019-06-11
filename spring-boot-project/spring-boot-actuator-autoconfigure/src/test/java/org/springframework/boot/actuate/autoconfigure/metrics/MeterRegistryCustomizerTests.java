@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,7 @@ package org.springframework.boot.actuate.autoconfigure.metrics;
 import io.micrometer.atlas.AtlasMeterRegistry;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.actuate.autoconfigure.metrics.export.atlas.AtlasMetricsExportAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.export.prometheus.PrometheusMetricsExportAutoConfiguration;
@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Jon Schneider
  * @author Andy Wilkinson
  */
-public class MeterRegistryCustomizerTests {
+class MeterRegistryCustomizerTests {
 
 	private ApplicationContextRunner contextRunner = new ApplicationContextRunner()
 			.with(MetricsRun.limitedTo(AtlasMetricsExportAutoConfiguration.class,
@@ -45,37 +45,29 @@ public class MeterRegistryCustomizerTests {
 			.withConfiguration(AutoConfigurations.of(JvmMetricsAutoConfiguration.class));
 
 	@Test
-	public void commonTagsAreAppliedToAutoConfiguredBinders() {
-		this.contextRunner
-				.withUserConfiguration(MeterRegistryCustomizerConfiguration.class)
-				.run((context) -> {
-					MeterRegistry registry = context.getBean(MeterRegistry.class);
-					registry.get("jvm.memory.used").tags("region", "us-east-1").gauge();
-				});
+	void commonTagsAreAppliedToAutoConfiguredBinders() {
+		this.contextRunner.withUserConfiguration(MeterRegistryCustomizerConfiguration.class).run((context) -> {
+			MeterRegistry registry = context.getBean(MeterRegistry.class);
+			registry.get("jvm.memory.used").tags("region", "us-east-1").gauge();
+		});
 	}
 
 	@Test
-	public void commonTagsAreAppliedBeforeRegistryIsInjectableElsewhere() {
-		this.contextRunner
-				.withUserConfiguration(MeterRegistryCustomizerConfiguration.class)
-				.run((context) -> {
-					MeterRegistry registry = context.getBean(MeterRegistry.class);
-					registry.get("my.thing").tags("region", "us-east-1").gauge();
-				});
+	void commonTagsAreAppliedBeforeRegistryIsInjectableElsewhere() {
+		this.contextRunner.withUserConfiguration(MeterRegistryCustomizerConfiguration.class).run((context) -> {
+			MeterRegistry registry = context.getBean(MeterRegistry.class);
+			registry.get("my.thing").tags("region", "us-east-1").gauge();
+		});
 	}
 
 	@Test
-	public void customizersCanBeAppliedToSpecificRegistryTypes() {
-		this.contextRunner
-				.withUserConfiguration(MeterRegistryCustomizerConfiguration.class)
-				.run((context) -> {
-					MeterRegistry prometheus = context
-							.getBean(PrometheusMeterRegistry.class);
-					prometheus.get("jvm.memory.used").tags("job", "myjob").gauge();
-					MeterRegistry atlas = context.getBean(AtlasMeterRegistry.class);
-					assertThat(atlas.find("jvm.memory.used").tags("job", "myjob").gauge())
-							.isNull();
-				});
+	void customizersCanBeAppliedToSpecificRegistryTypes() {
+		this.contextRunner.withUserConfiguration(MeterRegistryCustomizerConfiguration.class).run((context) -> {
+			MeterRegistry prometheus = context.getBean(PrometheusMeterRegistry.class);
+			prometheus.get("jvm.memory.used").tags("job", "myjob").gauge();
+			MeterRegistry atlas = context.getBean(AtlasMeterRegistry.class);
+			assertThat(atlas.find("jvm.memory.used").tags("job", "myjob").gauge()).isNull();
+		});
 	}
 
 	@Configuration(proxyBeanMethods = false)

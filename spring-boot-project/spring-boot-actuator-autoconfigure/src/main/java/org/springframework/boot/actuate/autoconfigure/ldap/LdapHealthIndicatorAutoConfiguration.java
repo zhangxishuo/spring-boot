@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,13 +47,12 @@ import org.springframework.ldap.core.LdapOperations;
 @ConditionalOnEnabledHealthIndicator("ldap")
 @AutoConfigureBefore(HealthIndicatorAutoConfiguration.class)
 @AutoConfigureAfter(LdapAutoConfiguration.class)
-public class LdapHealthIndicatorAutoConfiguration extends
-		CompositeHealthIndicatorConfiguration<LdapHealthIndicator, LdapOperations> {
+public class LdapHealthIndicatorAutoConfiguration
+		extends CompositeHealthIndicatorConfiguration<LdapHealthIndicator, LdapOperations> {
 
 	@Bean
 	@ConditionalOnMissingBean(name = "ldapHealthIndicator")
-	public HealthIndicator ldapHealthIndicator(
-			Map<String, LdapOperations> ldapOperations) {
+	public HealthIndicator ldapHealthIndicator(Map<String, LdapOperations> ldapOperations) {
 		return createHealthIndicator(ldapOperations);
 	}
 

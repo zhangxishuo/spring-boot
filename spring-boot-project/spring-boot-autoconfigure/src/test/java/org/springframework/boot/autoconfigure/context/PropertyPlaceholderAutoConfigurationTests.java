@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,8 @@
 
 package org.springframework.boot.autoconfigure.context;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -34,11 +34,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dave Syer
  */
-public class PropertyPlaceholderAutoConfigurationTests {
+class PropertyPlaceholderAutoConfigurationTests {
 
 	private final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 
-	@After
+	@AfterEach
 	public void close() {
 		if (this.context != null) {
 			this.context.close();
@@ -46,23 +46,20 @@ public class PropertyPlaceholderAutoConfigurationTests {
 	}
 
 	@Test
-	public void propertyPlaceholders() {
-		this.context.register(PropertyPlaceholderAutoConfiguration.class,
-				PlaceholderConfig.class);
+	void propertyPlaceholders() {
+		this.context.register(PropertyPlaceholderAutoConfiguration.class, PlaceholderConfig.class);
 		TestPropertyValues.of("foo:two").applyTo(this.context);
 		this.context.refresh();
-		assertThat(this.context.getBean(PlaceholderConfig.class).getFoo())
-				.isEqualTo("two");
+		assertThat(this.context.getBean(PlaceholderConfig.class).getFoo()).isEqualTo("two");
 	}
 
 	@Test
-	public void propertyPlaceholdersOverride() {
-		this.context.register(PropertyPlaceholderAutoConfiguration.class,
-				PlaceholderConfig.class, PlaceholdersOverride.class);
+	void propertyPlaceholdersOverride() {
+		this.context.register(PropertyPlaceholderAutoConfiguration.class, PlaceholderConfig.class,
+				PlaceholdersOverride.class);
 		TestPropertyValues.of("foo:two").applyTo(this.context);
 		this.context.refresh();
-		assertThat(this.context.getBean(PlaceholderConfig.class).getFoo())
-				.isEqualTo("spam");
+		assertThat(this.context.getBean(PlaceholderConfig.class).getFoo()).isEqualTo("spam");
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -83,8 +80,7 @@ public class PropertyPlaceholderAutoConfigurationTests {
 		@Bean
 		public static PropertySourcesPlaceholderConfigurer morePlaceholders() {
 			PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
-			configurer.setProperties(StringUtils
-					.splitArrayElementsIntoProperties(new String[] { "foo=spam" }, "="));
+			configurer.setProperties(StringUtils.splitArrayElementsIntoProperties(new String[] { "foo=spam" }, "="));
 			configurer.setLocalOverride(true);
 			configurer.setOrder(0);
 			return configurer;

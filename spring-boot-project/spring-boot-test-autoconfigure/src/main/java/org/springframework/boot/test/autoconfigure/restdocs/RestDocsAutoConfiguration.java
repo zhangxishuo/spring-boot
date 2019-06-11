@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -63,25 +63,21 @@ public class RestDocsAutoConfiguration {
 			MockMvcRestDocumentationConfigurer configurer = MockMvcRestDocumentation
 					.documentationConfiguration(contextProvider);
 			configurationCustomizers.orderedStream()
-					.forEach((configurationCustomizer) -> configurationCustomizer
-							.customize(configurer));
+					.forEach((configurationCustomizer) -> configurationCustomizer.customize(configurer));
 			return configurer;
 		}
 
 		@Bean
-		public RestDocsMockMvcBuilderCustomizer restDocumentationConfigurer(
-				RestDocsProperties properties,
+		public RestDocsMockMvcBuilderCustomizer restDocumentationConfigurer(RestDocsProperties properties,
 				MockMvcRestDocumentationConfigurer configurer,
 				ObjectProvider<RestDocumentationResultHandler> resultHandler) {
-			return new RestDocsMockMvcBuilderCustomizer(properties, configurer,
-					resultHandler.getIfAvailable());
+			return new RestDocsMockMvcBuilderCustomizer(properties, configurer, resultHandler.getIfAvailable());
 		}
 
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnClass({ RequestSpecification.class,
-			RestAssuredRestDocumentation.class })
+	@ConditionalOnClass({ RequestSpecification.class, RestAssuredRestDocumentation.class })
 	@EnableConfigurationProperties(RestDocsProperties.class)
 	static class RestDocsRestAssuredConfiguration {
 
@@ -93,14 +89,13 @@ public class RestDocsAutoConfiguration {
 			RestAssuredRestDocumentationConfigurer configurer = RestAssuredRestDocumentation
 					.documentationConfiguration(contextProvider);
 			configurationCustomizers.orderedStream()
-					.forEach((configurationCustomizer) -> configurationCustomizer
-							.customize(configurer));
+					.forEach((configurationCustomizer) -> configurationCustomizer.customize(configurer));
 			return new RequestSpecBuilder().addFilter(configurer).build();
 		}
 
 		@Bean
-		public RestDocsRestAssuredBuilderCustomizer restAssuredBuilderCustomizer(
-				RestDocsProperties properties, RequestSpecification configurer) {
+		public RestDocsRestAssuredBuilderCustomizer restAssuredBuilderCustomizer(RestDocsProperties properties,
+				RequestSpecification configurer) {
 			return new RestDocsRestAssuredBuilderCustomizer(properties, configurer);
 		}
 
@@ -120,14 +115,12 @@ public class RestDocsAutoConfiguration {
 			WebTestClientRestDocumentationConfigurer configurer = WebTestClientRestDocumentation
 					.documentationConfiguration(contextProvider);
 			configurationCustomizers.orderedStream()
-					.forEach((configurationCustomizer) -> configurationCustomizer
-							.customize(configurer));
+					.forEach((configurationCustomizer) -> configurationCustomizer.customize(configurer));
 			return configurer;
 		}
 
 		@Bean
-		public RestDocsWebTestClientBuilderCustomizer restDocumentationConfigurer(
-				RestDocsProperties properties,
+		public RestDocsWebTestClientBuilderCustomizer restDocumentationConfigurer(RestDocsProperties properties,
 				WebTestClientRestDocumentationConfigurer configurer) {
 			return new RestDocsWebTestClientBuilderCustomizer(properties, configurer);
 		}

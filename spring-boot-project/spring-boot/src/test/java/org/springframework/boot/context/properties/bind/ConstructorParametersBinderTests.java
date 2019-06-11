@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,7 @@ package org.springframework.boot.context.properties.bind;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.context.properties.source.ConfigurationPropertyName;
 import org.springframework.boot.context.properties.source.ConfigurationPropertySource;
@@ -32,19 +31,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Madhura Bhave
  */
-public class ConstructorParametersBinderTests {
+class ConstructorParametersBinderTests {
 
-	private List<ConfigurationPropertySource> sources = new ArrayList<>();
+	private final List<ConfigurationPropertySource> sources = new ArrayList<>();
 
-	private Binder binder;
-
-	@Before
-	public void setup() {
-		this.binder = new Binder(this.sources);
-	}
+	private final Binder binder = new Binder(this.sources);
 
 	@Test
-	public void bindToClassShouldCreateBoundBean() {
+	void bindToClassShouldCreateBoundBean() {
 		MockConfigurationPropertySource source = new MockConfigurationPropertySource();
 		source.put("foo.int-value", "12");
 		source.put("foo.long-value", "34");
@@ -52,8 +46,7 @@ public class ConstructorParametersBinderTests {
 		source.put("foo.string-value", "foo");
 		source.put("foo.enum-value", "foo-bar");
 		this.sources.add(source);
-		ExampleValueBean bean = this.binder
-				.bind("foo", Bindable.of(ExampleValueBean.class)).get();
+		ExampleValueBean bean = this.binder.bind("foo", Bindable.of(ExampleValueBean.class)).get();
 		assertThat(bean.getIntValue()).isEqualTo(12);
 		assertThat(bean.getLongValue()).isEqualTo(34);
 		assertThat(bean.isBooleanValue()).isTrue();
@@ -62,7 +55,7 @@ public class ConstructorParametersBinderTests {
 	}
 
 	@Test
-	public void bindToClassWhenHasNoPrefixShouldCreateBoundBean() {
+	void bindToClassWhenHasNoPrefixShouldCreateBoundBean() {
 		MockConfigurationPropertySource source = new MockConfigurationPropertySource();
 		source.put("int-value", "12");
 		source.put("long-value", "34");
@@ -70,8 +63,8 @@ public class ConstructorParametersBinderTests {
 		source.put("string-value", "foo");
 		source.put("enum-value", "foo-bar");
 		this.sources.add(source);
-		ExampleValueBean bean = this.binder.bind(ConfigurationPropertyName.of(""),
-				Bindable.of(ExampleValueBean.class)).get();
+		ExampleValueBean bean = this.binder.bind(ConfigurationPropertyName.of(""), Bindable.of(ExampleValueBean.class))
+				.get();
 		assertThat(bean.getIntValue()).isEqualTo(12);
 		assertThat(bean.getLongValue()).isEqualTo(34);
 		assertThat(bean.isBooleanValue()).isTrue();
@@ -80,44 +73,40 @@ public class ConstructorParametersBinderTests {
 	}
 
 	@Test
-	public void bindToAbstractClassWithShouldNotBind() {
+	void bindToAbstractClassWithShouldNotBind() {
 		MockConfigurationPropertySource source = new MockConfigurationPropertySource();
 		source.put("foo.name", "test");
 		this.sources.add(source);
-		boolean bound = this.binder.bind("foo", Bindable.of(ExampleAbstractBean.class))
-				.isBound();
+		boolean bound = this.binder.bind("foo", Bindable.of(ExampleAbstractBean.class)).isBound();
 		assertThat(bound).isFalse();
 	}
 
 	@Test
-	public void bindToClassWithMultipleConstructorsShouldNotBind() {
+	void bindToClassWithMultipleConstructorsShouldNotBind() {
 		MockConfigurationPropertySource source = new MockConfigurationPropertySource();
 		source.put("foo.int-value", "12");
 		this.sources.add(source);
-		boolean bound = this.binder
-				.bind("foo", Bindable.of(MultipleConstructorsBean.class)).isBound();
+		boolean bound = this.binder.bind("foo", Bindable.of(MultipleConstructorsBean.class)).isBound();
 		assertThat(bound).isFalse();
 	}
 
 	@Test
-	public void bindToClassWithOnlyDefaultConstructorShouldNotBind() {
+	void bindToClassWithOnlyDefaultConstructorShouldNotBind() {
 		MockConfigurationPropertySource source = new MockConfigurationPropertySource();
 		source.put("foo.int-value", "12");
 		this.sources.add(source);
-		boolean bound = this.binder.bind("foo", Bindable.of(DefaultConstructorBean.class))
-				.isBound();
+		boolean bound = this.binder.bind("foo", Bindable.of(DefaultConstructorBean.class)).isBound();
 		assertThat(bound).isFalse();
 	}
 
 	@Test
-	public void bindToClassShouldBindNested() {
+	void bindToClassShouldBindNested() {
 		MockConfigurationPropertySource source = new MockConfigurationPropertySource();
 		source.put("foo.value-bean.int-value", "123");
 		source.put("foo.value-bean.long-value", "34");
 		source.put("foo.value-bean.string-value", "foo");
 		this.sources.add(source);
-		ExampleNestedBean bean = this.binder
-				.bind("foo", Bindable.of(ExampleNestedBean.class)).get();
+		ExampleNestedBean bean = this.binder.bind("foo", Bindable.of(ExampleNestedBean.class)).get();
 		assertThat(bean.getValueBean().getIntValue()).isEqualTo(123);
 		assertThat(bean.getValueBean().getLongValue()).isEqualTo(34);
 		assertThat(bean.getValueBean().isBooleanValue()).isFalse();
@@ -126,12 +115,11 @@ public class ConstructorParametersBinderTests {
 	}
 
 	@Test
-	public void bindToClassWithNoValueForPrimitiveShouldUseDefault() {
+	void bindToClassWithNoValueForPrimitiveShouldUseDefault() {
 		MockConfigurationPropertySource source = new MockConfigurationPropertySource();
 		source.put("foo.string-value", "foo");
 		this.sources.add(source);
-		ExampleValueBean bean = this.binder
-				.bind("foo", Bindable.of(ExampleValueBean.class)).get();
+		ExampleValueBean bean = this.binder.bind("foo", Bindable.of(ExampleValueBean.class)).get();
 		assertThat(bean.getIntValue()).isEqualTo(0);
 		assertThat(bean.getLongValue()).isEqualTo(0);
 		assertThat(bean.isBooleanValue()).isEqualTo(false);
@@ -139,12 +127,11 @@ public class ConstructorParametersBinderTests {
 	}
 
 	@Test
-	public void bindToClassWithNoValueAndDefaultValueShouldUseDefault() {
+	void bindToClassWithNoValueAndDefaultValueShouldUseDefault() {
 		MockConfigurationPropertySource source = new MockConfigurationPropertySource();
 		source.put("foo.string-value", "foo");
 		this.sources.add(source);
-		ExampleDefaultValueBean bean = this.binder
-				.bind("foo", Bindable.of(ExampleDefaultValueBean.class)).get();
+		ExampleDefaultValueBean bean = this.binder.bind("foo", Bindable.of(ExampleDefaultValueBean.class)).get();
 		assertThat(bean.getIntValue()).isEqualTo(5);
 		assertThat(bean.getStringsList()).containsOnly("a", "b", "c");
 		assertThat(bean.getCustomList()).containsOnly("x,y,z");
@@ -162,8 +149,8 @@ public class ConstructorParametersBinderTests {
 
 		private final ExampleEnum enumValue;
 
-		public ExampleValueBean(int intValue, long longValue, boolean booleanValue,
-				String stringValue, ExampleEnum enumValue) {
+		ExampleValueBean(int intValue, long longValue, boolean booleanValue, String stringValue,
+				ExampleEnum enumValue) {
 			this.intValue = intValue;
 			this.longValue = longValue;
 			this.booleanValue = booleanValue;
@@ -204,12 +191,11 @@ public class ConstructorParametersBinderTests {
 	@SuppressWarnings("unused")
 	public static class MultipleConstructorsBean {
 
-		public MultipleConstructorsBean(int intValue) {
+		MultipleConstructorsBean(int intValue) {
 			this(intValue, 23L, "hello");
 		}
 
-		public MultipleConstructorsBean(int intValue, long longValue,
-				String stringValue) {
+		MultipleConstructorsBean(int intValue, long longValue, String stringValue) {
 		}
 
 	}
@@ -218,7 +204,7 @@ public class ConstructorParametersBinderTests {
 
 		private final String name;
 
-		public ExampleAbstractBean(String name) {
+		ExampleAbstractBean(String name) {
 			this.name = name;
 		}
 
@@ -230,8 +216,7 @@ public class ConstructorParametersBinderTests {
 
 	public static class DefaultConstructorBean {
 
-		public DefaultConstructorBean() {
-
+		DefaultConstructorBean() {
 		}
 
 	}
@@ -240,7 +225,7 @@ public class ConstructorParametersBinderTests {
 
 		private final ExampleValueBean valueBean;
 
-		public ExampleNestedBean(ExampleValueBean valueBean) {
+		ExampleNestedBean(ExampleValueBean valueBean) {
 			this.valueBean = valueBean;
 		}
 
@@ -258,7 +243,7 @@ public class ConstructorParametersBinderTests {
 
 		private final List<String> customList;
 
-		public ExampleDefaultValueBean(@DefaultValue("5") int intValue,
+		ExampleDefaultValueBean(@DefaultValue("5") int intValue,
 				@DefaultValue({ "a", "b", "c" }) List<String> stringsList,
 				@DefaultValue("x,y,z") List<String> customList) {
 			this.intValue = intValue;

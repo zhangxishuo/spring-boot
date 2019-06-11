@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,7 @@ import org.springframework.boot.actuate.endpoint.annotation.Selector;
 import org.springframework.util.Assert;
 
 /**
- * {@link Endpoint} to expose application health information.
+ * {@link Endpoint @Endpoint} to expose application health information.
  *
  * @author Dave Syer
  * @author Christian Dupuis
@@ -58,8 +58,7 @@ public class HealthEndpoint {
 	 */
 	@ReadOperation
 	public Health healthForComponent(@Selector String component) {
-		HealthIndicator indicator = getNestedHealthIndicator(this.healthIndicator,
-				component);
+		HealthIndicator indicator = getNestedHealthIndicator(this.healthIndicator, component);
 		return (indicator != null) ? indicator.health() : null;
 	}
 
@@ -72,16 +71,13 @@ public class HealthEndpoint {
 	 * @return the {@link Health} for the component instance of {@code null}
 	 */
 	@ReadOperation
-	public Health healthForComponentInstance(@Selector String component,
-			@Selector String instance) {
-		HealthIndicator indicator = getNestedHealthIndicator(this.healthIndicator,
-				component);
+	public Health healthForComponentInstance(@Selector String component, @Selector String instance) {
+		HealthIndicator indicator = getNestedHealthIndicator(this.healthIndicator, component);
 		HealthIndicator nestedIndicator = getNestedHealthIndicator(indicator, instance);
 		return (nestedIndicator != null) ? nestedIndicator.health() : null;
 	}
 
-	private HealthIndicator getNestedHealthIndicator(HealthIndicator healthIndicator,
-			String name) {
+	private HealthIndicator getNestedHealthIndicator(HealthIndicator healthIndicator, String name) {
 		if (healthIndicator instanceof CompositeHealthIndicator) {
 			return ((CompositeHealthIndicator) healthIndicator).getRegistry().get(name);
 		}

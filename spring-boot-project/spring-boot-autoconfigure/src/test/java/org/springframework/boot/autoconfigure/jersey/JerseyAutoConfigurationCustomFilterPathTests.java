@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,8 +27,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 import org.glassfish.jersey.server.ResourceConfig;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,7 +42,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,19 +50,16 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dave Syer
  */
-
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = "spring.jersey.type=filter")
 @DirtiesContext
-@RunWith(SpringRunner.class)
-public class JerseyAutoConfigurationCustomFilterPathTests {
+class JerseyAutoConfigurationCustomFilterPathTests {
 
 	@Autowired
 	private TestRestTemplate restTemplate;
 
 	@Test
-	public void contextLoads() {
-		ResponseEntity<String> entity = this.restTemplate.getForEntity("/rest/hello",
-				String.class);
+	void contextLoads() {
+		ResponseEntity<String> entity = this.restTemplate.getForEntity("/rest/hello", String.class);
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
@@ -81,7 +76,7 @@ public class JerseyAutoConfigurationCustomFilterPathTests {
 			return "Hello " + this.msg;
 		}
 
-		public Application() {
+		Application() {
 			register(Application.class);
 		}
 
@@ -95,8 +90,8 @@ public class JerseyAutoConfigurationCustomFilterPathTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
 	@Configuration
-	@Import({ ServletWebServerFactoryAutoConfiguration.class,
-			JerseyAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class })
+	@Import({ ServletWebServerFactoryAutoConfiguration.class, JerseyAutoConfiguration.class,
+			PropertyPlaceholderAutoConfiguration.class })
 	protected @interface MinimalWebConfiguration {
 
 	}

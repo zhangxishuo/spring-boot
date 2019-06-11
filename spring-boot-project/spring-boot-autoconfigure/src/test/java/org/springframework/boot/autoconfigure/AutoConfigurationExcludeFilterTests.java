@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,8 +19,8 @@ package org.springframework.boot.autoconfigure;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.context.filtersample.ExampleConfiguration;
@@ -38,13 +38,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Stephane Nicoll
  */
-public class AutoConfigurationExcludeFilterTests {
+class AutoConfigurationExcludeFilterTests {
 
 	private static final Class<?> FILTERED = ExampleFilteredAutoConfiguration.class;
 
 	private AnnotationConfigApplicationContext context;
 
-	@After
+	@AfterEach
 	public void cleanUp() {
 		if (this.context != null) {
 			this.context.close();
@@ -52,22 +52,22 @@ public class AutoConfigurationExcludeFilterTests {
 	}
 
 	@Test
-	public void filterExcludeAutoConfiguration() {
+	void filterExcludeAutoConfiguration() {
 		this.context = new AnnotationConfigApplicationContext(Config.class);
 		assertThat(this.context.getBeansOfType(String.class)).hasSize(1);
 		assertThat(this.context.getBean(String.class)).isEqualTo("test");
-		assertThatExceptionOfType(NoSuchBeanDefinitionException.class)
-				.isThrownBy(() -> this.context.getBean(FILTERED));
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() -> this.context.getBean(FILTERED));
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@ComponentScan(basePackageClasses = ExampleConfiguration.class, excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = TestAutoConfigurationExcludeFilter.class))
+	@ComponentScan(basePackageClasses = ExampleConfiguration.class,
+			excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM,
+					classes = TestAutoConfigurationExcludeFilter.class))
 	static class Config {
 
 	}
 
-	static class TestAutoConfigurationExcludeFilter
-			extends AutoConfigurationExcludeFilter {
+	static class TestAutoConfigurationExcludeFilter extends AutoConfigurationExcludeFilter {
 
 		@Override
 		protected List<String> getAutoConfigurations() {

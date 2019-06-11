@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,10 +16,13 @@
 
 package org.springframework.boot.devtools.autoconfigure;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -28,6 +31,7 @@ import org.springframework.boot.devtools.restart.MockRestarter;
 import org.springframework.boot.devtools.restart.server.HttpRestartServer;
 import org.springframework.boot.devtools.restart.server.SourceFolderUrlFilter;
 import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -37,7 +41,6 @@ import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -49,16 +52,14 @@ import static org.mockito.Mockito.mock;
  * @author Rob Winch
  * @author Phillip Webb
  */
-public class RemoteDevToolsAutoConfigurationTests {
+@ExtendWith(MockRestarter.class)
+class RemoteDevToolsAutoConfigurationTests {
 
 	private static final String DEFAULT_CONTEXT_PATH = RemoteDevToolsProperties.DEFAULT_CONTEXT_PATH;
 
 	private static final String DEFAULT_SECRET_HEADER_NAME = RemoteDevToolsProperties.DEFAULT_SECRET_HEADER_NAME;
 
-	@Rule
-	public MockRestarter mockRestarter = new MockRestarter();
-
-	private AnnotationConfigWebApplicationContext context;
+	private AnnotationConfigServletWebApplicationContext context;
 
 	private MockHttpServletRequest request;
 
@@ -66,14 +67,14 @@ public class RemoteDevToolsAutoConfigurationTests {
 
 	private MockFilterChain chain;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.request = new MockHttpServletRequest();
 		this.response = new MockHttpServletResponse();
 		this.chain = new MockFilterChain();
 	}
 
-	@After
+	@AfterEach
 	public void close() {
 		if (this.context != null) {
 			this.context.close();
@@ -81,15 +82,15 @@ public class RemoteDevToolsAutoConfigurationTests {
 	}
 
 	@Test
-	public void disabledIfRemoteSecretIsMissing() {
-		loadContext("a:b");
+	void disabledIfRemoteSecretIsMissing() throws Exception {
+		this.context = getContext(() -> loadContext("a:b"));
 		assertThatExceptionOfType(NoSuchBeanDefinitionException.class)
 				.isThrownBy(() -> this.context.getBean(DispatcherFilter.class));
 	}
 
 	@Test
-	public void ignoresUnmappedUrl() throws Exception {
-		loadContext("spring.devtools.remote.secret:supersecret");
+	void ignoresUnmappedUrl() throws Exception {
+		this.context = getContext(() -> loadContext("spring.devtools.remote.secret:supersecret"));
 		DispatcherFilter filter = this.context.getBean(DispatcherFilter.class);
 		this.request.setRequestURI("/restart");
 		this.request.addHeader(DEFAULT_SECRET_HEADER_NAME, "supersecret");
@@ -98,8 +99,8 @@ public class RemoteDevToolsAutoConfigurationTests {
 	}
 
 	@Test
-	public void ignoresIfMissingSecretFromRequest() throws Exception {
-		loadContext("spring.devtools.remote.secret:supersecret");
+	void ignoresIfMissingSecretFromRequest() throws Exception {
+		this.context = getContext(() -> loadContext("spring.devtools.remote.secret:supersecret"));
 		DispatcherFilter filter = this.context.getBean(DispatcherFilter.class);
 		this.request.setRequestURI(DEFAULT_CONTEXT_PATH + "/restart");
 		filter.doFilter(this.request, this.response, this.chain);
@@ -107,8 +108,8 @@ public class RemoteDevToolsAutoConfigurationTests {
 	}
 
 	@Test
-	public void ignoresInvalidSecretInRequest() throws Exception {
-		loadContext("spring.devtools.remote.secret:supersecret");
+	void ignoresInvalidSecretInRequest() throws Exception {
+		this.context = getContext(() -> loadContext("spring.devtools.remote.secret:supersecret"));
 		DispatcherFilter filter = this.context.getBean(DispatcherFilter.class);
 		this.request.setRequestURI(DEFAULT_CONTEXT_PATH + "/restart");
 		this.request.addHeader(DEFAULT_SECRET_HEADER_NAME, "invalid");
@@ -117,8 +118,8 @@ public class RemoteDevToolsAutoConfigurationTests {
 	}
 
 	@Test
-	public void invokeRestartWithDefaultSetup() throws Exception {
-		loadContext("spring.devtools.remote.secret:supersecret");
+	void invokeRestartWithDefaultSetup() throws Exception {
+		this.context = getContext(() -> loadContext("spring.devtools.remote.secret:supersecret"));
 		DispatcherFilter filter = this.context.getBean(DispatcherFilter.class);
 		this.request.setRequestURI(DEFAULT_CONTEXT_PATH + "/restart");
 		this.request.addHeader(DEFAULT_SECRET_HEADER_NAME, "supersecret");
@@ -127,9 +128,9 @@ public class RemoteDevToolsAutoConfigurationTests {
 	}
 
 	@Test
-	public void invokeRestartWithCustomServerContextPath() throws Exception {
-		loadContext("spring.devtools.remote.secret:supersecret",
-				"server.servlet.context-path:/test");
+	void invokeRestartWithCustomServerContextPath() throws Exception {
+		this.context = getContext(
+				() -> loadContext("spring.devtools.remote.secret:supersecret", "server.servlet.context-path:/test"));
 		DispatcherFilter filter = this.context.getBean(DispatcherFilter.class);
 		this.request.setRequestURI("/test" + DEFAULT_CONTEXT_PATH + "/restart");
 		this.request.addHeader(DEFAULT_SECRET_HEADER_NAME, "supersecret");
@@ -138,16 +139,16 @@ public class RemoteDevToolsAutoConfigurationTests {
 	}
 
 	@Test
-	public void disableRestart() {
-		loadContext("spring.devtools.remote.secret:supersecret",
-				"spring.devtools.remote.restart.enabled:false");
+	void disableRestart() throws Exception {
+		this.context = getContext(() -> loadContext("spring.devtools.remote.secret:supersecret",
+				"spring.devtools.remote.restart.enabled:false"));
 		assertThatExceptionOfType(NoSuchBeanDefinitionException.class)
 				.isThrownBy(() -> this.context.getBean("remoteRestartHandlerMapper"));
 	}
 
 	@Test
-	public void devToolsHealthReturns200() throws Exception {
-		loadContext("spring.devtools.remote.secret:supersecret");
+	void devToolsHealthReturns200() throws Exception {
+		this.context = getContext(() -> loadContext("spring.devtools.remote.secret:supersecret"));
 		DispatcherFilter filter = this.context.getBean(DispatcherFilter.class);
 		this.request.setRequestURI(DEFAULT_CONTEXT_PATH);
 		this.request.addHeader(DEFAULT_SECRET_HEADER_NAME, "supersecret");
@@ -157,9 +158,9 @@ public class RemoteDevToolsAutoConfigurationTests {
 	}
 
 	@Test
-	public void devToolsHealthWithCustomServerContextPathReturns200() throws Exception {
-		loadContext("spring.devtools.remote.secret:supersecret",
-				"server.servlet.context-path:/test");
+	void devToolsHealthWithCustomServerContextPathReturns200() throws Exception {
+		this.context = getContext(
+				() -> loadContext("spring.devtools.remote.secret:supersecret", "server.servlet.context-path:/test"));
 		DispatcherFilter filter = this.context.getBean(DispatcherFilter.class);
 		this.request.setRequestURI("/test" + DEFAULT_CONTEXT_PATH);
 		this.request.addHeader(DEFAULT_SECRET_HEADER_NAME, "supersecret");
@@ -168,17 +169,29 @@ public class RemoteDevToolsAutoConfigurationTests {
 		assertThat(this.response.getStatus()).isEqualTo(200);
 	}
 
-	private void assertRestartInvoked(boolean value) {
-		assertThat(this.context.getBean(MockHttpRestartServer.class).invoked)
-				.isEqualTo(value);
+	private AnnotationConfigServletWebApplicationContext getContext(
+			Supplier<AnnotationConfigServletWebApplicationContext> supplier) throws Exception {
+		AtomicReference<AnnotationConfigServletWebApplicationContext> atomicReference = new AtomicReference<>();
+		Thread thread = new Thread(() -> {
+			AnnotationConfigServletWebApplicationContext context = supplier.get();
+			atomicReference.getAndSet(context);
+		});
+		thread.start();
+		thread.join();
+		return atomicReference.get();
 	}
 
-	private void loadContext(String... properties) {
-		this.context = new AnnotationConfigWebApplicationContext();
-		this.context.setServletContext(new MockServletContext());
-		this.context.register(Config.class, PropertyPlaceholderAutoConfiguration.class);
-		TestPropertyValues.of(properties).applyTo(this.context);
-		this.context.refresh();
+	private void assertRestartInvoked(boolean value) {
+		assertThat(this.context.getBean(MockHttpRestartServer.class).invoked).isEqualTo(value);
+	}
+
+	private AnnotationConfigServletWebApplicationContext loadContext(String... properties) {
+		AnnotationConfigServletWebApplicationContext context = new AnnotationConfigServletWebApplicationContext();
+		context.setServletContext(new MockServletContext());
+		context.register(Config.class, PropertyPlaceholderAutoConfiguration.class);
+		TestPropertyValues.of(properties).applyTo(context);
+		context.refresh();
+		return context;
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -187,8 +200,7 @@ public class RemoteDevToolsAutoConfigurationTests {
 
 		@Bean
 		public HttpRestartServer remoteRestartHttpRestartServer() {
-			SourceFolderUrlFilter sourceFolderUrlFilter = mock(
-					SourceFolderUrlFilter.class);
+			SourceFolderUrlFilter sourceFolderUrlFilter = mock(SourceFolderUrlFilter.class);
 			return new MockHttpRestartServer(sourceFolderUrlFilter);
 		}
 

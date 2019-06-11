@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,8 +45,7 @@ public class NettyWebServerFactoryCustomizer
 
 	private final ServerProperties serverProperties;
 
-	public NettyWebServerFactoryCustomizer(Environment environment,
-			ServerProperties serverProperties) {
+	public NettyWebServerFactoryCustomizer(Environment environment, ServerProperties serverProperties) {
 		this.environment = environment;
 		this.serverProperties = serverProperties;
 	}
@@ -58,37 +57,30 @@ public class NettyWebServerFactoryCustomizer
 
 	@Override
 	public void customize(NettyReactiveWebServerFactory factory) {
-		factory.setUseForwardHeaders(
-				getOrDeduceUseForwardHeaders(this.serverProperties, this.environment));
+		factory.setUseForwardHeaders(getOrDeduceUseForwardHeaders());
 		PropertyMapper propertyMapper = PropertyMapper.get();
-		propertyMapper.from(this.serverProperties::getMaxHttpHeaderSize).whenNonNull()
-				.asInt(DataSize::toBytes)
-				.to((maxHttpRequestHeaderSize) -> customizeMaxHttpHeaderSize(factory,
-						maxHttpRequestHeaderSize));
-		propertyMapper.from(this.serverProperties::getConnectionTimeout).whenNonNull()
-				.asInt(Duration::toMillis).to((duration) -> factory
-						.addServerCustomizers(getConnectionTimeOutCustomizer(duration)));
+		propertyMapper.from(this.serverProperties::getMaxHttpHeaderSize).whenNonNull().asInt(DataSize::toBytes)
+				.to((maxHttpRequestHeaderSize) -> customizeMaxHttpHeaderSize(factory, maxHttpRequestHeaderSize));
+		propertyMapper.from(this.serverProperties::getConnectionTimeout).whenNonNull().asInt(Duration::toMillis)
+				.to((duration) -> factory.addServerCustomizers(getConnectionTimeOutCustomizer(duration)));
 	}
 
-	private boolean getOrDeduceUseForwardHeaders(ServerProperties serverProperties,
-			Environment environment) {
-		if (serverProperties.isUseForwardHeaders() != null) {
-			return serverProperties.isUseForwardHeaders();
+	private boolean getOrDeduceUseForwardHeaders() {
+		if (this.serverProperties.getForwardHeadersStrategy().equals(ServerProperties.ForwardHeadersStrategy.NONE)) {
+			CloudPlatform platform = CloudPlatform.getActive(this.environment);
+			return platform != null && platform.isUsingForwardHeaders();
 		}
-		CloudPlatform platform = CloudPlatform.getActive(environment);
-		return platform != null && platform.isUsingForwardHeaders();
+		return this.serverProperties.getForwardHeadersStrategy().equals(ServerProperties.ForwardHeadersStrategy.NATIVE);
 	}
 
-	private void customizeMaxHttpHeaderSize(NettyReactiveWebServerFactory factory,
-			Integer maxHttpHeaderSize) {
-		factory.addServerCustomizers((NettyServerCustomizer) (httpServer) -> httpServer
-				.httpRequestDecoder((httpRequestDecoderSpec) -> httpRequestDecoderSpec
-						.maxHeaderSize(maxHttpHeaderSize)));
+	private void customizeMaxHttpHeaderSize(NettyReactiveWebServerFactory factory, Integer maxHttpHeaderSize) {
+		factory.addServerCustomizers((NettyServerCustomizer) (httpServer) -> httpServer.httpRequestDecoder(
+				(httpRequestDecoderSpec) -> httpRequestDecoderSpec.maxHeaderSize(maxHttpHeaderSize)));
 	}
 
 	private NettyServerCustomizer getConnectionTimeOutCustomizer(int duration) {
-		return (httpServer) -> httpServer.tcpConfiguration((tcpServer) -> tcpServer
-				.selectorOption(ChannelOption.CONNECT_TIMEOUT_MILLIS, duration));
+		return (httpServer) -> httpServer.tcpConfiguration(
+				(tcpServer) -> tcpServer.selectorOption(ChannelOption.CONNECT_TIMEOUT_MILLIS, duration));
 	}
 
 }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,8 +36,8 @@ import org.springframework.core.Ordered;
  * active.
  * <p>
  * Once in effect, the auto-configuration is the equivalent of adding the
- * {@link CloudScan} annotation in one of the configuration file. Specifically, it adds a
- * bean for each service bound to the application and one for
+ * {@link CloudScan @CloudScan} annotation in one of the configuration file. Specifically,
+ * it adds a bean for each service bound to the application and one for
  * {@link ApplicationInstanceInfo}.
  *
  * @author Ramnivas Laddad

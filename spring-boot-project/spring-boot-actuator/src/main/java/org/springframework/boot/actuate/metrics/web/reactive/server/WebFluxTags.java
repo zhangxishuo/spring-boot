@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -96,8 +96,7 @@ public final class WebFluxTags {
 	 * @return the uri tag derived from the exchange
 	 */
 	public static Tag uri(ServerWebExchange exchange) {
-		PathPattern pathPattern = exchange
-				.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+		PathPattern pathPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
 		if (pathPattern != null) {
 			return Tag.of("uri", pathPattern.getPatternString());
 		}
@@ -132,8 +131,7 @@ public final class WebFluxTags {
 	public static Tag exception(Throwable exception) {
 		if (exception != null) {
 			String simpleName = exception.getClass().getSimpleName();
-			return Tag.of("exception", StringUtils.hasText(simpleName) ? simpleName
-					: exception.getClass().getName());
+			return Tag.of("exception", StringUtils.hasText(simpleName) ? simpleName : exception.getClass().getName());
 		}
 		return EXCEPTION_NONE;
 	}

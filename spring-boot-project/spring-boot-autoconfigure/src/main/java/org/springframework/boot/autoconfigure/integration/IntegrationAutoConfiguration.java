@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -81,15 +81,13 @@ public class IntegrationAutoConfiguration {
 	protected static class IntegrationJmxConfiguration {
 
 		@Bean
-		public IntegrationMBeanExporter integrationMbeanExporter(BeanFactory beanFactory,
-				Environment environment) {
+		public IntegrationMBeanExporter integrationMbeanExporter(BeanFactory beanFactory, Environment environment) {
 			IntegrationMBeanExporter exporter = new IntegrationMBeanExporter();
 			String defaultDomain = environment.getProperty("spring.jmx.default-domain");
 			if (StringUtils.hasLength(defaultDomain)) {
 				exporter.setDefaultDomain(defaultDomain);
 			}
-			String serverBean = environment.getProperty("spring.jmx.server",
-					"mbeanServer");
+			String serverBean = environment.getProperty("spring.jmx.server", "mbeanServer");
 			exporter.setServer(beanFactory.getBean(serverBean, MBeanServer.class));
 			return exporter;
 		}
@@ -101,7 +99,8 @@ public class IntegrationAutoConfiguration {
 	 */
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(EnableIntegrationManagement.class)
-	@ConditionalOnMissingBean(value = IntegrationManagementConfigurer.class, name = IntegrationManagementConfigurer.MANAGEMENT_CONFIGURER_NAME, search = SearchStrategy.CURRENT)
+	@ConditionalOnMissingBean(value = IntegrationManagementConfigurer.class,
+			name = IntegrationManagementConfigurer.MANAGEMENT_CONFIGURER_NAME, search = SearchStrategy.CURRENT)
 	protected static class IntegrationManagementConfiguration {
 
 		@Configuration(proxyBeanMethods = false)
@@ -132,11 +131,9 @@ public class IntegrationAutoConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
-		public IntegrationDataSourceInitializer integrationDataSourceInitializer(
-				DataSource dataSource, ResourceLoader resourceLoader,
-				IntegrationProperties properties) {
-			return new IntegrationDataSourceInitializer(dataSource, resourceLoader,
-					properties);
+		public IntegrationDataSourceInitializer integrationDataSourceInitializer(DataSource dataSource,
+				ResourceLoader resourceLoader, IntegrationProperties properties) {
+			return new IntegrationDataSourceInitializer(dataSource, resourceLoader, properties);
 		}
 
 	}

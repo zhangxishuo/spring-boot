@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@
 
 package org.springframework.boot.testsupport.assertj;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -27,27 +27,27 @@ import static org.hamcrest.Matchers.startsWith;
  *
  * @author Phillip Webb
  */
-public class MatchedTests {
+class MatchedTests {
 
 	@Test
-	public void byMatcherMatches() {
+	void byMatcherMatches() {
 		assertThat("1234").is(Matched.by(startsWith("12")));
 	}
 
 	@Test
-	public void byMatcherDoesNotMatch() {
+	void byMatcherDoesNotMatch() {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat("1234").is(Matched.by(startsWith("23"))))
 				.withMessageContaining("a string starting with \"23\"");
 	}
 
 	@Test
-	public void whenMatcherMatches() {
+	void whenMatcherMatches() {
 		assertThat("1234").is(Matched.when(startsWith("12")));
 	}
 
 	@Test
-	public void whenMatcherDoesNotMatch() {
+	void whenMatcherDoesNotMatch() {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat("1234").is(Matched.when(startsWith("23"))))
 				.withMessageContaining("a string starting with \"23\"");

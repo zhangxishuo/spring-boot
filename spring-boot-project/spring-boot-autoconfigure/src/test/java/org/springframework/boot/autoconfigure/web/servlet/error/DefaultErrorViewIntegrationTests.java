@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,9 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -38,7 +37,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -53,26 +51,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Dave Syer
  */
-
 @SpringBootTest
 @DirtiesContext
-@RunWith(SpringRunner.class)
-public class DefaultErrorViewIntegrationTests {
+class DefaultErrorViewIntegrationTests {
 
 	@Autowired
 	private WebApplicationContext wac;
 
 	private MockMvc mockMvc;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 
 	@Test
-	public void testErrorForBrowserClient() throws Exception {
-		MvcResult response = this.mockMvc
-				.perform(get("/error").accept(MediaType.TEXT_HTML))
+	void testErrorForBrowserClient() throws Exception {
+		MvcResult response = this.mockMvc.perform(get("/error").accept(MediaType.TEXT_HTML))
 				.andExpect(status().is5xxServerError()).andReturn();
 		String content = response.getResponse().getContentAsString();
 		assertThat(content).contains("<html>");
@@ -80,12 +75,11 @@ public class DefaultErrorViewIntegrationTests {
 	}
 
 	@Test
-	public void testErrorWithHtmlEscape() throws Exception {
+	void testErrorWithHtmlEscape() throws Exception {
 		MvcResult response = this.mockMvc
 				.perform(get("/error")
 						.requestAttr("javax.servlet.error.exception",
-								new RuntimeException(
-										"<script>alert('Hello World')</script>"))
+								new RuntimeException("<script>alert('Hello World')</script>"))
 						.accept(MediaType.TEXT_HTML))
 				.andExpect(status().is5xxServerError()).andReturn();
 		String content = response.getResponse().getContentAsString();
@@ -95,14 +89,10 @@ public class DefaultErrorViewIntegrationTests {
 	}
 
 	@Test
-	public void testErrorWithSpelEscape() throws Exception {
+	void testErrorWithSpelEscape() throws Exception {
 		String spel = "${T(" + getClass().getName() + ").injectCall()}";
-		MvcResult response = this.mockMvc
-				.perform(
-						get("/error")
-								.requestAttr("javax.servlet.error.exception",
-										new RuntimeException(spel))
-								.accept(MediaType.TEXT_HTML))
+		MvcResult response = this.mockMvc.perform(get("/error")
+				.requestAttr("javax.servlet.error.exception", new RuntimeException(spel)).accept(MediaType.TEXT_HTML))
 				.andExpect(status().is5xxServerError()).andReturn();
 		String content = response.getResponse().getContentAsString();
 		assertThat(content).doesNotContain("injection");
@@ -115,10 +105,9 @@ public class DefaultErrorViewIntegrationTests {
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
-	@Import({ ServletWebServerFactoryAutoConfiguration.class,
-			DispatcherServletAutoConfiguration.class, WebMvcAutoConfiguration.class,
-			HttpMessageConvertersAutoConfiguration.class, ErrorMvcAutoConfiguration.class,
-			PropertyPlaceholderAutoConfiguration.class })
+	@Import({ ServletWebServerFactoryAutoConfiguration.class, DispatcherServletAutoConfiguration.class,
+			WebMvcAutoConfiguration.class, HttpMessageConvertersAutoConfiguration.class,
+			ErrorMvcAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class })
 	protected @interface MinimalWebConfiguration {
 
 	}

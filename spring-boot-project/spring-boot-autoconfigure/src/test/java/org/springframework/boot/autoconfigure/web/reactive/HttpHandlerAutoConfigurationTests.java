@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@
 
 package org.springframework.boot.autoconfigure.web.reactive;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ReactiveWebApplicationContextRunner;
@@ -37,25 +37,22 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  * @author Stephane Nicoll
  * @author Andy Wilkinson
  */
-public class HttpHandlerAutoConfigurationTests {
+class HttpHandlerAutoConfigurationTests {
 
 	private final ReactiveWebApplicationContextRunner contextRunner = new ReactiveWebApplicationContextRunner()
 			.withConfiguration(AutoConfigurations.of(HttpHandlerAutoConfiguration.class));
 
 	@Test
-	public void shouldNotProcessIfExistingHttpHandler() {
-		this.contextRunner.withUserConfiguration(CustomHttpHandler.class)
-				.run((context) -> {
-					assertThat(context).hasSingleBean(HttpHandler.class);
-					assertThat(context).getBean(HttpHandler.class)
-							.isSameAs(context.getBean("customHttpHandler"));
-				});
+	void shouldNotProcessIfExistingHttpHandler() {
+		this.contextRunner.withUserConfiguration(CustomHttpHandler.class).run((context) -> {
+			assertThat(context).hasSingleBean(HttpHandler.class);
+			assertThat(context).getBean(HttpHandler.class).isSameAs(context.getBean("customHttpHandler"));
+		});
 	}
 
 	@Test
-	public void shouldConfigureHttpHandlerAnnotation() {
-		this.contextRunner
-				.withConfiguration(AutoConfigurations.of(WebFluxAutoConfiguration.class))
+	void shouldConfigureHttpHandlerAnnotation() {
+		this.contextRunner.withConfiguration(AutoConfigurations.of(WebFluxAutoConfiguration.class))
 				.run((context) -> assertThat(context).hasSingleBean(HttpHandler.class));
 	}
 

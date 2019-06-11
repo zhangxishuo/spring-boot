@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,8 +44,8 @@ public class PersistenceExceptionTranslationAutoConfiguration {
 	public static PersistenceExceptionTranslationPostProcessor persistenceExceptionTranslationPostProcessor(
 			Environment environment) {
 		PersistenceExceptionTranslationPostProcessor postProcessor = new PersistenceExceptionTranslationPostProcessor();
-		boolean proxyTargetClass = environment.getProperty(
-				"spring.aop.proxy-target-class", Boolean.class, Boolean.TRUE);
+		boolean proxyTargetClass = environment.getProperty("spring.aop.proxy-target-class", Boolean.class,
+				Boolean.TRUE);
 		postProcessor.setProxyTargetClass(proxyTargetClass);
 		return postProcessor;
 	}

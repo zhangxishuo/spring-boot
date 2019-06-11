@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,8 +57,7 @@ public class HealthIndicatorAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean(HealthAggregator.class)
-	public OrderedHealthAggregator healthAggregator(
-			HealthIndicatorProperties properties) {
+	public OrderedHealthAggregator healthAggregator(HealthIndicatorProperties properties) {
 		OrderedHealthAggregator healthAggregator = new OrderedHealthAggregator();
 		if (properties.getOrder() != null) {
 			healthAggregator.setStatusOrder(properties.getOrder());
@@ -68,8 +67,7 @@ public class HealthIndicatorAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean(HealthIndicatorRegistry.class)
-	public HealthIndicatorRegistry healthIndicatorRegistry(
-			ApplicationContext applicationContext) {
+	public HealthIndicatorRegistry healthIndicatorRegistry(ApplicationContext applicationContext) {
 		return HealthIndicatorRegistryBeans.get(applicationContext);
 	}
 
@@ -83,8 +81,7 @@ public class HealthIndicatorAutoConfiguration {
 				Map<String, ReactiveHealthIndicator> reactiveHealthIndicators,
 				Map<String, HealthIndicator> healthIndicators) {
 			return new ReactiveHealthIndicatorRegistryFactory()
-					.createReactiveHealthIndicatorRegistry(reactiveHealthIndicators,
-							healthIndicators);
+					.createReactiveHealthIndicatorRegistry(reactiveHealthIndicators, healthIndicators);
 		}
 
 	}

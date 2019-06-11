@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,8 +49,7 @@ class HazelcastClientConfiguration {
 	static class HazelcastClientConfigFileConfiguration {
 
 		@Bean
-		public HazelcastInstance hazelcastInstance(HazelcastProperties properties)
-				throws IOException {
+		public HazelcastInstance hazelcastInstance(HazelcastProperties properties) throws IOException {
 			Resource config = properties.resolveConfigLocation();
 			if (config != null) {
 				return new HazelcastClientFactory(config).getHazelcastInstance();
@@ -78,8 +77,8 @@ class HazelcastClientConfiguration {
 	static class ConfigAvailableCondition extends HazelcastConfigResourceCondition {
 
 		ConfigAvailableCondition() {
-			super(CONFIG_SYSTEM_PROPERTY, "file:./hazelcast-client.xml",
-					"classpath:/hazelcast-client.xml");
+			super(CONFIG_SYSTEM_PROPERTY, "file:./hazelcast-client.xml", "classpath:/hazelcast-client.xml",
+					"file:./hazelcast-client.yaml", "classpath:/hazelcast-client.yaml");
 		}
 
 	}

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.OAuth2IntrospectionAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.introspection.ReactiveOAuth2TokenIntrospectionClient;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for Reactive OAuth2 resource server
@@ -38,11 +40,24 @@ import org.springframework.security.oauth2.server.resource.BearerTokenAuthentica
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureBefore(ReactiveSecurityAutoConfiguration.class)
 @EnableConfigurationProperties(OAuth2ResourceServerProperties.class)
-@ConditionalOnClass({ EnableWebFluxSecurity.class, BearerTokenAuthenticationToken.class,
-		ReactiveJwtDecoder.class })
+@ConditionalOnClass({ EnableWebFluxSecurity.class })
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
-@Import({ ReactiveOAuth2ResourceServerJwkConfiguration.class,
-		ReactiveOAuth2ResourceServerWebSecurityConfiguration.class })
 public class ReactiveOAuth2ResourceServerAutoConfiguration {
+
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnClass({ BearerTokenAuthenticationToken.class, ReactiveJwtDecoder.class })
+	@Import({ ReactiveOAuth2ResourceServerJwkConfiguration.JwtConfiguration.class,
+			ReactiveOAuth2ResourceServerJwkConfiguration.WebSecurityConfiguration.class })
+	static class JwtConfiguration {
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnClass({ OAuth2IntrospectionAuthenticationToken.class, ReactiveOAuth2TokenIntrospectionClient.class })
+	@Import({ ReactiveOAuth2ResourceServerOpaqueTokenConfiguration.OpaqueTokenIntrospectionClientConfiguration.class,
+			ReactiveOAuth2ResourceServerOpaqueTokenConfiguration.WebSecurityConfiguration.class })
+	static class OpaqueTokenConfiguration {
+
+	}
 
 }

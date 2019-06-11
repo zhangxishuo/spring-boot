@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -63,16 +63,12 @@ public class ErrorWebFluxAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean(value = ErrorWebExceptionHandler.class, search = SearchStrategy.CURRENT)
 	@Order(-1)
-	public ErrorWebExceptionHandler errorWebExceptionHandler(
-			ErrorAttributes errorAttributes, ResourceProperties resourceProperties,
-			ObjectProvider<ViewResolver> viewResolvers,
-			ServerCodecConfigurer serverCodecConfigurer,
-			ApplicationContext applicationContext) {
-		DefaultErrorWebExceptionHandler exceptionHandler = new DefaultErrorWebExceptionHandler(
-				errorAttributes, resourceProperties, this.serverProperties.getError(),
-				applicationContext);
-		exceptionHandler.setViewResolvers(
-				viewResolvers.orderedStream().collect(Collectors.toList()));
+	public ErrorWebExceptionHandler errorWebExceptionHandler(ErrorAttributes errorAttributes,
+			ResourceProperties resourceProperties, ObjectProvider<ViewResolver> viewResolvers,
+			ServerCodecConfigurer serverCodecConfigurer, ApplicationContext applicationContext) {
+		DefaultErrorWebExceptionHandler exceptionHandler = new DefaultErrorWebExceptionHandler(errorAttributes,
+				resourceProperties, this.serverProperties.getError(), applicationContext);
+		exceptionHandler.setViewResolvers(viewResolvers.orderedStream().collect(Collectors.toList()));
 		exceptionHandler.setMessageWriters(serverCodecConfigurer.getWriters());
 		exceptionHandler.setMessageReaders(serverCodecConfigurer.getReaders());
 		return exceptionHandler;
@@ -81,8 +77,7 @@ public class ErrorWebFluxAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean(value = ErrorAttributes.class, search = SearchStrategy.CURRENT)
 	public DefaultErrorAttributes errorAttributes() {
-		return new DefaultErrorAttributes(
-				this.serverProperties.getError().isIncludeException());
+		return new DefaultErrorAttributes(this.serverProperties.getError().isIncludeException());
 	}
 
 }

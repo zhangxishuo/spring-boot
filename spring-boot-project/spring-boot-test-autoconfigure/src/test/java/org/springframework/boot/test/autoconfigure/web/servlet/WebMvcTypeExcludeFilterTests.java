@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,7 @@ package org.springframework.boot.test.autoconfigure.web.servlet;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.FilterType;
@@ -40,14 +40,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Phillip Webb
  */
-public class WebMvcTypeExcludeFilterTests {
+class WebMvcTypeExcludeFilterTests {
 
 	private MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 
 	@Test
-	public void matchWhenHasNoControllers() throws Exception {
-		WebMvcTypeExcludeFilter filter = new WebMvcTypeExcludeFilter(
-				WithNoControllers.class);
+	void matchWhenHasNoControllers() throws Exception {
+		WebMvcTypeExcludeFilter filter = new WebMvcTypeExcludeFilter(WithNoControllers.class);
 		assertThat(excludes(filter, Controller1.class)).isFalse();
 		assertThat(excludes(filter, Controller2.class)).isFalse();
 		assertThat(excludes(filter, ExampleControllerAdvice.class)).isFalse();
@@ -59,9 +58,8 @@ public class WebMvcTypeExcludeFilterTests {
 	}
 
 	@Test
-	public void matchWhenHasController() throws Exception {
-		WebMvcTypeExcludeFilter filter = new WebMvcTypeExcludeFilter(
-				WithController.class);
+	void matchWhenHasController() throws Exception {
+		WebMvcTypeExcludeFilter filter = new WebMvcTypeExcludeFilter(WithController.class);
 		assertThat(excludes(filter, Controller1.class)).isFalse();
 		assertThat(excludes(filter, Controller2.class)).isTrue();
 		assertThat(excludes(filter, ExampleControllerAdvice.class)).isFalse();
@@ -73,9 +71,8 @@ public class WebMvcTypeExcludeFilterTests {
 	}
 
 	@Test
-	public void matchNotUsingDefaultFilters() throws Exception {
-		WebMvcTypeExcludeFilter filter = new WebMvcTypeExcludeFilter(
-				NotUsingDefaultFilters.class);
+	void matchNotUsingDefaultFilters() throws Exception {
+		WebMvcTypeExcludeFilter filter = new WebMvcTypeExcludeFilter(NotUsingDefaultFilters.class);
 		assertThat(excludes(filter, Controller1.class)).isTrue();
 		assertThat(excludes(filter, Controller2.class)).isTrue();
 		assertThat(excludes(filter, ExampleControllerAdvice.class)).isTrue();
@@ -87,9 +84,8 @@ public class WebMvcTypeExcludeFilterTests {
 	}
 
 	@Test
-	public void matchWithIncludeFilter() throws Exception {
-		WebMvcTypeExcludeFilter filter = new WebMvcTypeExcludeFilter(
-				WithIncludeFilter.class);
+	void matchWithIncludeFilter() throws Exception {
+		WebMvcTypeExcludeFilter filter = new WebMvcTypeExcludeFilter(WithIncludeFilter.class);
 		assertThat(excludes(filter, Controller1.class)).isFalse();
 		assertThat(excludes(filter, Controller2.class)).isFalse();
 		assertThat(excludes(filter, ExampleControllerAdvice.class)).isFalse();
@@ -100,9 +96,8 @@ public class WebMvcTypeExcludeFilterTests {
 	}
 
 	@Test
-	public void matchWithExcludeFilter() throws Exception {
-		WebMvcTypeExcludeFilter filter = new WebMvcTypeExcludeFilter(
-				WithExcludeFilter.class);
+	void matchWithExcludeFilter() throws Exception {
+		WebMvcTypeExcludeFilter filter = new WebMvcTypeExcludeFilter(WithExcludeFilter.class);
 		assertThat(excludes(filter, Controller1.class)).isTrue();
 		assertThat(excludes(filter, Controller2.class)).isFalse();
 		assertThat(excludes(filter, ExampleControllerAdvice.class)).isFalse();
@@ -113,10 +108,8 @@ public class WebMvcTypeExcludeFilterTests {
 		assertThat(excludes(filter, ExampleWebSecurityConfigurer.class)).isFalse();
 	}
 
-	private boolean excludes(WebMvcTypeExcludeFilter filter, Class<?> type)
-			throws IOException {
-		MetadataReader metadataReader = this.metadataReaderFactory
-				.getMetadataReader(type.getName());
+	private boolean excludes(WebMvcTypeExcludeFilter filter, Class<?> type) throws IOException {
+		MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(type.getName());
 		return filter.match(metadataReader, this.metadataReaderFactory);
 	}
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,7 @@ package org.springframework.boot.autoconfigure.session;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.FilteredClassLoader;
@@ -43,26 +43,22 @@ import static org.mockito.Mockito.verify;
  *
  * @author Vedran Pavic
  */
-public class SessionAutoConfigurationHazelcastTests
-		extends AbstractSessionAutoConfigurationTests {
+class SessionAutoConfigurationHazelcastTests extends AbstractSessionAutoConfigurationTests {
 
 	private final WebApplicationContextRunner contextRunner = new WebApplicationContextRunner()
 			.withConfiguration(AutoConfigurations.of(SessionAutoConfiguration.class))
 			.withUserConfiguration(HazelcastConfiguration.class);
 
 	@Test
-	public void defaultConfig() {
-		this.contextRunner.withPropertyValues("spring.session.store-type=hazelcast")
-				.run(this::validateDefaultConfig);
+	void defaultConfig() {
+		this.contextRunner.withPropertyValues("spring.session.store-type=hazelcast").run(this::validateDefaultConfig);
 	}
 
 	@Test
-	public void defaultConfigWithUniqueStoreImplementation() {
+	void defaultConfigWithUniqueStoreImplementation() {
 		this.contextRunner
-				.withClassLoader(
-						new FilteredClassLoader(JdbcOperationsSessionRepository.class,
-								RedisOperationsSessionRepository.class,
-								MongoOperationsSessionRepository.class))
+				.withClassLoader(new FilteredClassLoader(JdbcOperationsSessionRepository.class,
+						RedisOperationsSessionRepository.class, MongoOperationsSessionRepository.class))
 				.run(this::validateDefaultConfig);
 	}
 
@@ -73,28 +69,23 @@ public class SessionAutoConfigurationHazelcastTests
 	}
 
 	@Test
-	public void customMapName() {
-		this.contextRunner
-				.withPropertyValues("spring.session.store-type=hazelcast",
-						"spring.session.hazelcast.map-name=foo:bar:biz")
-				.run((context) -> {
+	void customMapName() {
+		this.contextRunner.withPropertyValues("spring.session.store-type=hazelcast",
+				"spring.session.hazelcast.map-name=foo:bar:biz").run((context) -> {
 					validateSessionRepository(context, HazelcastSessionRepository.class);
-					HazelcastInstance hazelcastInstance = context
-							.getBean(HazelcastInstance.class);
+					HazelcastInstance hazelcastInstance = context.getBean(HazelcastInstance.class);
 					verify(hazelcastInstance, times(1)).getMap("foo:bar:biz");
 				});
 	}
 
 	@Test
-	public void customFlushMode() {
-		this.contextRunner
-				.withPropertyValues("spring.session.store-type=hazelcast",
-						"spring.session.hazelcast.flush-mode=immediate")
-				.run((context) -> {
-					HazelcastSessionRepository repository = validateSessionRepository(
-							context, HazelcastSessionRepository.class);
-					assertThat(repository).hasFieldOrPropertyWithValue(
-							"hazelcastFlushMode", HazelcastFlushMode.IMMEDIATE);
+	void customFlushMode() {
+		this.contextRunner.withPropertyValues("spring.session.store-type=hazelcast",
+				"spring.session.hazelcast.flush-mode=immediate").run((context) -> {
+					HazelcastSessionRepository repository = validateSessionRepository(context,
+							HazelcastSessionRepository.class);
+					assertThat(repository).hasFieldOrPropertyWithValue("hazelcastFlushMode",
+							HazelcastFlushMode.IMMEDIATE);
 				});
 	}
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -63,18 +63,16 @@ class DataSourceJmxConfiguration {
 
 		@PostConstruct
 		public void validateMBeans() {
-			HikariDataSource hikariDataSource = DataSourceUnwrapper
-					.unwrap(this.dataSource, HikariDataSource.class);
+			HikariDataSource hikariDataSource = DataSourceUnwrapper.unwrap(this.dataSource, HikariDataSource.class);
 			if (hikariDataSource != null && hikariDataSource.isRegisterMbeans()) {
-				this.mBeanExporter
-						.ifUnique((exporter) -> exporter.addExcludedBean("dataSource"));
+				this.mBeanExporter.ifUnique((exporter) -> exporter.addExcludedBean("dataSource"));
 			}
 		}
 
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnProperty(prefix = "spring.datasource", name = "jmx-enabled")
+	@ConditionalOnProperty(prefix = "spring.datasource.tomcat", name = "jmx-enabled")
 	@ConditionalOnClass(DataSourceProxy.class)
 	@ConditionalOnSingleCandidate(DataSource.class)
 	static class TomcatDataSourceJmxConfiguration {
@@ -82,8 +80,7 @@ class DataSourceJmxConfiguration {
 		@Bean
 		@ConditionalOnMissingBean(name = "dataSourceMBean")
 		public Object dataSourceMBean(DataSource dataSource) {
-			DataSourceProxy dataSourceProxy = DataSourceUnwrapper.unwrap(dataSource,
-					DataSourceProxy.class);
+			DataSourceProxy dataSourceProxy = DataSourceUnwrapper.unwrap(dataSource, DataSourceProxy.class);
 			if (dataSourceProxy != null) {
 				try {
 					return dataSourceProxy.createPool().getJmxPool();

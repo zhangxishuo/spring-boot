@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -64,8 +64,7 @@ public class ReactiveOAuth2ClientAutoConfiguration {
 	public InMemoryReactiveClientRegistrationRepository clientRegistrationRepository(
 			OAuth2ClientProperties properties) {
 		List<ClientRegistration> registrations = new ArrayList<>(
-				OAuth2ClientPropertiesRegistrationAdapter
-						.getClientRegistrations(properties).values());
+				OAuth2ClientPropertiesRegistrationAdapter.getClientRegistrations(properties).values());
 		return new InMemoryReactiveClientRegistrationRepository(registrations);
 	}
 
@@ -74,8 +73,7 @@ public class ReactiveOAuth2ClientAutoConfiguration {
 	@ConditionalOnMissingBean
 	public ReactiveOAuth2AuthorizedClientService authorizedClientService(
 			ReactiveClientRegistrationRepository clientRegistrationRepository) {
-		return new InMemoryReactiveOAuth2AuthorizedClientService(
-				clientRegistrationRepository);
+		return new InMemoryReactiveOAuth2AuthorizedClientService(clientRegistrationRepository);
 	}
 
 	@Bean
@@ -83,8 +81,7 @@ public class ReactiveOAuth2ClientAutoConfiguration {
 	@ConditionalOnMissingBean
 	public ServerOAuth2AuthorizedClientRepository authorizedClientRepository(
 			ReactiveOAuth2AuthorizedClientService authorizedClientService) {
-		return new AuthenticatedPrincipalServerOAuth2AuthorizedClientRepository(
-				authorizedClientService);
+		return new AuthenticatedPrincipalServerOAuth2AuthorizedClientRepository(authorizedClientService);
 	}
 
 	static class NonServletApplicationCondition extends NoneNestedConditions {

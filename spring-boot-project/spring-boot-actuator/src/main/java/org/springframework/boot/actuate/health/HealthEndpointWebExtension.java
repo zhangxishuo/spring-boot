@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,7 @@ import org.springframework.boot.actuate.endpoint.web.WebEndpointResponse;
 import org.springframework.boot.actuate.endpoint.web.annotation.EndpointWebExtension;
 
 /**
- * {@link EndpointWebExtension} for the {@link HealthEndpoint}.
+ * {@link EndpointWebExtension @EndpointWebExtension} for the {@link HealthEndpoint}.
  *
  * @author Christian Dupuis
  * @author Dave Syer
@@ -43,8 +43,7 @@ public class HealthEndpointWebExtension {
 
 	private final HealthWebEndpointResponseMapper responseMapper;
 
-	public HealthEndpointWebExtension(HealthEndpoint delegate,
-			HealthWebEndpointResponseMapper responseMapper) {
+	public HealthEndpointWebExtension(HealthEndpoint delegate, HealthWebEndpointResponseMapper responseMapper) {
 		this.delegate = delegate;
 		this.responseMapper = responseMapper;
 	}
@@ -55,25 +54,20 @@ public class HealthEndpointWebExtension {
 	}
 
 	@ReadOperation
-	public WebEndpointResponse<Health> healthForComponent(SecurityContext securityContext,
-			@Selector String component) {
+	public WebEndpointResponse<Health> healthForComponent(SecurityContext securityContext, @Selector String component) {
 		Supplier<Health> health = () -> this.delegate.healthForComponent(component);
 		return this.responseMapper.mapDetails(health, securityContext);
 	}
 
 	@ReadOperation
-	public WebEndpointResponse<Health> healthForComponentInstance(
-			SecurityContext securityContext, @Selector String component,
-			@Selector String instance) {
-		Supplier<Health> health = () -> this.delegate
-				.healthForComponentInstance(component, instance);
+	public WebEndpointResponse<Health> healthForComponentInstance(SecurityContext securityContext,
+			@Selector String component, @Selector String instance) {
+		Supplier<Health> health = () -> this.delegate.healthForComponentInstance(component, instance);
 		return this.responseMapper.mapDetails(health, securityContext);
 	}
 
-	public WebEndpointResponse<Health> getHealth(SecurityContext securityContext,
-			ShowDetails showDetails) {
-		return this.responseMapper.map(this.delegate.health(), securityContext,
-				showDetails);
+	public WebEndpointResponse<Health> getHealth(SecurityContext securityContext, ShowDetails showDetails) {
+		return this.responseMapper.map(this.delegate.health(), securityContext, showDetails);
 	}
 
 }

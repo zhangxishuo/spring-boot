@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,21 +42,19 @@ import org.springframework.context.annotation.Configuration;
  * @author Artsiom Yudovin
  * @since 2.1.1
  */
-
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(RestClient.class)
 @ConditionalOnBean(RestClient.class)
 @ConditionalOnEnabledHealthIndicator("elasticsearch")
 @AutoConfigureBefore(HealthIndicatorAutoConfiguration.class)
-@AutoConfigureAfter({ RestClientAutoConfiguration.class,
-		ElasticSearchClientHealthIndicatorAutoConfiguration.class })
-public class ElasticSearchRestHealthIndicatorAutoConfiguration extends
-		CompositeHealthIndicatorConfiguration<ElasticsearchRestHealthIndicator, RestClient> {
+@AutoConfigureAfter({ RestClientAutoConfiguration.class, ElasticSearchClientHealthIndicatorAutoConfiguration.class })
+@SuppressWarnings("deprecation")
+public class ElasticSearchRestHealthIndicatorAutoConfiguration
+		extends CompositeHealthIndicatorConfiguration<ElasticsearchRestHealthIndicator, RestClient> {
 
 	@Bean
 	@ConditionalOnMissingBean(name = "elasticsearchRestHealthIndicator")
-	public HealthIndicator elasticsearchRestHealthIndicator(
-			Map<String, RestClient> clients) {
+	public HealthIndicator elasticsearchRestHealthIndicator(Map<String, RestClient> clients) {
 		return createHealthIndicator(clients);
 	}
 

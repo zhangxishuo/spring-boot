@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,10 +47,8 @@ public class SendGridAutoConfiguration {
 	@ConditionalOnMissingBean
 	public SendGrid sendGrid(SendGridProperties properties) {
 		if (properties.isProxyConfigured()) {
-			HttpHost proxy = new HttpHost(properties.getProxy().getHost(),
-					properties.getProxy().getPort());
-			return new SendGrid(properties.getApiKey(),
-					new Client(HttpClientBuilder.create().setProxy(proxy).build()));
+			HttpHost proxy = new HttpHost(properties.getProxy().getHost(), properties.getProxy().getPort());
+			return new SendGrid(properties.getApiKey(), new Client(HttpClientBuilder.create().setProxy(proxy).build()));
 		}
 		return new SendGrid(properties.getApiKey());
 	}

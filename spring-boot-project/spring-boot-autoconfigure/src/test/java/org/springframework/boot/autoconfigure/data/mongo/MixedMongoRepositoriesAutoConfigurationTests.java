@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,8 +19,8 @@ package org.springframework.boot.autoconfigure.data.mongo;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.TestAutoConfigurationPackage;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
@@ -31,7 +31,6 @@ import org.springframework.boot.autoconfigure.data.mongo.country.CountryReposito
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
-import org.springframework.boot.autoconfigure.mongo.MongoAutoConfigurationTests;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -51,30 +50,28 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dave Syer
  * @author Oliver Gierke
  */
-public class MixedMongoRepositoriesAutoConfigurationTests {
+class MixedMongoRepositoriesAutoConfigurationTests {
 
 	private AnnotationConfigApplicationContext context;
 
-	@After
+	@AfterEach
 	public void close() {
 		this.context.close();
 	}
 
 	@Test
-	public void testDefaultRepositoryConfiguration() {
+	void testDefaultRepositoryConfiguration() {
 		this.context = new AnnotationConfigApplicationContext();
-		TestPropertyValues.of("spring.datasource.initialization-mode:never")
-				.applyTo(this.context);
+		TestPropertyValues.of("spring.datasource.initialization-mode:never").applyTo(this.context);
 		this.context.register(TestConfiguration.class, BaseConfiguration.class);
 		this.context.refresh();
 		assertThat(this.context.getBean(CountryRepository.class)).isNotNull();
 	}
 
 	@Test
-	public void testMixedRepositoryConfiguration() {
+	void testMixedRepositoryConfiguration() {
 		this.context = new AnnotationConfigApplicationContext();
-		TestPropertyValues.of("spring.datasource.initialization-mode:never")
-				.applyTo(this.context);
+		TestPropertyValues.of("spring.datasource.initialization-mode:never").applyTo(this.context);
 		this.context.register(MixedConfiguration.class, BaseConfiguration.class);
 		this.context.refresh();
 		assertThat(this.context.getBean(CountryRepository.class)).isNotNull();
@@ -82,31 +79,28 @@ public class MixedMongoRepositoriesAutoConfigurationTests {
 	}
 
 	@Test
-	public void testJpaRepositoryConfigurationWithMongoTemplate() {
+	void testJpaRepositoryConfigurationWithMongoTemplate() {
 		this.context = new AnnotationConfigApplicationContext();
-		TestPropertyValues.of("spring.datasource.initialization-mode:never")
-				.applyTo(this.context);
+		TestPropertyValues.of("spring.datasource.initialization-mode:never").applyTo(this.context);
 		this.context.register(JpaConfiguration.class, BaseConfiguration.class);
 		this.context.refresh();
 		assertThat(this.context.getBean(CityRepository.class)).isNotNull();
 	}
 
 	@Test
-	public void testJpaRepositoryConfigurationWithMongoOverlap() {
+	void testJpaRepositoryConfigurationWithMongoOverlap() {
 		this.context = new AnnotationConfigApplicationContext();
-		TestPropertyValues.of("spring.datasource.initialization-mode:never")
-				.applyTo(this.context);
+		TestPropertyValues.of("spring.datasource.initialization-mode:never").applyTo(this.context);
 		this.context.register(OverlapConfiguration.class, BaseConfiguration.class);
 		this.context.refresh();
 		assertThat(this.context.getBean(CityRepository.class)).isNotNull();
 	}
 
 	@Test
-	public void testJpaRepositoryConfigurationWithMongoOverlapDisabled() {
+	void testJpaRepositoryConfigurationWithMongoOverlapDisabled() {
 		this.context = new AnnotationConfigApplicationContext();
 		TestPropertyValues
-				.of("spring.datasource.initialization-mode:never",
-						"spring.data.mongodb.repositories.type:none")
+				.of("spring.datasource.initialization-mode:never", "spring.data.mongodb.repositories.type:none")
 				.applyTo(this.context);
 		this.context.register(OverlapConfiguration.class, BaseConfiguration.class);
 		this.context.refresh();
@@ -114,7 +108,7 @@ public class MixedMongoRepositoriesAutoConfigurationTests {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@TestAutoConfigurationPackage(MongoAutoConfigurationTests.class)
+	@TestAutoConfigurationPackage(MongoAutoConfiguration.class)
 	// Not this package or its parent
 	@EnableMongoRepositories(basePackageClasses = Country.class)
 	protected static class TestConfiguration {
@@ -122,7 +116,7 @@ public class MixedMongoRepositoriesAutoConfigurationTests {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@TestAutoConfigurationPackage(MongoAutoConfigurationTests.class)
+	@TestAutoConfigurationPackage(MongoAutoConfiguration.class)
 	@EnableMongoRepositories(basePackageClasses = Country.class)
 	@EntityScan(basePackageClasses = City.class)
 	@EnableJpaRepositories(basePackageClasses = CityRepository.class)
@@ -131,7 +125,7 @@ public class MixedMongoRepositoriesAutoConfigurationTests {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@TestAutoConfigurationPackage(MongoAutoConfigurationTests.class)
+	@TestAutoConfigurationPackage(MongoAutoConfiguration.class)
 	@EntityScan(basePackageClasses = City.class)
 	@EnableJpaRepositories(basePackageClasses = CityRepository.class)
 	protected static class JpaConfiguration {
@@ -159,9 +153,8 @@ public class MixedMongoRepositoriesAutoConfigurationTests {
 		public String[] selectImports(AnnotationMetadata importingClassMetadata) {
 			List<String> names = new ArrayList<>();
 			for (Class<?> type : new Class<?>[] { DataSourceAutoConfiguration.class,
-					HibernateJpaAutoConfiguration.class,
-					JpaRepositoriesAutoConfiguration.class, MongoAutoConfiguration.class,
-					MongoDataAutoConfiguration.class,
+					HibernateJpaAutoConfiguration.class, JpaRepositoriesAutoConfiguration.class,
+					MongoAutoConfiguration.class, MongoDataAutoConfiguration.class,
 					MongoRepositoriesAutoConfiguration.class }) {
 				names.add(type.getName());
 			}

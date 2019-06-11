@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,8 @@
 
 package org.springframework.boot.autoconfigure.data.couchbase;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.TestAutoConfigurationPackage;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -39,11 +39,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Eddú Meléndez
  * @author Stephane Nicoll
  */
-public class CouchbaseRepositoriesAutoConfigurationTests {
+class CouchbaseRepositoriesAutoConfigurationTests {
 
 	private AnnotationConfigApplicationContext context;
 
-	@After
+	@AfterEach
 	public void close() {
 		if (this.context != null) {
 			this.context.close();
@@ -51,32 +51,31 @@ public class CouchbaseRepositoriesAutoConfigurationTests {
 	}
 
 	@Test
-	public void couchbaseNotAvailable() {
+	void couchbaseNotAvailable() {
 		load(null);
 		assertThat(this.context.getBeansOfType(CityRepository.class)).hasSize(0);
 	}
 
 	@Test
-	public void defaultRepository() {
+	void defaultRepository() {
 		load(DefaultConfiguration.class);
 		assertThat(this.context.getBeansOfType(CityRepository.class)).hasSize(1);
 	}
 
 	@Test
-	public void reactiveRepositories() {
-		load(DefaultConfiguration.class,
-				"spring.data.couchbase.repositories.type=reactive");
+	void reactiveRepositories() {
+		load(DefaultConfiguration.class, "spring.data.couchbase.repositories.type=reactive");
 		assertThat(this.context.getBeansOfType(CityRepository.class)).hasSize(0);
 	}
 
 	@Test
-	public void disabledRepositories() {
+	void disabledRepositories() {
 		load(DefaultConfiguration.class, "spring.data.couchbase.repositories.type=none");
 		assertThat(this.context.getBeansOfType(CityRepository.class)).hasSize(0);
 	}
 
 	@Test
-	public void noRepositoryAvailable() {
+	void noRepositoryAvailable() {
 		load(NoRepositoryConfiguration.class);
 		assertThat(this.context.getBeansOfType(CityRepository.class)).hasSize(0);
 	}
@@ -87,9 +86,8 @@ public class CouchbaseRepositoriesAutoConfigurationTests {
 		if (config != null) {
 			context.register(config);
 		}
-		context.register(PropertyPlaceholderAutoConfiguration.class,
-				CouchbaseAutoConfiguration.class, CouchbaseDataAutoConfiguration.class,
-				CouchbaseRepositoriesAutoConfiguration.class);
+		context.register(PropertyPlaceholderAutoConfiguration.class, CouchbaseAutoConfiguration.class,
+				CouchbaseDataAutoConfiguration.class, CouchbaseRepositoriesAutoConfiguration.class);
 		context.refresh();
 		this.context = context;
 	}

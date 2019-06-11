@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.boot.actuate.autoconfigure.metrics.web.client;
 import io.micrometer.core.instrument.MeterRegistry;
 
 import org.springframework.boot.actuate.autoconfigure.metrics.MetricsProperties;
+import org.springframework.boot.actuate.autoconfigure.metrics.MetricsProperties.Web.Client.ClientRequest;
 import org.springframework.boot.actuate.metrics.web.client.DefaultRestTemplateExchangeTagsProvider;
 import org.springframework.boot.actuate.metrics.web.client.MetricsRestTemplateCustomizer;
 import org.springframework.boot.actuate.metrics.web.client.RestTemplateExchangeTagsProvider;
@@ -49,13 +50,11 @@ class RestTemplateMetricsConfiguration {
 	}
 
 	@Bean
-	public MetricsRestTemplateCustomizer metricsRestTemplateCustomizer(
-			MeterRegistry meterRegistry,
-			RestTemplateExchangeTagsProvider restTemplateExchangeTagsProvider,
-			MetricsProperties properties) {
-		return new MetricsRestTemplateCustomizer(meterRegistry,
-				restTemplateExchangeTagsProvider,
-				properties.getWeb().getClient().getRequestsMetricName());
+	public MetricsRestTemplateCustomizer metricsRestTemplateCustomizer(MeterRegistry meterRegistry,
+			RestTemplateExchangeTagsProvider restTemplateExchangeTagsProvider, MetricsProperties properties) {
+		ClientRequest request = properties.getWeb().getClient().getRequest();
+		return new MetricsRestTemplateCustomizer(meterRegistry, restTemplateExchangeTagsProvider,
+				request.getMetricName(), request.getAutotime());
 	}
 
 }

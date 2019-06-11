@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,8 +27,7 @@ import org.springframework.boot.configurationprocessor.test.TestConfigurationMet
  *
  * @author Stephane Nicoll
  */
-class MetadataGenerationEnvironmentFactory
-		implements Function<ProcessingEnvironment, MetadataGenerationEnvironment> {
+class MetadataGenerationEnvironmentFactory implements Function<ProcessingEnvironment, MetadataGenerationEnvironment> {
 
 	@Override
 	public MetadataGenerationEnvironment apply(ProcessingEnvironment environment) {
@@ -36,6 +35,7 @@ class MetadataGenerationEnvironmentFactory
 				TestConfigurationMetadataAnnotationProcessor.CONFIGURATION_PROPERTIES_ANNOTATION,
 				TestConfigurationMetadataAnnotationProcessor.NESTED_CONFIGURATION_PROPERTY_ANNOTATION,
 				TestConfigurationMetadataAnnotationProcessor.DEPRECATED_CONFIGURATION_PROPERTY_ANNOTATION,
+				TestConfigurationMetadataAnnotationProcessor.DEFAULT_VALUE_ANNOTATION,
 				TestConfigurationMetadataAnnotationProcessor.ENDPOINT_ANNOTATION,
 				TestConfigurationMetadataAnnotationProcessor.READ_OPERATION_ANNOTATION);
 	}

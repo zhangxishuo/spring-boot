@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@
 
 package org.springframework.boot.actuate.autoconfigure.neo4j;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.SessionFactory;
 
@@ -39,37 +39,33 @@ import static org.mockito.Mockito.mock;
  * @author Phillip Webb
  * @author Stephane Nicoll
  */
-public class Neo4jHealthIndicatorAutoConfigurationTests {
+class Neo4jHealthIndicatorAutoConfigurationTests {
 
 	private ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-			.withUserConfiguration(Neo4jConfiguration.class).withConfiguration(
-					AutoConfigurations.of(Neo4jHealthIndicatorAutoConfiguration.class,
-							HealthIndicatorAutoConfiguration.class));
+			.withUserConfiguration(Neo4jConfiguration.class).withConfiguration(AutoConfigurations
+					.of(Neo4jHealthIndicatorAutoConfiguration.class, HealthIndicatorAutoConfiguration.class));
 
 	@Test
-	public void runShouldCreateIndicator() {
-		this.contextRunner.run(
-				(context) -> assertThat(context).hasSingleBean(Neo4jHealthIndicator.class)
-						.doesNotHaveBean(ApplicationHealthIndicator.class));
+	void runShouldCreateIndicator() {
+		this.contextRunner.run((context) -> assertThat(context).hasSingleBean(Neo4jHealthIndicator.class)
+				.doesNotHaveBean(ApplicationHealthIndicator.class));
 	}
 
 	@Test
-	public void runWhenDisabledShouldNotCreateIndicator() {
+	void runWhenDisabledShouldNotCreateIndicator() {
 		this.contextRunner.withPropertyValues("management.health.neo4j.enabled:false")
-				.run((context) -> assertThat(context)
-						.doesNotHaveBean(Neo4jHealthIndicator.class)
+				.run((context) -> assertThat(context).doesNotHaveBean(Neo4jHealthIndicator.class)
 						.hasSingleBean(ApplicationHealthIndicator.class));
 	}
 
 	@Test
-	public void defaultIndicatorCanBeReplaced() {
-		this.contextRunner.withUserConfiguration(CustomIndicatorConfiguration.class)
-				.run((context) -> {
-					assertThat(context).hasSingleBean(Neo4jHealthIndicator.class);
-					assertThat(context).doesNotHaveBean(ApplicationHealthIndicator.class);
-					Health health = context.getBean(Neo4jHealthIndicator.class).health();
-					assertThat(health.getDetails()).containsOnly(entry("test", true));
-				});
+	void defaultIndicatorCanBeReplaced() {
+		this.contextRunner.withUserConfiguration(CustomIndicatorConfiguration.class).run((context) -> {
+			assertThat(context).hasSingleBean(Neo4jHealthIndicator.class);
+			assertThat(context).doesNotHaveBean(ApplicationHealthIndicator.class);
+			Health health = context.getBean(Neo4jHealthIndicator.class).health();
+			assertThat(health.getDetails()).containsOnly(entry("test", true));
+		});
 	}
 
 	@Configuration(proxyBeanMethods = false)

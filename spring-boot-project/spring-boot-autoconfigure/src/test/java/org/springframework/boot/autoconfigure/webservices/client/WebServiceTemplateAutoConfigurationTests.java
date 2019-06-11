@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,7 @@ package org.springframework.boot.autoconfigure.webservices.client;
 
 import java.util.function.Consumer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.assertj.AssertableApplicationContext;
@@ -43,14 +43,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Stephane Nicoll
  * @author Dmytro Nosan
  */
-public class WebServiceTemplateAutoConfigurationTests {
+class WebServiceTemplateAutoConfigurationTests {
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-			.withConfiguration(
-					AutoConfigurations.of(WebServiceTemplateAutoConfiguration.class));
+			.withConfiguration(AutoConfigurations.of(WebServiceTemplateAutoConfiguration.class));
 
 	@Test
-	public void autoConfiguredBuilderShouldNotHaveMarshallerAndUnmarshaller() {
+	void autoConfiguredBuilderShouldNotHaveMarshallerAndUnmarshaller() {
 		this.contextRunner.run(assertWebServiceTemplateBuilder((builder) -> {
 			WebServiceTemplate webServiceTemplate = builder.build();
 			assertThat(webServiceTemplate.getUnmarshaller()).isNull();
@@ -59,20 +58,18 @@ public class WebServiceTemplateAutoConfigurationTests {
 	}
 
 	@Test
-	public void autoConfiguredBuilderShouldHaveHttpMessageSenderByDefault() {
+	void autoConfiguredBuilderShouldHaveHttpMessageSenderByDefault() {
 		this.contextRunner.run(assertWebServiceTemplateBuilder((builder) -> {
 			WebServiceTemplate webServiceTemplate = builder.build();
 			assertThat(webServiceTemplate.getMessageSenders()).hasSize(1);
-			WebServiceMessageSender messageSender = webServiceTemplate
-					.getMessageSenders()[0];
+			WebServiceMessageSender messageSender = webServiceTemplate.getMessageSenders()[0];
 			assertThat(messageSender).isInstanceOf(ClientHttpRequestMessageSender.class);
 		}));
 	}
 
 	@Test
-	public void webServiceTemplateWhenHasCustomBuilderShouldUseCustomBuilder() {
-		this.contextRunner
-				.withUserConfiguration(CustomWebServiceTemplateBuilderConfig.class)
+	void webServiceTemplateWhenHasCustomBuilderShouldUseCustomBuilder() {
+		this.contextRunner.withUserConfiguration(CustomWebServiceTemplateBuilderConfig.class)
 				.run(assertWebServiceTemplateBuilder((builder) -> {
 					WebServiceTemplate webServiceTemplate = builder.build();
 					assertThat(webServiceTemplate.getMarshaller())
@@ -81,7 +78,7 @@ public class WebServiceTemplateAutoConfigurationTests {
 	}
 
 	@Test
-	public void webServiceTemplateShouldApplyCustomizer() {
+	void webServiceTemplateShouldApplyCustomizer() {
 		this.contextRunner.withUserConfiguration(WebServiceTemplateCustomizerConfig.class)
 				.run(assertWebServiceTemplateBuilder((builder) -> {
 					WebServiceTemplate webServiceTemplate = builder.build();
@@ -91,7 +88,7 @@ public class WebServiceTemplateAutoConfigurationTests {
 	}
 
 	@Test
-	public void builderShouldBeFreshForEachUse() {
+	void builderShouldBeFreshForEachUse() {
 		this.contextRunner.withUserConfiguration(DirtyWebServiceTemplateConfig.class)
 				.run((context) -> assertThat(context).hasNotFailed());
 	}
@@ -108,8 +105,7 @@ public class WebServiceTemplateAutoConfigurationTests {
 	static class DirtyWebServiceTemplateConfig {
 
 		@Bean
-		public WebServiceTemplate webServiceTemplateOne(
-				WebServiceTemplateBuilder builder) {
+		public WebServiceTemplate webServiceTemplateOne(WebServiceTemplateBuilder builder) {
 			try {
 				return builder.build();
 			}
@@ -119,8 +115,7 @@ public class WebServiceTemplateAutoConfigurationTests {
 		}
 
 		@Bean
-		public WebServiceTemplate webServiceTemplateTwo(
-				WebServiceTemplateBuilder builder) {
+		public WebServiceTemplate webServiceTemplateTwo(WebServiceTemplateBuilder builder) {
 			try {
 				return builder.build();
 			}

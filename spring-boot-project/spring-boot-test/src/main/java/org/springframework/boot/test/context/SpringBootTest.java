@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -111,7 +111,7 @@ public @interface SpringBootTest {
 	 * {@link ContextConfiguration#classes() @ContextConfiguration(classes=...)}. If no
 	 * explicit classes are defined the test will look for nested
 	 * {@link Configuration @Configuration} classes, before falling back to a
-	 * {@link SpringBootConfiguration} search.
+	 * {@link SpringBootConfiguration @SpringBootConfiguration} search.
 	 * @see ContextConfiguration#classes()
 	 * @return the annotated classes used to load the application context
 	 */
@@ -141,7 +141,7 @@ public @interface SpringBootTest {
 		 * Creates a web application context (reactive or servlet based) and sets a
 		 * {@code server.port=0} {@link Environment} property (which usually triggers
 		 * listening on a random port). Often used in conjunction with a
-		 * {@link LocalServerPort} injected field on the test.
+		 * {@link LocalServerPort @LocalServerPort} injected field on the test.
 		 */
 		RANDOM_PORT(true),
 

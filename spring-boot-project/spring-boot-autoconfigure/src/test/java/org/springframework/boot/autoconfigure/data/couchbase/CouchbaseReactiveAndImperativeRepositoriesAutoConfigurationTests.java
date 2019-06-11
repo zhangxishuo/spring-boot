@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,12 +19,11 @@ package org.springframework.boot.autoconfigure.data.couchbase;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.TestAutoConfigurationPackage;
 import org.springframework.boot.autoconfigure.couchbase.CouchbaseAutoConfiguration;
-import org.springframework.boot.autoconfigure.couchbase.CouchbaseAutoConfigurationTests;
 import org.springframework.boot.autoconfigure.couchbase.CouchbaseTestConfigurer;
 import org.springframework.boot.autoconfigure.data.couchbase.city.CityRepository;
 import org.springframework.boot.autoconfigure.data.couchbase.city.ReactiveCityRepository;
@@ -46,29 +45,27 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Stephane Nicoll
  */
-public class CouchbaseReactiveAndImperativeRepositoriesAutoConfigurationTests {
+class CouchbaseReactiveAndImperativeRepositoriesAutoConfigurationTests {
 
 	private AnnotationConfigApplicationContext context;
 
-	@After
+	@AfterEach
 	public void close() {
 		this.context.close();
 	}
 
 	@Test
-	public void shouldCreateInstancesForReactiveAndImperativeRepositories() {
+	void shouldCreateInstancesForReactiveAndImperativeRepositories() {
 		this.context = new AnnotationConfigApplicationContext();
-		TestPropertyValues.of("spring.datasource.initialization-mode:never")
-				.applyTo(this.context);
-		this.context.register(ImperativeAndReactiveConfiguration.class,
-				BaseConfiguration.class);
+		TestPropertyValues.of("spring.datasource.initialization-mode:never").applyTo(this.context);
+		this.context.register(ImperativeAndReactiveConfiguration.class, BaseConfiguration.class);
 		this.context.refresh();
 		assertThat(this.context.getBean(CityRepository.class)).isNotNull();
 		assertThat(this.context.getBean(ReactiveCityRepository.class)).isNotNull();
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@TestAutoConfigurationPackage(CouchbaseAutoConfigurationTests.class)
+	@TestAutoConfigurationPackage(CouchbaseAutoConfiguration.class)
 	@EnableCouchbaseRepositories(basePackageClasses = CityRepository.class)
 	@EnableReactiveCouchbaseRepositories(basePackageClasses = ReactiveCityRepository.class)
 	protected static class ImperativeAndReactiveConfiguration {
@@ -87,8 +84,7 @@ public class CouchbaseReactiveAndImperativeRepositoriesAutoConfigurationTests {
 		public String[] selectImports(AnnotationMetadata importingClassMetadata) {
 			List<String> names = new ArrayList<>();
 			for (Class<?> type : new Class<?>[] { CouchbaseAutoConfiguration.class,
-					CouchbaseDataAutoConfiguration.class,
-					CouchbaseRepositoriesAutoConfiguration.class,
+					CouchbaseDataAutoConfiguration.class, CouchbaseRepositoriesAutoConfiguration.class,
 					CouchbaseReactiveDataAutoConfiguration.class,
 					CouchbaseReactiveRepositoriesAutoConfiguration.class }) {
 				names.add(type.getName());
