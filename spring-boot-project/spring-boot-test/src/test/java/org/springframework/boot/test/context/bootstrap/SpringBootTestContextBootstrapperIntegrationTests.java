@@ -67,11 +67,11 @@ class SpringBootTestContextBootstrapperIntegrationTests {
 		assertThat(this.defaultTestExecutionListenersPostProcessorCalled).isTrue();
 	}
 
-	@TestConfiguration
+	@TestConfiguration(proxyBeanMethods = false)
 	static class TestConfig {
 
 		@Bean
-		public ExampleBean exampleBean() {
+		ExampleBean exampleBean() {
 			return new ExampleBean();
 		}
 

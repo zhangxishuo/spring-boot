@@ -41,6 +41,7 @@ import org.springframework.util.ErrorHandler;
  * @author Stephane Nicoll
  * @author Andy Wilkinson
  * @author Artsiom Yudovin
+ * @since 1.0.0
  */
 public class EventPublishingRunListener implements SpringApplicationRunListener, Ordered {
 
@@ -126,7 +127,7 @@ public class EventPublishingRunListener implements SpringApplicationRunListener,
 
 	private static class LoggingErrorHandler implements ErrorHandler {
 
-		private static Log logger = LogFactory.getLog(EventPublishingRunListener.class);
+		private static final Log logger = LogFactory.getLog(EventPublishingRunListener.class);
 
 		@Override
 		public void handleError(Throwable throwable) {

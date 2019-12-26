@@ -46,8 +46,9 @@ import org.springframework.boot.loader.data.RandomAccessDataFile;
  *
  * @author Phillip Webb
  * @author Andy Wilkinson
+ * @since 1.0.0
  */
-public class JarFile extends java.util.jar.JarFile {
+public class JarFile extends java.util.jar.JarFile implements Iterable<java.util.jar.JarEntry> {
 
 	private static final String MANIFEST_NAME = "META-INF/MANIFEST.MF";
 
@@ -78,6 +79,8 @@ public class JarFile extends java.util.jar.JarFile {
 	private SoftReference<Manifest> manifest;
 
 	private boolean signed;
+
+	private String comment;
 
 	/**
 	 * Create a new {@link JarFile} backed by the specified file.
@@ -118,9 +121,15 @@ public class JarFile extends java.util.jar.JarFile {
 		this.pathFromRoot = pathFromRoot;
 		CentralDirectoryParser parser = new CentralDirectoryParser();
 		this.entries = parser.addVisitor(new JarFileEntries(this, filter));
-		parser.addVisitor(centralDirectoryVisitor());
-		this.data = parser.parse(data, filter == null);
 		this.type = type;
+		parser.addVisitor(centralDirectoryVisitor());
+		try {
+			this.data = parser.parse(data, filter == null);
+		}
+		catch (RuntimeException ex) {
+			close();
+			throw ex;
+		}
 		this.manifestSupplier = (manifestSupplier != null) ? manifestSupplier : () -> {
 			try (InputStream inputStream = getInputStream(MANIFEST_NAME)) {
 				if (inputStream == null) {
@@ -139,6 +148,7 @@ public class JarFile extends java.util.jar.JarFile {
 
 			@Override
 			public void visitStart(CentralDirectoryEndRecord endRecord, RandomAccessData centralDirectoryData) {
+				JarFile.this.comment = endRecord.getComment();
 			}
 
 			@Override
@@ -181,7 +191,7 @@ public class JarFile extends java.util.jar.JarFile {
 
 	@Override
 	public Enumeration<java.util.jar.JarEntry> entries() {
-		final Iterator<JarEntry> iterator = this.entries.iterator();
+		Iterator<java.util.jar.JarEntry> iterator = iterator();
 		return new Enumeration<java.util.jar.JarEntry>() {
 
 			@Override
@@ -195,6 +205,17 @@ public class JarFile extends java.util.jar.JarFile {
 			}
 
 		};
+	}
+
+	/**
+	 * Return an iterator for the contained entries.
+	 * @see java.lang.Iterable#iterator()
+	 * @since 2.3.0
+	 */
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Iterator<java.util.jar.JarEntry> iterator() {
+		return (Iterator) this.entries.iterator();
 	}
 
 	public JarEntry getJarEntry(CharSequence name) {
@@ -281,6 +302,11 @@ public class JarFile extends java.util.jar.JarFile {
 		RandomAccessData entryData = this.entries.getEntryData(entry.getName());
 		return new JarFile(this.rootFile, this.pathFromRoot + "!/" + entry.getName(), entryData,
 				JarFileType.NESTED_JAR);
+	}
+
+	@Override
+	public String getComment() {
+		return this.comment;
 	}
 
 	@Override

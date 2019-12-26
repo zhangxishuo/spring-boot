@@ -92,7 +92,7 @@ public class SessionAutoConfiguration {
 
 		@Bean
 		@Conditional(DefaultCookieSerializerCondition.class)
-		public DefaultCookieSerializer cookieSerializer(ServerProperties serverProperties) {
+		DefaultCookieSerializer cookieSerializer(ServerProperties serverProperties) {
 			Cookie cookie = serverProperties.getServlet().getSession().getCookie();
 			DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
 			PropertyMapper map = PropertyMapper.get().alwaysApplyingWhenNonNull();
@@ -134,12 +134,12 @@ public class SessionAutoConfiguration {
 	}
 
 	/**
-	 * Customization log for {@link SpringSessionRememberMeServices} that is only
-	 * instantiated when Spring Security is on the classpath.
+	 * Customization for {@link SpringSessionRememberMeServices} that is only instantiated
+	 * when Spring Security is on the classpath.
 	 */
 	static class RememberMeServicesCookieSerializerCustomizer {
 
-		public void apply(DefaultCookieSerializer cookieSerializer) {
+		void apply(DefaultCookieSerializer cookieSerializer) {
 			cookieSerializer.setRememberMeRequestAttribute(SpringSessionRememberMeServices.REMEMBER_ME_LOGIN_ATTR);
 		}
 
@@ -229,7 +229,7 @@ public class SessionAutoConfiguration {
 		}
 
 		@PostConstruct
-		public void checkAvailableImplementations() {
+		void checkAvailableImplementations() {
 			List<Class<?>> availableCandidates = new ArrayList<>();
 			for (String candidate : this.candidates) {
 				addCandidateIfAvailable(availableCandidates, candidate);
@@ -264,10 +264,10 @@ public class SessionAutoConfiguration {
 		ServletSessionRepositoryImplementationValidator(ApplicationContext applicationContext,
 				SessionProperties sessionProperties) {
 			super(applicationContext, sessionProperties,
-					Arrays.asList("org.springframework.session.hazelcast.HazelcastSessionRepository",
-							"org.springframework.session.jdbc.JdbcOperationsSessionRepository",
-							"org.springframework.session.data.mongo.MongoOperationsSessionRepository",
-							"org.springframework.session.data.redis.RedisOperationsSessionRepository"));
+					Arrays.asList("org.springframework.session.hazelcast.HazelcastIndexedSessionRepository",
+							"org.springframework.session.jdbc.JdbcIndexedSessionRepository",
+							"org.springframework.session.data.mongo.MongoIndexedSessionRepository",
+							"org.springframework.session.data.redis.RedisIndexedSessionRepository"));
 		}
 
 	}
@@ -282,8 +282,8 @@ public class SessionAutoConfiguration {
 		ReactiveSessionRepositoryImplementationValidator(ApplicationContext applicationContext,
 				SessionProperties sessionProperties) {
 			super(applicationContext, sessionProperties,
-					Arrays.asList("org.springframework.session.data.redis.ReactiveRedisOperationsSessionRepository",
-							"org.springframework.session.data.mongo.ReactiveMongoOperationsSessionRepository"));
+					Arrays.asList("org.springframework.session.data.redis.ReactiveRedisSessionRepository",
+							"org.springframework.session.data.mongo.ReactiveMongoSessionRepository"));
 		}
 
 	}
@@ -304,7 +304,7 @@ public class SessionAutoConfiguration {
 		}
 
 		@PostConstruct
-		public void checkSessionRepository() {
+		void checkSessionRepository() {
 			StoreType storeType = this.sessionProperties.getStoreType();
 			if (storeType != StoreType.NONE && this.sessionRepositoryProvider.getIfAvailable() == null
 					&& storeType != null) {

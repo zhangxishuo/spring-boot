@@ -163,9 +163,9 @@ class SpringIterableConfigurationPropertySourceTests {
 		EnumerablePropertySource<?> source = new MapPropertySource("test", map);
 		SpringIterableConfigurationPropertySource adapter = new SpringIterableConfigurationPropertySource(source,
 				DefaultPropertyMapper.INSTANCE);
-		assertThat(adapter.stream().count()).isEqualTo(2);
+		assertThat(adapter.stream()).hasSize(2);
 		map.put("key3", "value3");
-		assertThat(adapter.stream().count()).isEqualTo(3);
+		assertThat(adapter.stream()).hasSize(3);
 	}
 
 	@Test
@@ -177,11 +177,14 @@ class SpringIterableConfigurationPropertySourceTests {
 		EnumerablePropertySource<?> source = new MapPropertySource("test", map);
 		SpringIterableConfigurationPropertySource adapter = new SpringIterableConfigurationPropertySource(source,
 				DefaultPropertyMapper.INSTANCE);
-		assertThat(adapter.stream().count()).isEqualTo(2);
+		assertThat(adapter.stream()).hasSize(2);
 		map.setThrowException(true);
+		map.put("key3", "value3");
+		assertThat(adapter.stream()).hasSize(3);
 	}
 
-	public void originTrackedMapPropertySourceKeyAdditionInvalidatesCache() {
+	@Test
+	void originTrackedMapPropertySourceKeyAdditionInvalidatesCache() {
 		// gh-13344
 		Map<String, Object> map = new LinkedHashMap<>();
 		map.put("key1", "value1");
@@ -189,12 +192,13 @@ class SpringIterableConfigurationPropertySourceTests {
 		EnumerablePropertySource<?> source = new OriginTrackedMapPropertySource("test", map);
 		SpringIterableConfigurationPropertySource adapter = new SpringIterableConfigurationPropertySource(source,
 				DefaultPropertyMapper.INSTANCE);
-		assertThat(adapter.stream().count()).isEqualTo(2);
+		assertThat(adapter.stream()).hasSize(2);
 		map.put("key3", "value3");
-		assertThat(adapter.stream().count()).isEqualTo(3);
+		assertThat(adapter.stream()).hasSize(3);
 	}
 
-	public void readOnlyOriginTrackedMapPropertySourceKeyAdditionDoesNotInvalidateCache() {
+	@Test
+	void readOnlyOriginTrackedMapPropertySourceKeyAdditionDoesNotInvalidateCache() {
 		// gh-16717
 		Map<String, Object> map = new LinkedHashMap<>();
 		map.put("key1", "value1");
@@ -202,16 +206,17 @@ class SpringIterableConfigurationPropertySourceTests {
 		EnumerablePropertySource<?> source = new OriginTrackedMapPropertySource("test", map, true);
 		SpringIterableConfigurationPropertySource adapter = new SpringIterableConfigurationPropertySource(source,
 				DefaultPropertyMapper.INSTANCE);
-		assertThat(adapter.stream().count()).isEqualTo(2);
+		assertThat(adapter.stream()).hasSize(2);
 		map.put("key3", "value3");
-		assertThat(adapter.stream().count()).isEqualTo(2);
+		assertThat(adapter.stream()).hasSize(2);
 	}
 
 	/**
 	 * Test {@link PropertySource} that's also an {@link OriginLookup}.
+	 *
+	 * @param <T> the source type
 	 */
-	private static class OriginCapablePropertySource<T> extends EnumerablePropertySource<T>
-			implements OriginLookup<String> {
+	static class OriginCapablePropertySource<T> extends EnumerablePropertySource<T> implements OriginLookup<String> {
 
 		private final EnumerablePropertySource<T> propertySource;
 
@@ -244,11 +249,11 @@ class SpringIterableConfigurationPropertySourceTests {
 
 	}
 
-	private static class ConcurrentModificationThrowingMap<K, V> extends LinkedHashMap<K, V> {
+	static class ConcurrentModificationThrowingMap<K, V> extends LinkedHashMap<K, V> {
 
 		private boolean throwException;
 
-		public void setThrowException(boolean throwException) {
+		void setThrowException(boolean throwException) {
 			this.throwException = throwException;
 		}
 

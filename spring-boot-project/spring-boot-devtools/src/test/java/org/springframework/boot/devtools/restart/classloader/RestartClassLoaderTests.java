@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -62,7 +63,7 @@ class RestartClassLoaderTests {
 	private RestartClassLoader reloadClassLoader;
 
 	@BeforeEach
-	public void setup(@TempDir File tempDir) throws Exception {
+	void setup(@TempDir File tempDir) throws Exception {
 		this.sampleJarFile = createSampleJarFile(tempDir);
 		URL url = this.sampleJarFile.toURI().toURL();
 		ClassLoader classLoader = getClass().getClassLoader();
@@ -70,6 +71,12 @@ class RestartClassLoaderTests {
 		this.parentClassLoader = new URLClassLoader(urls, classLoader);
 		this.updatedFiles = new ClassLoaderFiles();
 		this.reloadClassLoader = new RestartClassLoader(this.parentClassLoader, urls, this.updatedFiles);
+	}
+
+	@AfterEach
+	void tearDown() throws Exception {
+		this.reloadClassLoader.close();
+		this.parentClassLoader.close();
 	}
 
 	private File createSampleJarFile(File tempDir) throws IOException {

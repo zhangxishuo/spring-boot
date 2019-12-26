@@ -50,11 +50,11 @@ class DefaultWebClientExchangeTagsProviderTests {
 	private ClientResponse response;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.request = ClientRequest.create(HttpMethod.GET, URI.create("https://example.org/projects/spring-boot"))
 				.attribute(URI_TEMPLATE_ATTRIBUTE, "https://example.org/projects/{project}").build();
 		this.response = mock(ClientResponse.class);
-		given(this.response.statusCode()).willReturn(HttpStatus.OK);
+		given(this.response.rawStatusCode()).willReturn(HttpStatus.OK.value());
 	}
 
 	@Test
@@ -77,14 +77,14 @@ class DefaultWebClientExchangeTagsProviderTests {
 	void tagsWhenIoExceptionShouldReturnIoErrorStatus() {
 		Iterable<Tag> tags = this.tagsProvider.tags(this.request, null, new IOException());
 		assertThat(tags).containsExactlyInAnyOrder(Tag.of("method", "GET"), Tag.of("uri", "/projects/{project}"),
-				Tag.of("clientName", "example.org"), Tag.of("status", "IO_ERROR"));
+				Tag.of("clientName", "example.org"), Tag.of("status", "IO_ERROR"), Tag.of("outcome", "UNKNOWN"));
 	}
 
 	@Test
 	void tagsWhenExceptionShouldReturnClientErrorStatus() {
 		Iterable<Tag> tags = this.tagsProvider.tags(this.request, null, new IllegalArgumentException());
 		assertThat(tags).containsExactlyInAnyOrder(Tag.of("method", "GET"), Tag.of("uri", "/projects/{project}"),
-				Tag.of("clientName", "example.org"), Tag.of("status", "CLIENT_ERROR"));
+				Tag.of("clientName", "example.org"), Tag.of("status", "CLIENT_ERROR"), Tag.of("outcome", "UNKNOWN"));
 	}
 
 }

@@ -72,6 +72,7 @@ import org.springframework.util.StringUtils;
  * @author Andy Wilkinson
  * @author Brian Clozel
  * @author Madhura Bhave
+ * @author Lorenzo Dee
  * @since 1.4.0
  * @see SpringBootTest
  * @see TestConfiguration
@@ -84,7 +85,7 @@ public class SpringBootTestContextBootstrapper extends DefaultTestContextBootstr
 	private static final String REACTIVE_WEB_ENVIRONMENT_CLASS = "org.springframework."
 			+ "web.reactive.DispatcherHandler";
 
-	private static final String MVC_WEB_ENVIRONMENT_CLASS = "org.springframework." + "web.servlet.DispatcherServlet";
+	private static final String MVC_WEB_ENVIRONMENT_CLASS = "org.springframework.web.servlet.DispatcherServlet";
 
 	private static final String JERSEY_WEB_ENVIRONMENT_CLASS = "org.glassfish.jersey.server.ResourceConfig";
 
@@ -131,8 +132,7 @@ public class SpringBootTestContextBootstrapper extends DefaultTestContextBootstr
 	}
 
 	private void addConfigAttributesClasses(ContextConfigurationAttributes configAttributes, Class<?>[] classes) {
-		List<Class<?>> combined = new ArrayList<>();
-		combined.addAll(Arrays.asList(classes));
+		List<Class<?>> combined = new ArrayList<>(Arrays.asList(classes));
 		if (configAttributes.getClasses() != null) {
 			combined.addAll(Arrays.asList(configAttributes.getClasses()));
 		}
@@ -154,10 +154,7 @@ public class SpringBootTestContextBootstrapper extends DefaultTestContextBootstr
 			WebApplicationType webApplicationType = getWebApplicationType(mergedConfig);
 			if (webApplicationType == WebApplicationType.SERVLET
 					&& (webEnvironment.isEmbedded() || webEnvironment == WebEnvironment.MOCK)) {
-				String resourceBasePath = MergedAnnotations.from(mergedConfig.getTestClass(), SearchStrategy.EXHAUSTIVE)
-						.get(WebAppConfiguration.class).getValue(MergedAnnotation.VALUE, String.class)
-						.orElse("src/main/webapp");
-				mergedConfig = new WebMergedContextConfiguration(mergedConfig, resourceBasePath);
+				mergedConfig = new WebMergedContextConfiguration(mergedConfig, determineResourceBasePath(mergedConfig));
 			}
 			else if (webApplicationType == WebApplicationType.REACTIVE
 					&& (webEnvironment.isEmbedded() || webEnvironment == WebEnvironment.MOCK)) {
@@ -187,6 +184,20 @@ public class SpringBootTestContextBootstrapper extends DefaultTestContextBootstr
 			}
 		}
 		return WebApplicationType.SERVLET;
+	}
+
+	/**
+	 * Determines the resource base path for web applications using the value of
+	 * {@link WebAppConfiguration @WebAppConfiguration}, if any, on the test class of the
+	 * given {@code configuration}. Defaults to {@code src/main/webapp} in its absence.
+	 * @param configuration the configuration to examine
+	 * @return the resource base path
+	 * @since 2.1.6
+	 */
+	protected String determineResourceBasePath(MergedContextConfiguration configuration) {
+		return MergedAnnotations.from(configuration.getTestClass(), SearchStrategy.TYPE_HIERARCHY)
+				.get(WebAppConfiguration.class).getValue(MergedAnnotation.VALUE, String.class)
+				.orElse("src/main/webapp");
 	}
 
 	private boolean isWebEnvironmentSupported(MergedContextConfiguration mergedConfig) {
@@ -220,7 +231,7 @@ public class SpringBootTestContextBootstrapper extends DefaultTestContextBootstr
 		Class<?> found = new AnnotatedClassFinder(SpringBootConfiguration.class)
 				.findFromClass(mergedConfig.getTestClass());
 		Assert.state(found != null, "Unable to find a @SpringBootConfiguration, you need to use "
-				+ "@ContextConfiguration or @SpringBootTest(classes=...) " + "with your test");
+				+ "@ContextConfiguration or @SpringBootTest(classes=...) with your test");
 		logger.info("Found @SpringBootConfiguration " + found.getName() + " for test " + mergedConfig.getTestClass());
 		return merge(found, classes);
 	}
@@ -315,7 +326,7 @@ public class SpringBootTestContextBootstrapper extends DefaultTestContextBootstr
 				.from(testClass, SearchStrategy.INHERITED_ANNOTATIONS).isPresent(WebAppConfiguration.class)) {
 			throw new IllegalStateException("@WebAppConfiguration should only be used "
 					+ "with @SpringBootTest when @SpringBootTest is configured with a "
-					+ "mock web environment. Please remove @WebAppConfiguration or " + "reconfigure @SpringBootTest.");
+					+ "mock web environment. Please remove @WebAppConfiguration or reconfigure @SpringBootTest.");
 		}
 	}
 

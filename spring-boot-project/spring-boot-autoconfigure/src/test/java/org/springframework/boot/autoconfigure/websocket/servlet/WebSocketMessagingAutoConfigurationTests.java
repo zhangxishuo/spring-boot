@@ -83,7 +83,7 @@ class WebSocketMessagingAutoConfigurationTests {
 	private SockJsClient sockJsClient;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		List<Transport> transports = Arrays.asList(
 				new WebSocketTransport(new StandardWebSocketClient(new WsWebSocketContainer())),
 				new RestTemplateXhrTransport(new RestTemplate()));
@@ -91,7 +91,7 @@ class WebSocketMessagingAutoConfigurationTests {
 	}
 
 	@AfterEach
-	public void tearDown() {
+	void tearDown() {
 		this.context.close();
 		this.sockJsClient.stop();
 	}
@@ -218,17 +218,17 @@ class WebSocketMessagingAutoConfigurationTests {
 		}
 
 		@Bean
-		public MessagingController messagingController() {
+		MessagingController messagingController() {
 			return new MessagingController();
 		}
 
 		@Bean
-		public TomcatServletWebServerFactory tomcat() {
+		TomcatServletWebServerFactory tomcat() {
 			return new TomcatServletWebServerFactory(0);
 		}
 
 		@Bean
-		public TomcatWebSocketServletWebServerCustomizer tomcatCustomizer() {
+		TomcatWebSocketServletWebServerCustomizer tomcatCustomizer() {
 			return new TomcatWebSocketServletWebServerCustomizer();
 		}
 
@@ -249,7 +249,7 @@ class WebSocketMessagingAutoConfigurationTests {
 
 	}
 
-	static class Data {
+	public static class Data {
 
 		private int foo;
 

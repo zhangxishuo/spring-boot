@@ -61,7 +61,8 @@ class WebEndpointAutoConfigurationTests {
 	void webApplicationConfiguresEndpointMediaTypes() {
 		this.contextRunner.run((context) -> {
 			EndpointMediaTypes endpointMediaTypes = context.getBean(EndpointMediaTypes.class);
-			assertThat(endpointMediaTypes.getConsumed()).containsExactly(ActuatorMediaType.V2_JSON, "application/json");
+			assertThat(endpointMediaTypes.getConsumed()).containsExactly(ActuatorMediaType.V3_JSON,
+					ActuatorMediaType.V2_JSON, "application/json");
 		});
 	}
 
@@ -119,7 +120,7 @@ class WebEndpointAutoConfigurationTests {
 	}
 
 	@Component
-	private static class TestPathMatcher implements PathMapper {
+	static class TestPathMatcher implements PathMapper {
 
 		@Override
 		public String getRootPath(EndpointId endpointId) {
@@ -133,19 +134,19 @@ class WebEndpointAutoConfigurationTests {
 
 	@Component
 	@Endpoint(id = "testone")
-	private static class TestOneEndpoint {
+	static class TestOneEndpoint {
 
 	}
 
 	@Component
 	@Endpoint(id = "testanotherone")
-	private static class TestAnotherOneEndpoint {
+	static class TestAnotherOneEndpoint {
 
 	}
 
 	@Component
 	@Endpoint(id = "testtwo")
-	private static class TestTwoEndpoint {
+	static class TestTwoEndpoint {
 
 	}
 

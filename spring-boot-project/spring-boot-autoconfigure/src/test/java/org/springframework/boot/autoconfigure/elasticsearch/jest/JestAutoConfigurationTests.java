@@ -17,6 +17,7 @@
 package org.springframework.boot.autoconfigure.elasticsearch.jest;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,12 +31,12 @@ import io.searchbox.core.Index;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.boot.testsupport.testcontainers.DisabledWithoutDockerTestcontainers;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -50,11 +51,12 @@ import static org.mockito.Mockito.mock;
  * @author Andy Wilkinson
  */
 @Deprecated
-@DisabledWithoutDockerTestcontainers
+@Testcontainers(disabledWithoutDocker = true)
 class JestAutoConfigurationTests {
 
 	@Container
-	static final ElasticsearchContainer elasticsearch = new ElasticsearchContainer();
+	static final ElasticsearchContainer elasticsearch = new ElasticsearchContainer().withStartupAttempts(5)
+			.withStartupTimeout(Duration.ofMinutes(2));
 
 	private ApplicationContextRunner contextRunner = new ApplicationContextRunner()
 			.withConfiguration(AutoConfigurations.of(GsonAutoConfiguration.class, JestAutoConfiguration.class));
@@ -135,7 +137,7 @@ class JestAutoConfigurationTests {
 	static class CustomJestClient {
 
 		@Bean
-		public JestClient customJestClient() {
+		JestClient customJestClient() {
 			return mock(JestClient.class);
 		}
 
@@ -145,7 +147,7 @@ class JestAutoConfigurationTests {
 	static class CustomGson {
 
 		@Bean
-		public Gson customGson() {
+		Gson customGson() {
 			return new Gson();
 		}
 
@@ -158,7 +160,7 @@ class JestAutoConfigurationTests {
 		private final Gson gson = new Gson();
 
 		@Bean
-		public HttpClientConfigBuilderCustomizer customizer() {
+		HttpClientConfigBuilderCustomizer customizer() {
 			return (builder) -> builder.gson(BuilderCustomizer.this.gson);
 		}
 

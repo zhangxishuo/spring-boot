@@ -61,7 +61,7 @@ class ServletEndpointRegistrarTests {
 	private ArgumentCaptor<Servlet> servlet;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		MockitoAnnotations.initMocks(this);
 		given(this.servletContext.addServlet(any(String.class), any(Servlet.class))).willReturn(this.dynamic);
 	}
@@ -134,7 +134,7 @@ class ServletEndpointRegistrarTests {
 		return endpoint;
 	}
 
-	public static class TestServlet extends GenericServlet {
+	static class TestServlet extends GenericServlet {
 
 		@Override
 		public void service(ServletRequest req, ServletResponse res) {

@@ -58,7 +58,7 @@ class CouchbaseDataAutoConfigurationTests {
 	private AnnotationConfigApplicationContext context;
 
 	@AfterEach
-	public void close() {
+	void close() {
 		if (this.context != null) {
 			this.context.close();
 		}
@@ -159,7 +159,7 @@ class CouchbaseDataAutoConfigurationTests {
 	static class CustomConversionsConfig {
 
 		@Bean(BeanNames.COUCHBASE_CUSTOM_CONVERSIONS)
-		public CouchbaseCustomConversions myCustomConversions() {
+		CouchbaseCustomConversions myCustomConversions() {
 			return new CouchbaseCustomConversions(Collections.singletonList(new MyConverter()));
 		}
 

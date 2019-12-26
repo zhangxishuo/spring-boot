@@ -39,10 +39,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class ReproIntegrationTests {
 
 	@RegisterExtension
-	private CliTester cli;
+	CliTester cli;
 
-	ReproIntegrationTests(CapturedOutput capturedOutput) {
-		this.cli = new CliTester("src/test/resources/repro-samples/", capturedOutput);
+	ReproIntegrationTests(CapturedOutput output) {
+		this.cli = new CliTester("src/test/resources/repro-samples/", output);
 	}
 
 	@Test

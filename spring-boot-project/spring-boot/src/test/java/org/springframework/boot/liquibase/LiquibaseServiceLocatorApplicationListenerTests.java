@@ -48,7 +48,7 @@ class LiquibaseServiceLocatorApplicationListenerTests {
 	private ConfigurableApplicationContext context;
 
 	@AfterEach
-	public void cleanUp() {
+	void cleanUp() {
 		if (this.context != null) {
 			this.context.close();
 		}
@@ -83,7 +83,7 @@ class LiquibaseServiceLocatorApplicationListenerTests {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	public static class Conf {
+	static class Conf {
 
 	}
 

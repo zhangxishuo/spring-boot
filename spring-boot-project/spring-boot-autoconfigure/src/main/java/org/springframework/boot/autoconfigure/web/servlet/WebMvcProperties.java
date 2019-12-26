@@ -34,7 +34,7 @@ import org.springframework.validation.DefaultMessageCodesResolver;
  * @author Stephane Nicoll
  * @author Eddú Meléndez
  * @author Brian Clozel
- * @since 1.1
+ * @since 2.0.0
  */
 @ConfigurationProperties(prefix = "spring.mvc")
 public class WebMvcProperties {
@@ -75,6 +75,11 @@ public class WebMvcProperties {
 	 * scenarios.
 	 */
 	private boolean ignoreDefaultModelOnRedirect = true;
+
+	/**
+	 * Whether to publish a ServletRequestHandledEvent at the end of each request.
+	 */
+	private boolean publishRequestHandledEvents = true;
 
 	/**
 	 * Whether a "NoHandlerFoundException" should be thrown if no Handler was found to
@@ -143,6 +148,14 @@ public class WebMvcProperties {
 		this.ignoreDefaultModelOnRedirect = ignoreDefaultModelOnRedirect;
 	}
 
+	public boolean isPublishRequestHandledEvents() {
+		return this.publishRequestHandledEvents;
+	}
+
+	public void setPublishRequestHandledEvents(boolean publishRequestHandledEvents) {
+		this.publishRequestHandledEvents = publishRequestHandledEvents;
+	}
+
 	public boolean isThrowExceptionIfNoHandlerFound() {
 		return this.throwExceptionIfNoHandlerFound;
 	}
@@ -207,8 +220,7 @@ public class WebMvcProperties {
 
 		/**
 		 * Amount of time before asynchronous request handling times out. If this value is
-		 * not set, the default timeout of the underlying implementation is used, e.g. 10
-		 * seconds on Tomcat with Servlet 3.
+		 * not set, the default timeout of the underlying implementation is used.
 		 */
 		private Duration requestTimeout;
 

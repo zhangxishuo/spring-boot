@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.springframework.boot.env.OriginTrackedMapPropertySource;
+import org.springframework.boot.origin.OriginLookup;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
@@ -115,9 +115,7 @@ class SpringIterableConfigurationPropertySource extends SpringConfigurationPrope
 		String[] names = getPropertySource().getPropertyNames();
 		List<PropertyMapping> mappings = new ArrayList<>(names.length * 2);
 		for (String name : names) {
-			for (PropertyMapping mapping : getMapper().map(name)) {
-				mappings.add(mapping);
-			}
+			Collections.addAll(mappings, getMapper().map(name));
 		}
 		result = mappings.toArray(new PropertyMapping[0]);
 		if (cache != null) {
@@ -163,23 +161,23 @@ class SpringIterableConfigurationPropertySource extends SpringConfigurationPrope
 			this.key = key;
 		}
 
-		public boolean hasKeyEqualTo(CacheKey key) {
+		boolean hasKeyEqualTo(CacheKey key) {
 			return this.key.equals(key);
 		}
 
-		public List<ConfigurationPropertyName> getNames() {
+		List<ConfigurationPropertyName> getNames() {
 			return this.names;
 		}
 
-		public void setNames(List<ConfigurationPropertyName> names) {
+		void setNames(List<ConfigurationPropertyName> names) {
 			this.names = names;
 		}
 
-		public PropertyMapping[] getMappings() {
+		PropertyMapping[] getMappings() {
 			return this.mappings;
 		}
 
-		public void setMappings(PropertyMapping[] mappings) {
+		void setMappings(PropertyMapping[] mappings) {
 			this.mappings = mappings;
 		}
 
@@ -195,7 +193,7 @@ class SpringIterableConfigurationPropertySource extends SpringConfigurationPrope
 			this.key = key;
 		}
 
-		public CacheKey copy() {
+		CacheKey copy() {
 			if (this == IMMUTABLE_PROPERTY_SOURCE) {
 				return IMMUTABLE_PROPERTY_SOURCE;
 			}
@@ -226,7 +224,7 @@ class SpringIterableConfigurationPropertySource extends SpringConfigurationPrope
 			return this.key.hashCode();
 		}
 
-		public static CacheKey get(EnumerablePropertySource<?> source) {
+		static CacheKey get(EnumerablePropertySource<?> source) {
 			if (isImmutable(source)) {
 				return IMMUTABLE_PROPERTY_SOURCE;
 			}
@@ -238,8 +236,8 @@ class SpringIterableConfigurationPropertySource extends SpringConfigurationPrope
 		}
 
 		private static boolean isImmutable(EnumerablePropertySource<?> source) {
-			if (source instanceof OriginTrackedMapPropertySource) {
-				return ((OriginTrackedMapPropertySource) source).isImmutable();
+			if (source instanceof OriginLookup) {
+				return ((OriginLookup<?>) source).isImmutable();
 			}
 			if (StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME.equals(source.getName())) {
 				return source.getSource() == System.getenv();

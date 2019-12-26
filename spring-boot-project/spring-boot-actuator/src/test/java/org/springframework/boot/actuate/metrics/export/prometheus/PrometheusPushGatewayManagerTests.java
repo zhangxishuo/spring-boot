@@ -44,7 +44,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Tests for {@link PrometheusPushGatewayManager}.
@@ -72,7 +72,7 @@ class PrometheusPushGatewayManagerTests {
 	private ScheduledFuture<Object> future;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		MockitoAnnotations.initMocks(this);
 		this.scheduler = mockScheduler(TaskScheduler.class);
 	}
@@ -162,7 +162,7 @@ class PrometheusPushGatewayManagerTests {
 				this.scheduler, this.pushRate, "job", this.groupingKey, ShutdownOperation.NONE);
 		manager.shutdown();
 		verify(this.future).cancel(false);
-		verifyZeroInteractions(this.pushGateway);
+		verifyNoInteractions(this.pushGateway);
 	}
 
 	@Test

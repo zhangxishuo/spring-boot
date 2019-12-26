@@ -53,7 +53,7 @@ class BannerTests {
 	private ConfigurableApplicationContext context;
 
 	@AfterEach
-	public void cleanUp() {
+	void cleanUp() {
 		if (this.context != null) {
 			this.context.close();
 		}
@@ -63,30 +63,30 @@ class BannerTests {
 	private ArgumentCaptor<Class<?>> sourceClassCaptor;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		MockitoAnnotations.initMocks(this);
 	}
 
 	@Test
-	void testDefaultBanner(CapturedOutput capturedOutput) {
+	void testDefaultBanner(CapturedOutput output) {
 		SpringApplication application = createSpringApplication();
 		this.context = application.run();
-		assertThat(capturedOutput).contains(":: Spring Boot ::");
+		assertThat(output).contains(":: Spring Boot ::");
 	}
 
 	@Test
-	void testDefaultBannerInLog(CapturedOutput capturedOutput) {
+	void testDefaultBannerInLog(CapturedOutput output) {
 		SpringApplication application = createSpringApplication();
 		this.context = application.run();
-		assertThat(capturedOutput).contains(":: Spring Boot ::");
+		assertThat(output).contains(":: Spring Boot ::");
 	}
 
 	@Test
-	void testCustomBanner(CapturedOutput capturedOutput) {
+	void testCustomBanner(CapturedOutput output) {
 		SpringApplication application = createSpringApplication();
 		application.setBanner(new DummyBanner());
 		this.context = application.run();
-		assertThat(capturedOutput).contains("My Banner");
+		assertThat(output).contains("My Banner");
 	}
 
 	@Test
@@ -135,7 +135,7 @@ class BannerTests {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	public static class Config {
+	static class Config {
 
 	}
 

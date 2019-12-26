@@ -40,7 +40,7 @@ import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Tests for {@link ImportAutoConfigurationImportSelector}.
@@ -58,7 +58,7 @@ class ImportAutoConfigurationImportSelectorTests {
 	private Environment environment;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		MockitoAnnotations.initMocks(this);
 		this.importSelector.setBeanFactory(this.beanFactory);
 		this.importSelector.setEnvironment(this.environment);
@@ -83,7 +83,7 @@ class ImportAutoConfigurationImportSelectorTests {
 	void propertyExclusionsAreNotApplied() throws Exception {
 		AnnotationMetadata annotationMetadata = getAnnotationMetadata(ImportFreeMarker.class);
 		this.importSelector.selectImports(annotationMetadata);
-		verifyZeroInteractions(this.environment);
+		verifyNoInteractions(this.environment);
 	}
 
 	@Test
@@ -312,7 +312,7 @@ class ImportAutoConfigurationImportSelectorTests {
 
 	}
 
-	private static class TestImportAutoConfigurationImportSelector extends ImportAutoConfigurationImportSelector {
+	static class TestImportAutoConfigurationImportSelector extends ImportAutoConfigurationImportSelector {
 
 		@Override
 		protected Collection<String> loadFactoryNames(Class<?> source) {

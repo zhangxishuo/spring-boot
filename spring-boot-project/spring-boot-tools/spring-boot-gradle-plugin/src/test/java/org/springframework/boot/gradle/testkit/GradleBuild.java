@@ -32,8 +32,10 @@ import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
+import org.gradle.util.GradleVersion;
 import org.jetbrains.kotlin.cli.common.PropertiesKt;
 import org.jetbrains.kotlin.compilerRunner.KotlinLogger;
+import org.jetbrains.kotlin.daemon.client.KotlinCompilerClient;
 import org.jetbrains.kotlin.gradle.model.KotlinProject;
 import org.jetbrains.kotlin.gradle.plugin.KotlinGradleSubplugin;
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlugin;
@@ -42,6 +44,8 @@ import org.springframework.asm.ClassVisitor;
 import org.springframework.boot.loader.tools.LaunchScript;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.FileSystemUtils;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * A {@code GradleBuild} is used to run a Gradle build using {@link GradleRunner}.
@@ -57,6 +61,8 @@ public class GradleBuild {
 	private String script;
 
 	private String gradleVersion;
+
+	private GradleVersion expectDeprecationWarnings;
 
 	public GradleBuild() {
 		this(Dsl.GROOVY);
@@ -85,6 +91,7 @@ public class GradleBuild {
 				new File(pathOfJarContaining(DependencyManagementPlugin.class)),
 				new File(pathOfJarContaining(PropertiesKt.class)), new File(pathOfJarContaining(KotlinLogger.class)),
 				new File(pathOfJarContaining(KotlinPlugin.class)), new File(pathOfJarContaining(KotlinProject.class)),
+				new File(pathOfJarContaining(KotlinCompilerClient.class)),
 				new File(pathOfJarContaining(KotlinGradleSubplugin.class)),
 				new File(pathOfJarContaining(ArchiveEntry.class)));
 	}
@@ -98,9 +105,19 @@ public class GradleBuild {
 		return this;
 	}
 
+	public GradleBuild expectDeprecationWarningsWithAtLeastVersion(String gradleVersion) {
+		this.expectDeprecationWarnings = GradleVersion.version(gradleVersion);
+		return this;
+	}
+
 	public BuildResult build(String... arguments) {
 		try {
-			return prepareRunner(arguments).build();
+			BuildResult result = prepareRunner(arguments).build();
+			if (this.gradleVersion != null && this.expectDeprecationWarnings != null
+					&& this.expectDeprecationWarnings.compareTo(GradleVersion.version(this.gradleVersion)) > 0) {
+				assertThat(result.getOutput()).doesNotContain("Deprecated").doesNotContain("deprecated");
+			}
+			return result;
 		}
 		catch (Exception ex) {
 			throw new RuntimeException(ex);

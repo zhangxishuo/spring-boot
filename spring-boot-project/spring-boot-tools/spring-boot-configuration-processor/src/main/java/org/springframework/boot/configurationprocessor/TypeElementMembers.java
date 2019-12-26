@@ -37,7 +37,6 @@ import javax.lang.model.util.ElementFilter;
  *
  * @author Stephane Nicoll
  * @author Phillip Webb
- * @since 1.2.0
  */
 class TypeElementMembers {
 
@@ -45,15 +44,18 @@ class TypeElementMembers {
 
 	private final MetadataGenerationEnvironment env;
 
+	private final TypeElement targetType;
+
 	private final Map<String, VariableElement> fields = new LinkedHashMap<>();
 
 	private final Map<String, ExecutableElement> publicGetters = new LinkedHashMap<>();
 
 	private final Map<String, List<ExecutableElement>> publicSetters = new LinkedHashMap<>();
 
-	TypeElementMembers(MetadataGenerationEnvironment env, TypeElement element) {
+	TypeElementMembers(MetadataGenerationEnvironment env, TypeElement targetType) {
 		this.env = env;
-		process(element);
+		this.targetType = targetType;
+		process(targetType);
 	}
 
 	private void process(TypeElement element) {
@@ -117,8 +119,19 @@ class TypeElementMembers {
 
 	private boolean isSetterReturnType(ExecutableElement method) {
 		TypeMirror returnType = method.getReturnType();
-		return (TypeKind.VOID == returnType.getKind()
-				|| this.env.getTypeUtils().isSameType(method.getEnclosingElement().asType(), returnType));
+		if (TypeKind.VOID == returnType.getKind()) {
+			return true;
+		}
+		if (TypeKind.DECLARED == returnType.getKind()
+				&& this.env.getTypeUtils().isSameType(method.getEnclosingElement().asType(), returnType)) {
+			return true;
+		}
+		if (TypeKind.TYPEVAR == returnType.getKind()) {
+			String resolvedType = this.env.getTypeUtils().getType(this.targetType, returnType);
+			return (resolvedType != null
+					&& resolvedType.equals(this.env.getTypeUtils().getQualifiedName(this.targetType)));
+		}
+		return false;
 	}
 
 	private String getAccessorName(String methodName) {
@@ -134,15 +147,15 @@ class TypeElementMembers {
 		}
 	}
 
-	public Map<String, VariableElement> getFields() {
+	Map<String, VariableElement> getFields() {
 		return Collections.unmodifiableMap(this.fields);
 	}
 
-	public Map<String, ExecutableElement> getPublicGetters() {
+	Map<String, ExecutableElement> getPublicGetters() {
 		return Collections.unmodifiableMap(this.publicGetters);
 	}
 
-	public ExecutableElement getPublicGetter(String name, TypeMirror type) {
+	ExecutableElement getPublicGetter(String name, TypeMirror type) {
 		ExecutableElement candidate = this.publicGetters.get(name);
 		if (candidate != null) {
 			TypeMirror returnType = candidate.getReturnType();
@@ -157,7 +170,7 @@ class TypeElementMembers {
 		return null;
 	}
 
-	public ExecutableElement getPublicSetter(String name, TypeMirror type) {
+	ExecutableElement getPublicSetter(String name, TypeMirror type) {
 		List<ExecutableElement> candidates = this.publicSetters.get(name);
 		if (candidates != null) {
 			ExecutableElement matching = getMatchingSetter(candidates, type);

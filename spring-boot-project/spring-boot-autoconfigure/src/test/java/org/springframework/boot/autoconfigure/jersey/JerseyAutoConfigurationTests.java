@@ -23,8 +23,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
-import org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingListener;
-import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -43,7 +41,6 @@ class JerseyAutoConfigurationTests {
 
 	private final WebApplicationContextRunner contextRunner = new WebApplicationContextRunner()
 			.withConfiguration(AutoConfigurations.of(JerseyAutoConfiguration.class))
-			.withInitializer(new ConditionEvaluationReportLoggingListener(LogLevel.INFO))
 			.withUserConfiguration(ResourceConfigConfiguration.class);
 
 	@Test
@@ -104,7 +101,7 @@ class JerseyAutoConfigurationTests {
 	static class ResourceConfigConfiguration {
 
 		@Bean
-		public ResourceConfig resourceConfig() {
+		ResourceConfig resourceConfig() {
 			return new ResourceConfig();
 		}
 
@@ -114,7 +111,7 @@ class JerseyAutoConfigurationTests {
 	static class RequestContextFilterConfiguration {
 
 		@Bean
-		public RequestContextFilter requestContextFilter() {
+		RequestContextFilter requestContextFilter() {
 			return new RequestContextFilter();
 		}
 
@@ -124,7 +121,7 @@ class JerseyAutoConfigurationTests {
 	static class RequestContextFilterRegistrationConfiguration {
 
 		@Bean
-		public FilterRegistrationBean<RequestContextFilter> customRequestContextFilterRegistration() {
+		FilterRegistrationBean<RequestContextFilter> customRequestContextFilterRegistration() {
 			return new FilterRegistrationBean<>(new RequestContextFilter());
 		}
 

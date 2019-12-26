@@ -28,6 +28,7 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
@@ -43,16 +44,19 @@ import org.springframework.batch.core.repository.support.MapJobRepositoryFactory
 import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.DefaultApplicationArguments;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.TestAutoConfigurationPackage;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.test.City;
 import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.jdbc.DataSourceInitializationMode;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -61,6 +65,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.mock;
 
 /**
  * Tests for {@link BatchAutoConfiguration}.
@@ -89,7 +94,19 @@ class BatchAutoConfigurationTests {
 	}
 
 	@Test
-	void testNoDatabase() {
+	void whenThereIsNoDataSourceAutoConfigurationBacksOff() {
+		this.contextRunner.withUserConfiguration(TestConfiguration.class)
+				.run((context) -> assertThat(context).doesNotHaveBean(BatchConfigurer.class));
+	}
+
+	@Test
+	void whenThereIsAnEntityManagerFactoryButNoDataSourceAutoConfigurationBacksOff() {
+		this.contextRunner.withUserConfiguration(TestConfiguration.class, EntityManagerFactoryConfiguration.class)
+				.run((context) -> assertThat(context).doesNotHaveBean(BatchConfigurer.class));
+	}
+
+	@Test
+	void testCustomConfigurationWithNoDatabase() {
 		this.contextRunner.withUserConfiguration(TestCustomConfiguration.class).run((context) -> {
 			assertThat(context).hasSingleBean(JobLauncher.class);
 			JobExplorer explorer = context.getBean(JobExplorer.class);
@@ -111,8 +128,25 @@ class BatchAutoConfigurationTests {
 		this.contextRunner.withUserConfiguration(JobConfiguration.class, EmbeddedDataSourceConfiguration.class)
 				.run((context) -> {
 					assertThat(context).hasSingleBean(JobLauncher.class);
-					context.getBean(JobLauncherCommandLineRunner.class).run();
-					assertThat(context.getBean(JobRepository.class).getLastJobExecution("job", new JobParameters()))
+					context.getBean(JobLauncherApplicationRunner.class)
+							.run(new DefaultApplicationArguments("jobParam=test"));
+					JobParameters jobParameters = new JobParametersBuilder().addString("jobParam", "test")
+							.toJobParameters();
+					assertThat(context.getBean(JobRepository.class).getLastJobExecution("job", jobParameters))
+							.isNotNull();
+				});
+	}
+
+	@Test
+	void testDefinesAndLaunchesJobIgnoreOptionArguments() {
+		this.contextRunner.withUserConfiguration(JobConfiguration.class, EmbeddedDataSourceConfiguration.class)
+				.run((context) -> {
+					assertThat(context).hasSingleBean(JobLauncher.class);
+					context.getBean(JobLauncherApplicationRunner.class)
+							.run(new DefaultApplicationArguments("--spring.property=value", "jobParam=test"));
+					JobParameters jobParameters = new JobParametersBuilder().addString("jobParam", "test")
+							.toJobParameters();
+					assertThat(context.getBean(JobRepository.class).getLastJobExecution("job", jobParameters))
 							.isNotNull();
 				});
 	}
@@ -124,7 +158,7 @@ class BatchAutoConfigurationTests {
 						EmbeddedDataSourceConfiguration.class)
 				.withPropertyValues("spring.batch.job.names:discreteRegisteredJob").run((context) -> {
 					assertThat(context).hasSingleBean(JobLauncher.class);
-					context.getBean(JobLauncherCommandLineRunner.class).run();
+					context.getBean(JobLauncherApplicationRunner.class).run();
 					assertThat(context.getBean(JobRepository.class).getLastJobExecution("discreteRegisteredJob",
 							new JobParameters())).isNotNull();
 				});
@@ -136,7 +170,7 @@ class BatchAutoConfigurationTests {
 				.withUserConfiguration(NamedJobConfigurationWithLocalJob.class, EmbeddedDataSourceConfiguration.class)
 				.withPropertyValues("spring.batch.job.names:discreteLocalJob").run((context) -> {
 					assertThat(context).hasSingleBean(JobLauncher.class);
-					context.getBean(JobLauncherCommandLineRunner.class).run();
+					context.getBean(JobLauncherApplicationRunner.class).run();
 					assertThat(context.getBean(JobRepository.class).getLastJobExecution("discreteLocalJob",
 							new JobParameters())).isNotNull();
 				});
@@ -233,20 +267,61 @@ class BatchAutoConfigurationTests {
 				});
 	}
 
+	@Test
+	void testBatchDataSource() {
+		this.contextRunner.withUserConfiguration(TestConfiguration.class, BatchDataSourceConfiguration.class)
+				.run((context) -> {
+					assertThat(context).hasSingleBean(BatchConfigurer.class)
+							.hasSingleBean(BatchDataSourceInitializer.class).hasBean("batchDataSource");
+					DataSource batchDataSource = context.getBean("batchDataSource", DataSource.class);
+					assertThat(context.getBean(BatchConfigurer.class)).hasFieldOrPropertyWithValue("dataSource",
+							batchDataSource);
+					assertThat(context.getBean(BatchDataSourceInitializer.class))
+							.hasFieldOrPropertyWithValue("dataSource", batchDataSource);
+				});
+	}
+
 	@Configuration(proxyBeanMethods = false)
-	protected static class EmptyConfiguration {
+	protected static class BatchDataSourceConfiguration {
+
+		@Bean
+		@Primary
+		public DataSource normalDataSource() {
+			return DataSourceBuilder.create().url("jdbc:hsqldb:mem:normal").username("sa").build();
+		}
+
+		@BatchDataSource
+		@Bean
+		public DataSource batchDataSource() {
+			return DataSourceBuilder.create().url("jdbc:hsqldb:mem:batchdatasource").username("sa").build();
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	static class EmptyConfiguration {
 
 	}
 
 	@EnableBatchProcessing
 	@TestAutoConfigurationPackage(City.class)
-	protected static class TestConfiguration {
+	static class TestConfiguration {
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	static class EntityManagerFactoryConfiguration {
+
+		@Bean
+		EntityManagerFactory entityManagerFactory() {
+			return mock(EntityManagerFactory.class);
+		}
 
 	}
 
 	@EnableBatchProcessing
 	@TestAutoConfigurationPackage(City.class)
-	protected static class TestCustomConfiguration implements BatchConfigurer {
+	static class TestCustomConfiguration implements BatchConfigurer {
 
 		private JobRepository jobRepository;
 
@@ -284,7 +359,7 @@ class BatchAutoConfigurationTests {
 
 	@Configuration(proxyBeanMethods = false)
 	@EnableBatchProcessing
-	protected static class NamedJobConfigurationWithRegisteredJob {
+	static class NamedJobConfigurationWithRegisteredJob {
 
 		@Autowired
 		private JobRegistry jobRegistry;
@@ -293,14 +368,14 @@ class BatchAutoConfigurationTests {
 		private JobRepository jobRepository;
 
 		@Bean
-		public JobRegistryBeanPostProcessor registryProcessor() {
+		JobRegistryBeanPostProcessor registryProcessor() {
 			JobRegistryBeanPostProcessor processor = new JobRegistryBeanPostProcessor();
 			processor.setJobRegistry(this.jobRegistry);
 			return processor;
 		}
 
 		@Bean
-		public Job discreteJob() {
+		Job discreteJob() {
 			AbstractJob job = new AbstractJob("discreteRegisteredJob") {
 
 				@Override
@@ -326,13 +401,13 @@ class BatchAutoConfigurationTests {
 
 	@Configuration(proxyBeanMethods = false)
 	@EnableBatchProcessing
-	protected static class NamedJobConfigurationWithLocalJob {
+	static class NamedJobConfigurationWithLocalJob {
 
 		@Autowired
 		private JobRepository jobRepository;
 
 		@Bean
-		public Job discreteJob() {
+		Job discreteJob() {
 			AbstractJob job = new AbstractJob("discreteLocalJob") {
 
 				@Override
@@ -358,13 +433,13 @@ class BatchAutoConfigurationTests {
 
 	@Configuration(proxyBeanMethods = false)
 	@EnableBatchProcessing
-	protected static class JobConfiguration {
+	static class JobConfiguration {
 
 		@Autowired
 		private JobRepository jobRepository;
 
 		@Bean
-		public Job job() {
+		Job job() {
 			AbstractJob job = new AbstractJob() {
 
 				@Override

@@ -52,6 +52,7 @@ import org.apache.commons.compress.archivers.zip.UnixStat;
  *
  * @author Phillip Webb
  * @author Andy Wilkinson
+ * @since 1.0.0
  */
 public class JarWriter implements LoaderClassesWriter, AutoCloseable {
 
@@ -134,7 +135,7 @@ public class JarWriter implements LoaderClassesWriter, AutoCloseable {
 			JarArchiveEntry entry = new JarArchiveEntry(entries.nextElement());
 			setUpEntry(jarFile, entry);
 			try (ZipHeaderPeekInputStream inputStream = new ZipHeaderPeekInputStream(jarFile.getInputStream(entry))) {
-				EntryWriter entryWriter = new InputStreamEntryWriter(inputStream, true);
+				EntryWriter entryWriter = new InputStreamEntryWriter(inputStream);
 				JarArchiveEntry transformedEntry = entryTransformer.transform(entry);
 				if (transformedEntry != null) {
 					writeEntry(transformedEntry, entryWriter, unpackHandler);
@@ -163,7 +164,12 @@ public class JarWriter implements LoaderClassesWriter, AutoCloseable {
 	@Override
 	public void writeEntry(String entryName, InputStream inputStream) throws IOException {
 		JarArchiveEntry entry = new JarArchiveEntry(entryName);
-		writeEntry(entry, new InputStreamEntryWriter(inputStream, true));
+		try {
+			writeEntry(entry, new InputStreamEntryWriter(inputStream));
+		}
+		finally {
+			inputStream.close();
+		}
 	}
 
 	/**
@@ -177,8 +183,9 @@ public class JarWriter implements LoaderClassesWriter, AutoCloseable {
 		JarArchiveEntry entry = new JarArchiveEntry(destination + library.getName());
 		entry.setTime(getNestedLibraryTime(file));
 		new CrcAndSize(file).setupStoredEntry(entry);
-		writeEntry(entry, new InputStreamEntryWriter(new FileInputStream(file), true),
-				new LibraryUnpackHandler(library));
+		try (FileInputStream input = new FileInputStream(file)) {
+			writeEntry(entry, new InputStreamEntryWriter(input), new LibraryUnpackHandler(library));
+		}
 	}
 
 	private long getNestedLibraryTime(File file) {
@@ -221,7 +228,7 @@ public class JarWriter implements LoaderClassesWriter, AutoCloseable {
 			JarEntry entry;
 			while ((entry = inputStream.getNextJarEntry()) != null) {
 				if (entry.getName().endsWith(".class")) {
-					writeEntry(new JarArchiveEntry(entry), new InputStreamEntryWriter(inputStream, false));
+					writeEntry(new JarArchiveEntry(entry), new InputStreamEntryWriter(inputStream));
 				}
 			}
 		}
@@ -283,7 +290,7 @@ public class JarWriter implements LoaderClassesWriter, AutoCloseable {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		entryWriter.write(output);
 		entry.setComment("UNPACK:" + unpackHandler.sha1Hash(entry.getName()));
-		return new InputStreamEntryWriter(new ByteArrayInputStream(output.toByteArray()), true);
+		return new InputStreamEntryWriter(new ByteArrayInputStream(output.toByteArray()));
 	}
 
 	/**
@@ -307,11 +314,8 @@ public class JarWriter implements LoaderClassesWriter, AutoCloseable {
 
 		private final InputStream inputStream;
 
-		private final boolean close;
-
-		InputStreamEntryWriter(InputStream inputStream, boolean close) {
+		InputStreamEntryWriter(InputStream inputStream) {
 			this.inputStream = inputStream;
-			this.close = close;
 		}
 
 		@Override
@@ -322,9 +326,6 @@ public class JarWriter implements LoaderClassesWriter, AutoCloseable {
 				outputStream.write(buffer, 0, bytesRead);
 			}
 			outputStream.flush();
-			if (this.close) {
-				this.inputStream.close();
-			}
 		}
 
 	}
@@ -388,7 +389,7 @@ public class JarWriter implements LoaderClassesWriter, AutoCloseable {
 			return read;
 		}
 
-		public boolean hasZipHeader() {
+		boolean hasZipHeader() {
 			return Arrays.equals(this.header, ZIP_HEADER);
 		}
 
@@ -430,7 +431,7 @@ public class JarWriter implements LoaderClassesWriter, AutoCloseable {
 			}
 		}
 
-		public void setupStoredEntry(JarArchiveEntry entry) {
+		void setupStoredEntry(JarArchiveEntry entry) {
 			entry.setSize(this.size);
 			entry.setCompressedSize(this.size);
 			entry.setCrc(this.crc.getValue());

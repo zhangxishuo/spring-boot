@@ -26,7 +26,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerA
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.session.jdbc.JdbcOperationsSessionRepository;
+import org.springframework.session.jdbc.JdbcIndexedSessionRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -72,7 +72,7 @@ class SessionAutoConfigurationIntegrationTests extends AbstractSessionAutoConfig
 	void severalCandidatesWithValidSessionStore() {
 		this.contextRunner.withUserConfiguration(HazelcastConfiguration.class)
 				.withPropertyValues("spring.session.store-type=jdbc")
-				.run((context) -> validateSessionRepository(context, JdbcOperationsSessionRepository.class));
+				.run((context) -> validateSessionRepository(context, JdbcIndexedSessionRepository.class));
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -80,7 +80,7 @@ class SessionAutoConfigurationIntegrationTests extends AbstractSessionAutoConfig
 
 		@Bean
 		@SuppressWarnings("unchecked")
-		public HazelcastInstance hazelcastInstance() {
+		HazelcastInstance hazelcastInstance() {
 			IMap<Object, Object> map = mock(IMap.class);
 			HazelcastInstance mock = mock(HazelcastInstance.class);
 			given(mock.getMap("spring:session:sessions")).willReturn(map);

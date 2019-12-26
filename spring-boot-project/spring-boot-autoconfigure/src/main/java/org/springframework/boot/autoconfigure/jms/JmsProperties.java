@@ -26,6 +26,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author Greg Turnquist
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @since 1.0.0
  */
 @ConfigurationProperties(prefix = "spring.jms")
 public class JmsProperties {
@@ -154,6 +155,13 @@ public class JmsProperties {
 		 */
 		private Integer maxConcurrency;
 
+		/**
+		 * Timeout to use for receive calls. Use -1 for a no-wait receive or 0 for no
+		 * timeout at all. The latter is only feasible if not running within a transaction
+		 * manager and is generally discouraged since it prevents clean shutdown.
+		 */
+		private Duration receiveTimeout = Duration.ofSeconds(1);
+
 		public boolean isAutoStartup() {
 			return this.autoStartup;
 		}
@@ -192,6 +200,14 @@ public class JmsProperties {
 			}
 			return ((this.maxConcurrency != null) ? this.concurrency + "-" + this.maxConcurrency
 					: String.valueOf(this.concurrency));
+		}
+
+		public Duration getReceiveTimeout() {
+			return this.receiveTimeout;
+		}
+
+		public void setReceiveTimeout(Duration receiveTimeout) {
+			this.receiveTimeout = receiveTimeout;
 		}
 
 	}

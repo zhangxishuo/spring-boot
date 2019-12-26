@@ -18,8 +18,10 @@ package org.springframework.boot.actuate.management;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.boot.actuate.endpoint.web.test.WebEndpointTest;
@@ -31,7 +33,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.FileCopyUtils;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
 
 /**
  * Integration tests for {@link HeapDumpWebEndpoint} exposed by Jersey, Spring MVC, and
@@ -45,7 +47,7 @@ class HeapDumpWebEndpointWebIntegrationTests {
 	private TestHeapDumpWebEndpoint endpoint;
 
 	@BeforeEach
-	public void configureEndpoint(ApplicationContext context) {
+	void configureEndpoint(ApplicationContext context) {
 		this.endpoint = context.getBean(TestHeapDumpWebEndpoint.class);
 		this.endpoint.setAvailable(true);
 	}
@@ -64,24 +66,20 @@ class HeapDumpWebEndpointWebIntegrationTests {
 	}
 
 	private void assertHeapDumpFileIsDeleted() throws InterruptedException {
-		long end = System.currentTimeMillis() + 5000;
-		while (System.currentTimeMillis() < end && this.endpoint.file.exists()) {
-			Thread.sleep(100);
-		}
-		assertThat(this.endpoint.file.exists()).isFalse();
+		Awaitility.waitAtMost(Duration.ofSeconds(5)).until(this.endpoint.file::exists, is(false));
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	public static class TestConfiguration {
+	static class TestConfiguration {
 
 		@Bean
-		public HeapDumpWebEndpoint endpoint() {
+		HeapDumpWebEndpoint endpoint() {
 			return new TestHeapDumpWebEndpoint();
 		}
 
 	}
 
-	private static class TestHeapDumpWebEndpoint extends HeapDumpWebEndpoint {
+	static class TestHeapDumpWebEndpoint extends HeapDumpWebEndpoint {
 
 		private boolean available;
 
@@ -94,7 +92,7 @@ class HeapDumpWebEndpointWebIntegrationTests {
 			reset();
 		}
 
-		public void reset() {
+		void reset() {
 			this.available = true;
 		}
 
@@ -112,7 +110,7 @@ class HeapDumpWebEndpointWebIntegrationTests {
 			};
 		}
 
-		public void setAvailable(boolean available) {
+		void setAvailable(boolean available) {
 			this.available = available;
 		}
 

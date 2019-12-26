@@ -16,6 +16,8 @@
 
 package org.springframework.boot.autoconfigure.data.cassandra;
 
+import java.time.Duration;
+
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import org.junit.jupiter.api.AfterEach;
@@ -23,12 +25,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.CassandraContainer;
 import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.cassandra.city.City;
 import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.boot.testsupport.testcontainers.DisabledWithoutDockerTestcontainers;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.cassandra.config.CassandraSessionFactoryBean;
 import org.springframework.data.cassandra.config.SchemaAction;
@@ -41,16 +43,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  * @author Stephane Nicoll
  */
-@DisabledWithoutDockerTestcontainers
+@Testcontainers(disabledWithoutDocker = true)
 class CassandraDataAutoConfigurationIntegrationTests {
 
 	@Container
-	static final CassandraContainer<?> cassandra = new CassandraContainer<>();
+	static final CassandraContainer<?> cassandra = new CassandraContainer<>().withStartupAttempts(5)
+			.withStartupTimeout(Duration.ofMinutes(2));
 
 	private AnnotationConfigApplicationContext context;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		this.context = new AnnotationConfigApplicationContext();
 		TestPropertyValues
 				.of("spring.data.cassandra.port=" + cassandra.getFirstMappedPort(),
@@ -59,7 +62,7 @@ class CassandraDataAutoConfigurationIntegrationTests {
 	}
 
 	@AfterEach
-	public void close() {
+	void close() {
 		if (this.context != null) {
 			this.context.close();
 		}

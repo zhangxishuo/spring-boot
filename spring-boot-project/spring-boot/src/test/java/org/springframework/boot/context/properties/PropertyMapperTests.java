@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * Tests for {@link PropertyMapper}.
  *
  * @author Phillip Webb
+ * @author Artsiom Yudovin
  */
 class PropertyMapperTests {
 
@@ -195,7 +196,18 @@ class PropertyMapperTests {
 		this.map.alwaysApplyingWhenNonNull().from(() -> null).toCall(Assertions::fail);
 	}
 
-	private static class Count<T> implements Supplier<T> {
+	@Test
+	void whenWhenValueNotMatchesShouldSupportChainedCalls() {
+		this.map.from("123").when("456"::equals).when("123"::equals).toCall(Assertions::fail);
+	}
+
+	@Test
+	void whenWhenValueMatchesShouldSupportChainedCalls() {
+		String result = this.map.from("123").when((s) -> s.contains("2")).when("123"::equals).toInstance(String::new);
+		assertThat(result).isEqualTo("123");
+	}
+
+	static class Count<T> implements Supplier<T> {
 
 		private final Supplier<T> source;
 
@@ -211,13 +223,13 @@ class PropertyMapperTests {
 			return this.source.get();
 		}
 
-		public int getCount() {
+		int getCount() {
 			return this.count;
 		}
 
 	}
 
-	private static class ExampleSource {
+	static class ExampleSource {
 
 		private final String name;
 
@@ -225,21 +237,21 @@ class PropertyMapperTests {
 			this.name = name;
 		}
 
-		public String getName() {
+		String getName() {
 			return this.name;
 		}
 
 	}
 
-	private static class ExampleDest {
+	static class ExampleDest {
 
 		private String name;
 
-		public void setName(String name) {
+		void setName(String name) {
 			this.name = name;
 		}
 
-		public String getName() {
+		String getName() {
 			return this.name;
 		}
 

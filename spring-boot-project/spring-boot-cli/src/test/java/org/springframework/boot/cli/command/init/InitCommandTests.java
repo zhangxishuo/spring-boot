@@ -55,7 +55,7 @@ class InitCommandTests extends AbstractHttpClientMockTests {
 	private ArgumentCaptor<HttpUriRequest> requestCaptor;
 
 	@BeforeEach
-	public void setupMocks() {
+	void setupMocks() {
 		MockitoAnnotations.initMocks(this);
 	}
 
@@ -350,16 +350,18 @@ class InitCommandTests extends AbstractHttpClientMockTests {
 	}
 
 	private byte[] createFakeZipArchive(String fileName, String content) throws IOException {
-		try (ByteArrayOutputStream bos = new ByteArrayOutputStream(); ZipOutputStream zos = new ZipOutputStream(bos)) {
-			ZipEntry entry = new ZipEntry(fileName);
-			zos.putNextEntry(entry);
-			zos.write(content.getBytes());
-			zos.closeEntry();
-			return bos.toByteArray();
+		try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+			try (ZipOutputStream zos = new ZipOutputStream(bos)) {
+				ZipEntry entry = new ZipEntry(fileName);
+				zos.putNextEntry(entry);
+				zos.write(content.getBytes());
+				zos.closeEntry();
+				return bos.toByteArray();
+			}
 		}
 	}
 
-	private static class TestableInitCommandOptionHandler extends InitCommand.InitOptionHandler {
+	static class TestableInitCommandOptionHandler extends InitCommand.InitOptionHandler {
 
 		private boolean disableProjectGeneration;
 

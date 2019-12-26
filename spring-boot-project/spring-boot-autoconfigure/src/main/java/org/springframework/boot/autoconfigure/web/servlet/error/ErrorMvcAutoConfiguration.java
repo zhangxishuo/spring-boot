@@ -81,6 +81,7 @@ import org.springframework.web.util.HtmlUtils;
  * @author Andy Wilkinson
  * @author Stephane Nicoll
  * @author Brian Clozel
+ * @since 1.0.0
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = Type.SERVLET)
@@ -135,8 +136,8 @@ public class ErrorMvcAutoConfiguration {
 
 		@Bean
 		@ConditionalOnBean(DispatcherServlet.class)
-		@ConditionalOnMissingBean
-		public DefaultErrorViewResolver conventionErrorViewResolver() {
+		@ConditionalOnMissingBean(ErrorViewResolver.class)
+		DefaultErrorViewResolver conventionErrorViewResolver() {
 			return new DefaultErrorViewResolver(this.applicationContext, this.resourceProperties);
 		}
 
@@ -251,7 +252,7 @@ public class ErrorMvcAutoConfiguration {
 	/**
 	 * {@link WebServerFactoryCustomizer} that configures the server's error pages.
 	 */
-	private static class ErrorPageCustomizer implements ErrorPageRegistrar, Ordered {
+	static class ErrorPageCustomizer implements ErrorPageRegistrar, Ordered {
 
 		private final ServerProperties properties;
 

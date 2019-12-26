@@ -32,6 +32,7 @@ import org.springframework.boot.cli.util.Log;
  * called with the current index followed by a list of arguments already typed.
  *
  * @author Phillip Webb
+ * @since 1.0.0
  */
 public class HintCommand extends AbstractCommand {
 
@@ -45,7 +46,7 @@ public class HintCommand extends AbstractCommand {
 	@Override
 	public ExitStatus run(String... args) throws Exception {
 		try {
-			int index = (args.length != 0) ? Integer.valueOf(args[0]) - 1 : 0;
+			int index = (args.length != 0) ? Integer.parseInt(args[0]) - 1 : 0;
 			List<String> arguments = new ArrayList<>(args.length);
 			for (int i = 2; i < args.length; i++) {
 				arguments.add(args[i]);

@@ -44,7 +44,7 @@ class CouchbaseRepositoriesAutoConfigurationTests {
 	private AnnotationConfigApplicationContext context;
 
 	@AfterEach
-	public void close() {
+	void close() {
 		if (this.context != null) {
 			this.context.close();
 		}
@@ -108,7 +108,7 @@ class CouchbaseRepositoriesAutoConfigurationTests {
 	@Configuration(proxyBeanMethods = false)
 	@TestAutoConfigurationPackage(EmptyDataPackage.class)
 	@Import(CouchbaseTestConfigurer.class)
-	protected static class NoRepositoryConfiguration {
+	static class NoRepositoryConfiguration {
 
 	}
 

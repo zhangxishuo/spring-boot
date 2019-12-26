@@ -52,7 +52,7 @@ class MailHealthIndicatorTests {
 	private MailHealthIndicator indicator;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		Session session = Session.getDefaultInstance(new Properties());
 		session.addProvider(new Provider(Type.TRANSPORT, "success", SuccessTransport.class.getName(), "Test", "1.0.0"));
 		this.mailSender = mock(JavaMailSenderImpl.class);
@@ -81,7 +81,7 @@ class MailHealthIndicatorTests {
 		assertThat(errorMessage.toString().contains("A test exception")).isTrue();
 	}
 
-	public static class SuccessTransport extends Transport {
+	static class SuccessTransport extends Transport {
 
 		SuccessTransport(Session session, URLName urlName) {
 			super(session, urlName);

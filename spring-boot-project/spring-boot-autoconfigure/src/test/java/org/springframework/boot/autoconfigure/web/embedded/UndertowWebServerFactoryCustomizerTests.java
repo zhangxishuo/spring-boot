@@ -51,6 +51,7 @@ import static org.mockito.Mockito.verify;
  * @author Phillip Webb
  * @author Artsiom Yudovin
  * @author Rafiullah Hamedy
+ * @author HaiTao Zhang
  */
 class UndertowWebServerFactoryCustomizerTests {
 
@@ -61,7 +62,7 @@ class UndertowWebServerFactoryCustomizerTests {
 	private UndertowWebServerFactoryCustomizer customizer;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.environment = new MockEnvironment();
 		this.serverProperties = new ServerProperties();
 		ConfigurationPropertySources.attach(this.environment);
@@ -109,8 +110,8 @@ class UndertowWebServerFactoryCustomizerTests {
 
 	@Test
 	void customConnectionTimeout() {
-		bind("server.connectionTimeout=100");
-		assertThat(boundServerOption(UndertowOptions.NO_REQUEST_TIMEOUT)).isEqualTo(100);
+		bind("server.undertow.no-request-timeout=1m");
+		assertThat(boundServerOption(UndertowOptions.NO_REQUEST_TIMEOUT)).isEqualTo(60000);
 	}
 
 	@Test
@@ -156,6 +157,29 @@ class UndertowWebServerFactoryCustomizerTests {
 	}
 
 	@Test
+	void customServerOption() {
+		bind("server.undertow.options.server.ALWAYS_SET_KEEP_ALIVE=false");
+		assertThat(boundServerOption(UndertowOptions.ALWAYS_SET_KEEP_ALIVE)).isFalse();
+	}
+
+	@Test
+	void customServerOptionShouldBeRelaxed() {
+		bind("server.undertow.options.server.always-set-keep-alive=false");
+		assertThat(boundServerOption(UndertowOptions.ALWAYS_SET_KEEP_ALIVE)).isFalse();
+	}
+
+	@Test
+	void customSocketOption() {
+		bind("server.undertow.options.socket.ALWAYS_SET_KEEP_ALIVE=false");
+		assertThat(boundSocketOption(UndertowOptions.ALWAYS_SET_KEEP_ALIVE)).isFalse();
+	}
+
+	void customSocketOptionShouldBeRelaxed() {
+		bind("server.undertow.options.socket.always-set-keep-alive=false");
+		assertThat(boundSocketOption(UndertowOptions.ALWAYS_SET_KEEP_ALIVE)).isFalse();
+	}
+
+	@Test
 	void deduceUseForwardHeaders() {
 		this.environment.setProperty("DYNO", "-");
 		ConfigurableUndertowWebServerFactory factory = mock(ConfigurableUndertowWebServerFactory.class);
@@ -183,6 +207,14 @@ class UndertowWebServerFactoryCustomizerTests {
 		ConfigurableUndertowWebServerFactory factory = mockFactory(builder);
 		this.customizer.customize(factory);
 		OptionMap map = ((OptionMap.Builder) ReflectionTestUtils.getField(builder, "serverOptions")).getMap();
+		return map.get(option);
+	}
+
+	private <T> T boundSocketOption(Option<T> option) {
+		Builder builder = Undertow.builder();
+		ConfigurableUndertowWebServerFactory factory = mockFactory(builder);
+		this.customizer.customize(factory);
+		OptionMap map = ((OptionMap.Builder) ReflectionTestUtils.getField(builder, "socketOptions")).getMap();
 		return map.get(option);
 	}
 

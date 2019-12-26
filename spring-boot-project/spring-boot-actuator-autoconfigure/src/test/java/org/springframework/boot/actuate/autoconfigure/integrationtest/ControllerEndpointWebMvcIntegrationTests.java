@@ -63,7 +63,7 @@ class ControllerEndpointWebMvcIntegrationTests {
 	private AnnotationConfigServletWebApplicationContext context;
 
 	@AfterEach
-	public void close() {
+	void close() {
 		TestSecurityContextHolder.clearContext();
 		this.context.close();
 	}
@@ -124,7 +124,7 @@ class ControllerEndpointWebMvcIntegrationTests {
 	static class ExampleController {
 
 		@GetMapping("/")
-		public String example() {
+		String example() {
 			return "Example";
 		}
 

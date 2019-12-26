@@ -50,12 +50,12 @@ class DevToolPropertiesIntegrationTests {
 	private ConfigurableApplicationContext context;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		Restarter.initialize(new String[] {}, false, new MockInitializer(), false);
 	}
 
 	@AfterEach
-	public void cleanup() {
+	void cleanup() {
 		if (this.context != null) {
 			this.context.close();
 		}
@@ -138,7 +138,7 @@ class DevToolPropertiesIntegrationTests {
 
 		@Bean
 		@ConditionalOnProperty("spring.h2.console.enabled")
-		public MyBean myBean() {
+		MyBean myBean() {
 			return new MyBean();
 		}
 

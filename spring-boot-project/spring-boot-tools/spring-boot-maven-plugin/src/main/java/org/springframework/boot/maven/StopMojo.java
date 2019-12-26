@@ -32,8 +32,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 /**
- * Stop a spring application that has been started by the "start" goal. Typically invoked
- * once a test suite has completed.
+ * Stop an application that has been started by the "start" goal. Typically invoked once a
+ * test suite has completed.
  *
  * @author Stephane Nicoll
  * @since 1.3.0
@@ -52,7 +52,7 @@ public class StopMojo extends AbstractMojo {
 	 * Flag to indicate if process to stop was forked. By default, the value is inherited
 	 * from the {@link MavenProject}. If it is set, it must match the value used to
 	 * {@link StartMojo start} the process.
-	 * @since 1.3
+	 * @since 1.3.0
 	 */
 	@Parameter(property = "spring-boot.stop.fork")
 	private Boolean fork;
@@ -104,7 +104,7 @@ public class StopMojo extends AbstractMojo {
 			return this.fork;
 		}
 		String property = this.project.getProperties().getProperty("_spring.boot.fork.enabled");
-		return Boolean.valueOf(property);
+		return Boolean.parseBoolean(property);
 	}
 
 	private void stopForkedProcess() throws IOException, MojoFailureException, MojoExecutionException {

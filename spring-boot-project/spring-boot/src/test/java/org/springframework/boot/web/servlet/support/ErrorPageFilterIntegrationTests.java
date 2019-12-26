@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.xnio.channels.UnsupportedOptionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
@@ -76,7 +75,7 @@ class ErrorPageFilterIntegrationTests {
 	private AnnotationConfigServletWebServerApplicationContext context;
 
 	@AfterEach
-	public void init() {
+	void init() {
 		this.controller.reset();
 	}
 
@@ -104,47 +103,47 @@ class ErrorPageFilterIntegrationTests {
 
 	@Configuration(proxyBeanMethods = false)
 	@EnableWebMvc
-	public static class TomcatConfig {
+	static class TomcatConfig {
 
 		@Bean
-		public ServletWebServerFactory webServerFactory() {
+		ServletWebServerFactory webServerFactory() {
 			return new TomcatServletWebServerFactory(0);
 		}
 
 		@Bean
-		public ErrorPageFilter errorPageFilter() {
+		ErrorPageFilter errorPageFilter() {
 			return new ErrorPageFilter();
 		}
 
 		@Bean
-		public DispatcherServlet dispatcherServlet() {
+		DispatcherServlet dispatcherServlet() {
 			return new DispatcherServlet();
 		}
 
 		@Bean
-		public HelloWorldController helloWorldController() {
+		HelloWorldController helloWorldController() {
 			return new HelloWorldController();
 		}
 
 	}
 
 	@Controller
-	public static class HelloWorldController implements WebMvcConfigurer {
+	static class HelloWorldController implements WebMvcConfigurer {
 
 		private int status;
 
 		private CountDownLatch latch = new CountDownLatch(1);
 
-		public int getStatus() throws InterruptedException {
+		int getStatus() throws InterruptedException {
 			assertThat(this.latch.await(1, TimeUnit.SECONDS)).as("Timed out waiting for latch").isTrue();
 			return this.status;
 		}
 
-		public void setStatus(int status) {
+		void setStatus(int status) {
 			this.status = status;
 		}
 
-		public void reset() {
+		void reset() {
 			this.status = 0;
 			this.latch = new CountDownLatch(1);
 		}
@@ -163,14 +162,14 @@ class ErrorPageFilterIntegrationTests {
 
 		@RequestMapping("/hello")
 		@ResponseBody
-		public String sayHello() {
+		String sayHello() {
 			return "Hello World";
 		}
 
 		@RequestMapping("/create")
 		@ResponseBody
 		@ResponseStatus(HttpStatus.CREATED)
-		public String created() {
+		String created() {
 			return "Hello World";
 		}
 
@@ -190,7 +189,7 @@ class ErrorPageFilterIntegrationTests {
 
 		@Override
 		public ApplicationContext loadContext(String... locations) {
-			throw new UnsupportedOptionException();
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -200,7 +199,7 @@ class ErrorPageFilterIntegrationTests {
 
 		@Override
 		protected String getResourceSuffix() {
-			throw new UnsupportedOptionException();
+			throw new UnsupportedOperationException();
 		}
 
 	}

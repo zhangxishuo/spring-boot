@@ -36,7 +36,12 @@ import org.springframework.data.mongodb.core.MongoClientFactoryBean;
 @Order(Ordered.LOWEST_PRECEDENCE)
 public class MongoClientDependsOnBeanFactoryPostProcessor extends AbstractDependsOnBeanFactoryPostProcessor {
 
-	public MongoClientDependsOnBeanFactoryPostProcessor(String... dependsOn) {
+	/**
+	 * Creates a new {@code MongoClientDependsOnBeanFactoryPostProcessor} that will set up
+	 * dependencies upon beans with the given types.
+	 * @param dependsOn types of the beans to depend upon
+	 */
+	public MongoClientDependsOnBeanFactoryPostProcessor(Class<?>... dependsOn) {
 		super(MongoClient.class, MongoClientFactoryBean.class, dependsOn);
 	}
 

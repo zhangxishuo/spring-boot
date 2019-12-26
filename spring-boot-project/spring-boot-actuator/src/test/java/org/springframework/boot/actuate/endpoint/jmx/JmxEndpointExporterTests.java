@@ -71,7 +71,7 @@ class JmxEndpointExporterTests {
 	private JmxEndpointExporter exporter;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		MockitoAnnotations.initMocks(this);
 		this.exporter = new JmxEndpointExporter(this.mBeanServer, this.objectNameFactory, this.responseMapper,
 				this.endpoints);
@@ -170,7 +170,7 @@ class JmxEndpointExporterTests {
 	/**
 	 * Test {@link EndpointObjectNameFactory}.
 	 */
-	private static class TestEndpointObjectNameFactory implements EndpointObjectNameFactory {
+	static class TestEndpointObjectNameFactory implements EndpointObjectNameFactory {
 
 		@Override
 		public ObjectName getObjectName(ExposableJmxEndpoint endpoint) throws MalformedObjectNameException {

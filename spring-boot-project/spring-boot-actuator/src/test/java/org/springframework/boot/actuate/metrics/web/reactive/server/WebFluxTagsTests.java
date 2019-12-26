@@ -45,7 +45,7 @@ class WebFluxTagsTests {
 	private PathPatternParser parser = new PathPatternParser();
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 	}
 
@@ -150,6 +150,20 @@ class WebFluxTagsTests {
 		this.exchange.getResponse().setStatusCode(HttpStatus.BAD_GATEWAY);
 		Tag tag = WebFluxTags.outcome(this.exchange);
 		assertThat(tag.getValue()).isEqualTo("SERVER_ERROR");
+	}
+
+	@Test
+	void outcomeTagIsClientErrorWhenResponseIsNonStandardInClientSeries() {
+		this.exchange.getResponse().setStatusCodeValue(490);
+		Tag tag = WebFluxTags.outcome(this.exchange);
+		assertThat(tag.getValue()).isEqualTo("CLIENT_ERROR");
+	}
+
+	@Test
+	void outcomeTagIsUnknownWhenResponseStatusIsInUnknownSeries() {
+		this.exchange.getResponse().setStatusCodeValue(701);
+		Tag tag = WebFluxTags.outcome(this.exchange);
+		assertThat(tag.getValue()).isEqualTo("UNKNOWN");
 	}
 
 }

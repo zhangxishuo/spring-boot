@@ -165,7 +165,7 @@ class MongoDataAutoConfigurationTests {
 	void backsOffIfMongoClientBeanIsNotPresent() {
 		ApplicationContextRunner runner = new ApplicationContextRunner()
 				.withConfiguration(AutoConfigurations.of(MongoDataAutoConfiguration.class));
-		runner.run((context) -> assertThat(context).doesNotHaveBean(MongoDataAutoConfiguration.class));
+		runner.run((context) -> assertThat(context).doesNotHaveBean(MongoTemplate.class));
 	}
 
 	@Test
@@ -184,6 +184,12 @@ class MongoDataAutoConfigurationTests {
 		});
 	}
 
+	@Test
+	void autoConfiguresIfUserProvidesMongoDbFactoryButNoClient() {
+		this.contextRunner.withUserConfiguration(MongoDbFactoryConfiguration.class)
+				.run((context) -> assertThat(context).hasSingleBean(MongoTemplate.class));
+	}
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static void assertDomainTypesDiscovered(MongoMappingContext mappingContext, Class<?>... types) {
 		Set<Class> initialEntitySet = (Set<Class>) ReflectionTestUtils.getField(mappingContext, "initialEntitySet");
@@ -194,7 +200,7 @@ class MongoDataAutoConfigurationTests {
 	static class CustomConversionsConfig {
 
 		@Bean
-		public MongoCustomConversions customConversions() {
+		MongoCustomConversions customConversions() {
 			return new MongoCustomConversions(Arrays.asList(new MyConverter()));
 		}
 
@@ -216,7 +222,17 @@ class MongoDataAutoConfigurationTests {
 
 	}
 
-	private static class MyConverter implements Converter<MongoClient, Boolean> {
+	@Configuration(proxyBeanMethods = false)
+	static class MongoDbFactoryConfiguration {
+
+		@Bean
+		MongoDbFactory mongoDbFactory() {
+			return new SimpleMongoClientDbFactory(MongoClients.create(), "test");
+		}
+
+	}
+
+	static class MyConverter implements Converter<MongoClient, Boolean> {
 
 		@Override
 		public Boolean convert(MongoClient source) {

@@ -74,6 +74,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Quinten De Swaef
  * @author Venil Noronha
  * @author Andrew McGhie
+ * @author HaiTao Zhang
+ * @author Rafiullah Hamedy
  */
 class ServerPropertiesTests {
 
@@ -123,10 +125,12 @@ class ServerPropertiesTests {
 		map.put("server.tomcat.accesslog.rename-on-rotate", "true");
 		map.put("server.tomcat.accesslog.ipv6Canonical", "true");
 		map.put("server.tomcat.accesslog.request-attributes-enabled", "true");
-		map.put("server.tomcat.protocol-header", "X-Forwarded-Protocol");
-		map.put("server.tomcat.remote-ip-header", "Remote-Ip");
-		map.put("server.tomcat.internal-proxies", "10\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
+		map.put("server.tomcat.remoteip.protocol-header", "X-Forwarded-Protocol");
+		map.put("server.tomcat.remoteip.remote-ip-header", "Remote-Ip");
+		map.put("server.tomcat.remoteip.internal-proxies", "10\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
 		map.put("server.tomcat.background-processor-delay", "10");
+		map.put("server.tomcat.relaxed-path-chars", "|,<");
+		map.put("server.tomcat.relaxed-query-chars", "^  ,  | ");
 		bind(map);
 		ServerProperties.Tomcat tomcat = this.properties.getTomcat();
 		Accesslog accesslog = tomcat.getAccesslog();
@@ -146,6 +150,8 @@ class ServerPropertiesTests {
 		assertThat(tomcat.getProtocolHeader()).isEqualTo("X-Forwarded-Protocol");
 		assertThat(tomcat.getInternalProxies()).isEqualTo("10\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
 		assertThat(tomcat.getBackgroundProcessorDelay()).isEqualTo(Duration.ofSeconds(10));
+		assertThat(tomcat.getRelaxedPathChars()).containsExactly('|', '<');
+		assertThat(tomcat.getRelaxedQueryChars()).containsExactly('^', '|');
 	}
 
 	@Test
@@ -215,6 +221,38 @@ class ServerPropertiesTests {
 	}
 
 	@Test
+	void testCustomizeJettyMaxThreads() {
+		bind("server.jetty.max-threads", "10");
+		assertThat(this.properties.getJetty().getMaxThreads()).isEqualTo(10);
+	}
+
+	@Test
+	void testCustomizeJettyMinThreads() {
+		bind("server.jetty.min-threads", "10");
+		assertThat(this.properties.getJetty().getMinThreads()).isEqualTo(10);
+	}
+
+	@Test
+	void testCustomizeJettyIdleTimeout() {
+		bind("server.jetty.thread-idle-timeout", "10s");
+		assertThat(this.properties.getJetty().getThreadIdleTimeout()).isEqualTo(Duration.ofSeconds(10));
+	}
+
+	@Test
+	void testCustomizeUndertowServerOption() {
+		bind("server.undertow.options.server.ALWAYS_SET_KEEP_ALIVE", "true");
+		assertThat(this.properties.getUndertow().getOptions().getServer()).containsEntry("ALWAYS_SET_KEEP_ALIVE",
+				"true");
+	}
+
+	@Test
+	void testCustomizeUndertowSocketOption() {
+		bind("server.undertow.options.socket.ALWAYS_SET_KEEP_ALIVE", "true");
+		assertThat(this.properties.getUndertow().getOptions().getSocket()).containsEntry("ALWAYS_SET_KEEP_ALIVE",
+				"true");
+	}
+
+	@Test
 	void testCustomizeJettyAccessLog() {
 		Map<String, String> map = new HashMap<>();
 		map.put("server.jetty.accesslog.enabled", "true");
@@ -274,6 +312,12 @@ class ServerPropertiesTests {
 	}
 
 	@Test
+	void tomcatMaxHttpFormPostSizeMatchesConnectorDefault() throws Exception {
+		assertThat(this.properties.getTomcat().getMaxHttpFormPostSize().toBytes())
+				.isEqualTo(getDefaultConnector().getMaxPostSize());
+	}
+
+	@Test
 	void tomcatUriEncodingMatchesConnectorDefault() throws Exception {
 		assertThat(this.properties.getTomcat().getUriEncoding().name())
 				.isEqualTo(getDefaultConnector().getURIEncoding());
@@ -304,7 +348,7 @@ class ServerPropertiesTests {
 	}
 
 	@Test
-	void jettyMaxHttpPostSizeMatchesDefault() throws Exception {
+	void jettyMaxHttpFormPostSizeMatchesDefault() throws Exception {
 		JettyServletWebServerFactory jettyFactory = new JettyServletWebServerFactory(0);
 		JettyWebServer jetty = (JettyWebServer) jettyFactory
 				.getWebServer((ServletContextInitializer) (servletContext) -> servletContext
@@ -356,7 +400,7 @@ class ServerPropertiesTests {
 			assertThat(failure.get()).isNotNull();
 			String message = failure.get().getCause().getMessage();
 			int defaultMaxPostSize = Integer.valueOf(message.substring(message.lastIndexOf(' ')).trim());
-			assertThat(this.properties.getJetty().getMaxHttpPostSize().toBytes()).isEqualTo(defaultMaxPostSize);
+			assertThat(this.properties.getJetty().getMaxHttpFormPostSize().toBytes()).isEqualTo(defaultMaxPostSize);
 		}
 		finally {
 			jetty.stop();

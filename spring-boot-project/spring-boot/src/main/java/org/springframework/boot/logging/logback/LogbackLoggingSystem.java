@@ -33,7 +33,9 @@ import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.classic.util.ContextInitializer;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.spi.FilterReply;
+import ch.qos.logback.core.status.OnConsoleStatusListener;
 import ch.qos.logback.core.status.Status;
+import ch.qos.logback.core.util.StatusListenerConfigHelper;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
@@ -59,6 +61,7 @@ import org.springframework.util.StringUtils;
  * @author Dave Syer
  * @author Andy Wilkinson
  * @author Ben Hale
+ * @since 1.0.0
  */
 public class LogbackLoggingSystem extends Slf4JLoggingSystem {
 
@@ -117,7 +120,7 @@ public class LogbackLoggingSystem extends Slf4JLoggingSystem {
 		markAsInitialized(loggerContext);
 		if (StringUtils.hasText(System.getProperty(CONFIGURATION_FILE_PROPERTY))) {
 			getLogger(LogbackLoggingSystem.class.getName()).warn("Ignoring '" + CONFIGURATION_FILE_PROPERTY
-					+ "' system property. " + "Please use 'logging.config' instead.");
+					+ "' system property. Please use 'logging.config' instead.");
 		}
 	}
 
@@ -125,12 +128,19 @@ public class LogbackLoggingSystem extends Slf4JLoggingSystem {
 	protected void loadDefaults(LoggingInitializationContext initializationContext, LogFile logFile) {
 		LoggerContext context = getLoggerContext();
 		stopAndReset(context);
-		LogbackConfigurator configurator = new LogbackConfigurator(context);
+		boolean debug = Boolean.getBoolean("logback.debug");
+		if (debug) {
+			StatusListenerConfigHelper.addOnConsoleListenerInstance(context, new OnConsoleStatusListener());
+		}
+		LogbackConfigurator configurator = debug ? new DebugLogbackConfigurator(context)
+				: new LogbackConfigurator(context);
 		Environment environment = initializationContext.getEnvironment();
 		context.putProperty(LoggingSystemProperties.LOG_LEVEL_PATTERN,
 				environment.resolvePlaceholders("${logging.pattern.level:${LOG_LEVEL_PATTERN:%5p}}"));
 		context.putProperty(LoggingSystemProperties.LOG_DATEFORMAT_PATTERN, environment.resolvePlaceholders(
 				"${logging.pattern.dateformat:${LOG_DATEFORMAT_PATTERN:yyyy-MM-dd HH:mm:ss.SSS}}"));
+		context.putProperty(LoggingSystemProperties.ROLLING_FILE_NAME_PATTERN, environment
+				.resolvePlaceholders("${logging.pattern.rolling-file-name:${LOG_FILE}.%d{yyyy-MM-dd}.%i.gz}"));
 		new DefaultLogbackConfiguration(initializationContext, logFile).apply(configurator);
 		context.setPackagingDataEnabled(true);
 	}
@@ -264,7 +274,6 @@ public class LogbackLoggingSystem extends Slf4JLoggingSystem {
 			name = Logger.ROOT_LOGGER_NAME;
 		}
 		return factory.getLogger(name);
-
 	}
 
 	private LoggerContext getLoggerContext() {

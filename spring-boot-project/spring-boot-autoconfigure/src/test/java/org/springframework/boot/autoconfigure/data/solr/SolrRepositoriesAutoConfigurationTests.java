@@ -47,7 +47,7 @@ class SolrRepositoriesAutoConfigurationTests {
 	private AnnotationConfigApplicationContext context;
 
 	@AfterEach
-	public void close() {
+	void close() {
 		this.context.close();
 	}
 
@@ -100,7 +100,7 @@ class SolrRepositoriesAutoConfigurationTests {
 	@Configuration(proxyBeanMethods = false)
 	@TestAutoConfigurationPackage(SolrRepositoriesAutoConfigurationTests.class)
 	@EnableSolrRepositories(basePackageClasses = CitySolrRepository.class)
-	protected static class CustomizedConfiguration {
+	static class CustomizedConfiguration {
 
 	}
 
@@ -108,7 +108,7 @@ class SolrRepositoriesAutoConfigurationTests {
 	@TestAutoConfigurationPackage(SolrRepositoriesAutoConfigurationTests.class)
 	// To not find any repositories
 	@EnableSolrRepositories("foo.bar")
-	protected static class SortOfInvalidCustomConfiguration {
+	static class SortOfInvalidCustomConfiguration {
 
 	}
 

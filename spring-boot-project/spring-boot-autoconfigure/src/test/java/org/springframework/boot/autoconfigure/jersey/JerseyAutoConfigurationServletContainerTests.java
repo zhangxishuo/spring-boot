@@ -67,12 +67,13 @@ class JerseyAutoConfigurationServletContainerTests {
 			PropertyPlaceholderAutoConfiguration.class })
 	@Import(ContainerConfiguration.class)
 	@Path("/hello")
+	@Configuration(proxyBeanMethods = false)
 	public static class Application extends ResourceConfig {
 
 		@Value("${message:World}")
 		private String msg;
 
-		public Application() {
+		Application() {
 			register(Application.class);
 		}
 
@@ -84,10 +85,10 @@ class JerseyAutoConfigurationServletContainerTests {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	public static class ContainerConfiguration {
+	static class ContainerConfiguration {
 
 		@Bean
-		public TomcatServletWebServerFactory tomcat() {
+		TomcatServletWebServerFactory tomcat() {
 			return new TomcatServletWebServerFactory() {
 
 				@Override

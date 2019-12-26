@@ -38,7 +38,7 @@ class OnEnabledDevToolsConditionTests {
 	private AnnotationConfigApplicationContext context;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.context = new AnnotationConfigApplicationContext();
 		this.context.register(TestConfiguration.class);
 	}
@@ -66,7 +66,7 @@ class OnEnabledDevToolsConditionTests {
 
 		@Bean
 		@Conditional(OnEnabledDevToolsCondition.class)
-		public String test() {
+		String test() {
 			return "hello";
 		}
 

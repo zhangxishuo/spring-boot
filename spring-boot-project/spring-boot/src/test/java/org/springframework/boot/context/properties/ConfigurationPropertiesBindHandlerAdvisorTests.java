@@ -46,7 +46,7 @@ class ConfigurationPropertiesBindHandlerAdvisorTests {
 	private AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 
 	@AfterEach
-	public void cleanup() {
+	void cleanup() {
 		this.context.close();
 	}
 
@@ -133,7 +133,6 @@ class ConfigurationPropertiesBindHandlerAdvisorTests {
 				}
 			}
 			return super.onStart(name, target, context);
-
 		}
 
 		private ConfigurationPropertyName getDefaultName(ConfigurationPropertyName name) {
@@ -154,7 +153,7 @@ class ConfigurationPropertiesBindHandlerAdvisorTests {
 
 		private Map<String, BindingProperties> bindings = new TreeMap<>();
 
-		public Map<String, BindingProperties> getBindings() {
+		Map<String, BindingProperties> getBindings() {
 			return this.bindings;
 		}
 
@@ -166,19 +165,19 @@ class ConfigurationPropertiesBindHandlerAdvisorTests {
 
 		private String contentType = "application/json";
 
-		public String getDestination() {
+		String getDestination() {
 			return this.destination;
 		}
 
-		public void setDestination(String destination) {
+		void setDestination(String destination) {
 			this.destination = destination;
 		}
 
-		public String getContentType() {
+		String getContentType() {
 			return this.contentType;
 		}
 
-		public void setContentType(String contentType) {
+		void setContentType(String contentType) {
 			this.contentType = contentType;
 		}
 

@@ -22,28 +22,31 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import org.springframework.boot.loader.TestJarCreator;
 import org.springframework.boot.loader.archive.Archive.Entry;
+import org.springframework.boot.loader.jar.JarFile;
 import org.springframework.util.FileCopyUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for {@link JarFileArchive}.
  *
  * @author Phillip Webb
  * @author Andy Wilkinson
+ * @author Camille Vienot
  */
 class JarFileArchiveTests {
 
@@ -57,14 +60,22 @@ class JarFileArchiveTests {
 	private String rootJarFileUrl;
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		setup(false);
+	}
+
+	@AfterEach
+	void tearDown() throws Exception {
+		this.archive.close();
 	}
 
 	private void setup(boolean unpackNested) throws Exception {
 		this.rootJarFile = new File(this.tempDir, "root.jar");
 		this.rootJarFileUrl = this.rootJarFile.toURI().toString();
 		TestJarCreator.createTestJar(this.rootJarFile, unpackNested);
+		if (this.archive != null) {
+			this.archive.close();
+		}
 		this.archive = new JarFileArchive(this.rootJarFile);
 	}
 
@@ -88,79 +99,98 @@ class JarFileArchiveTests {
 	@Test
 	void getNestedArchive() throws Exception {
 		Entry entry = getEntriesMap(this.archive).get("nested.jar");
-		Archive nested = this.archive.getNestedArchive(entry);
-		assertThat(nested.getUrl().toString()).isEqualTo("jar:" + this.rootJarFileUrl + "!/nested.jar!/");
+		try (Archive nested = this.archive.getNestedArchive(entry)) {
+			assertThat(nested.getUrl().toString()).isEqualTo("jar:" + this.rootJarFileUrl + "!/nested.jar!/");
+		}
 	}
 
 	@Test
 	void getNestedUnpackedArchive() throws Exception {
 		setup(true);
 		Entry entry = getEntriesMap(this.archive).get("nested.jar");
-		Archive nested = this.archive.getNestedArchive(entry);
-		assertThat(nested.getUrl().toString()).startsWith("file:");
-		assertThat(nested.getUrl().toString()).endsWith("/nested.jar");
+		try (Archive nested = this.archive.getNestedArchive(entry)) {
+			assertThat(nested.getUrl().toString()).startsWith("file:");
+			assertThat(nested.getUrl().toString()).endsWith("/nested.jar");
+		}
 	}
 
 	@Test
 	void unpackedLocationsAreUniquePerArchive() throws Exception {
 		setup(true);
 		Entry entry = getEntriesMap(this.archive).get("nested.jar");
-		URL firstNested = this.archive.getNestedArchive(entry).getUrl();
+		URL firstNestedUrl;
+		try (Archive firstNested = this.archive.getNestedArchive(entry)) {
+			firstNestedUrl = firstNested.getUrl();
+		}
+		this.archive.close();
 		setup(true);
 		entry = getEntriesMap(this.archive).get("nested.jar");
-		URL secondNested = this.archive.getNestedArchive(entry).getUrl();
-		assertThat(secondNested).isNotEqualTo(firstNested);
+		try (Archive secondNested = this.archive.getNestedArchive(entry)) {
+			URL secondNestedUrl = secondNested.getUrl();
+			assertThat(secondNestedUrl).isNotEqualTo(firstNestedUrl);
+		}
 	}
 
 	@Test
 	void unpackedLocationsFromSameArchiveShareSameParent() throws Exception {
 		setup(true);
-		File nested = new File(
-				this.archive.getNestedArchive(getEntriesMap(this.archive).get("nested.jar")).getUrl().toURI());
-		File anotherNested = new File(
-				this.archive.getNestedArchive(getEntriesMap(this.archive).get("another-nested.jar")).getUrl().toURI());
-		assertThat(nested.getParent()).isEqualTo(anotherNested.getParent());
+		try (Archive nestedArchive = this.archive.getNestedArchive(getEntriesMap(this.archive).get("nested.jar"));
+				Archive anotherNestedArchive = this.archive
+						.getNestedArchive(getEntriesMap(this.archive).get("another-nested.jar"))) {
+			File nested = new File(nestedArchive.getUrl().toURI());
+			File anotherNested = new File(anotherNestedArchive.getUrl().toURI());
+			assertThat(nested.getParent()).isEqualTo(anotherNested.getParent());
+		}
 	}
 
 	@Test
-	void zip64ArchivesAreHandledGracefully() throws IOException {
+	void filesInZip64ArchivesAreAllListed() throws IOException {
 		File file = new File(this.tempDir, "test.jar");
 		FileCopyUtils.copy(writeZip64Jar(), file);
-		assertThatIllegalStateException().isThrownBy(() -> new JarFileArchive(file))
-				.withMessageContaining("Zip64 archives are not supported");
+		try (JarFileArchive zip64Archive = new JarFileArchive(file)) {
+			Iterator<Entry> entries = zip64Archive.iterator();
+			for (int i = 0; i < 65537; i++) {
+				assertThat(entries.hasNext()).as(i + "nth file is present").isTrue();
+				entries.next();
+			}
+		}
 	}
 
 	@Test
-	void nestedZip64ArchivesAreHandledGracefully() throws IOException {
+	void nestedZip64ArchivesAreHandledGracefully() throws Exception {
 		File file = new File(this.tempDir, "test.jar");
-		JarOutputStream output = new JarOutputStream(new FileOutputStream(file));
-		JarEntry zip64JarEntry = new JarEntry("nested/zip64.jar");
-		output.putNextEntry(zip64JarEntry);
-		byte[] zip64JarData = writeZip64Jar();
-		zip64JarEntry.setSize(zip64JarData.length);
-		zip64JarEntry.setCompressedSize(zip64JarData.length);
-		zip64JarEntry.setMethod(ZipEntry.STORED);
-		CRC32 crc32 = new CRC32();
-		crc32.update(zip64JarData);
-		zip64JarEntry.setCrc(crc32.getValue());
-		output.write(zip64JarData);
-		output.closeEntry();
-		output.close();
-		JarFileArchive jarFileArchive = new JarFileArchive(file);
-		assertThatIllegalStateException()
-				.isThrownBy(
-						() -> jarFileArchive.getNestedArchive(getEntriesMap(jarFileArchive).get("nested/zip64.jar")))
-				.withMessageContaining("Failed to get nested archive for entry nested/zip64.jar");
+		try (JarOutputStream output = new JarOutputStream(new FileOutputStream(file))) {
+			JarEntry zip64JarEntry = new JarEntry("nested/zip64.jar");
+			output.putNextEntry(zip64JarEntry);
+			byte[] zip64JarData = writeZip64Jar();
+			zip64JarEntry.setSize(zip64JarData.length);
+			zip64JarEntry.setCompressedSize(zip64JarData.length);
+			zip64JarEntry.setMethod(ZipEntry.STORED);
+			CRC32 crc32 = new CRC32();
+			crc32.update(zip64JarData);
+			zip64JarEntry.setCrc(crc32.getValue());
+			output.write(zip64JarData);
+			output.closeEntry();
+		}
+		try (JarFile jarFile = new JarFile(file)) {
+			ZipEntry nestedEntry = jarFile.getEntry("nested/zip64.jar");
+			JarFile nestedJarFile = jarFile.getNestedJarFile(nestedEntry);
+			Iterator<JarEntry> iterator = nestedJarFile.iterator();
+			for (int i = 0; i < 65537; i++) {
+				assertThat(iterator.hasNext()).as(i + "nth file is present").isTrue();
+				iterator.next();
+			}
+		}
 	}
 
 	private byte[] writeZip64Jar() throws IOException {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		JarOutputStream jarOutput = new JarOutputStream(bytes);
-		for (int i = 0; i < 65537; i++) {
-			jarOutput.putNextEntry(new JarEntry(i + ".dat"));
-			jarOutput.closeEntry();
+		try (JarOutputStream jarOutput = new JarOutputStream(bytes)) {
+			for (int i = 0; i < 65537; i++) {
+				jarOutput.putNextEntry(new JarEntry(i + ".dat"));
+				jarOutput.closeEntry();
+			}
 		}
-		jarOutput.close();
 		return bytes.toByteArray();
 	}
 

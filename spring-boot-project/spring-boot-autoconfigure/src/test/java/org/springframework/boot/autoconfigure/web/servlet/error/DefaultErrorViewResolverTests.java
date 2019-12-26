@@ -70,7 +70,7 @@ class DefaultErrorViewResolverTests {
 	private HttpServletRequest request = new MockHttpServletRequest();
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		MockitoAnnotations.initMocks(this);
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
 		applicationContext.refresh();
@@ -201,7 +201,7 @@ class DefaultErrorViewResolverTests {
 		return response;
 	}
 
-	private static class TestTemplateAvailabilityProviders extends TemplateAvailabilityProviders {
+	static class TestTemplateAvailabilityProviders extends TemplateAvailabilityProviders {
 
 		TestTemplateAvailabilityProviders(TemplateAvailabilityProvider provider) {
 			super(Collections.singletonList(provider));

@@ -145,8 +145,8 @@ class BindableTests {
 		Bindable<String> bindable = Bindable.of(String.class).withExistingValue("foo").withAnnotations(annotation);
 		System.out.println(bindable.toString());
 		assertThat(bindable.toString())
-				.contains("type = java.lang.String, " + "value = 'provided', annotations = array<Annotation>["
-						+ "@org.springframework.boot.context.properties.bind." + "BindableTests$TestAnnotation()]");
+				.contains("type = java.lang.String, value = 'provided', annotations = array<Annotation>["
+						+ "@org.springframework.boot.context.properties.bind.BindableTests$TestAnnotation()]");
 	}
 
 	@Test
@@ -160,6 +160,20 @@ class BindableTests {
 		assertThat(bindable1).isEqualTo(bindable3);
 	}
 
+	@Test // gh-18218
+	void withExistingValueDoesNotForgetAnnotations() {
+		Annotation annotation = AnnotationUtils.synthesizeAnnotation(TestAnnotation.class);
+		Bindable<?> bindable = Bindable.of(String.class).withAnnotations(annotation).withExistingValue("");
+		assertThat(bindable.getAnnotations()).containsExactly(annotation);
+	}
+
+	@Test // gh-18218
+	void withSuppliedValueDoesNotForgetAnnotations() {
+		Annotation annotation = AnnotationUtils.synthesizeAnnotation(TestAnnotation.class);
+		Bindable<?> bindable = Bindable.of(String.class).withAnnotations(annotation).withSuppliedValue(() -> "");
+		assertThat(bindable.getAnnotations()).containsExactly(annotation);
+	}
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface TestAnnotation {
 
@@ -169,11 +183,11 @@ class BindableTests {
 
 		private String foo = "hello world";
 
-		public String getFoo() {
+		String getFoo() {
 			return this.foo;
 		}
 
-		public void setFoo(String foo) {
+		void setFoo(String foo) {
 			this.foo = foo;
 		}
 
@@ -187,11 +201,11 @@ class BindableTests {
 
 		private String foo = "hello world";
 
-		public String getFoo() {
+		String getFoo() {
 			return this.foo;
 		}
 
-		public void setFoo(String foo) {
+		void setFoo(String foo) {
 			this.foo = foo;
 		}
 

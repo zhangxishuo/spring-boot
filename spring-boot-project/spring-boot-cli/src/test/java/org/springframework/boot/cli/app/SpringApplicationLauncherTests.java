@@ -36,7 +36,7 @@ class SpringApplicationLauncherTests {
 	private Map<String, String> env = new HashMap<>();
 
 	@AfterEach
-	public void cleanUp() {
+	void cleanUp() {
 		System.clearProperty("spring.application.class.name");
 	}
 
@@ -92,7 +92,7 @@ class SpringApplicationLauncherTests {
 		return classLoader.classes;
 	}
 
-	private static class TestClassLoader extends ClassLoader {
+	static class TestClassLoader extends ClassLoader {
 
 		private Set<String> classes = new HashSet<>();
 

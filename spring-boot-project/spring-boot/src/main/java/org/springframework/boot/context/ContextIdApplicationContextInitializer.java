@@ -33,6 +33,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Dave Syer
  * @author Andy Wilkinson
+ * @since 1.0.0
  */
 public class ContextIdApplicationContextInitializer
 		implements ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
@@ -71,7 +72,7 @@ public class ContextIdApplicationContextInitializer
 	/**
 	 * The ID of a context.
 	 */
-	class ContextId {
+	static class ContextId {
 
 		private final AtomicLong children = new AtomicLong(0);
 

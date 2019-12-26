@@ -46,7 +46,7 @@ class JpaWebAutoConfigurationTests {
 	private AnnotationConfigServletWebApplicationContext context;
 
 	@AfterEach
-	public void close() {
+	void close() {
 		this.context.close();
 	}
 
@@ -66,7 +66,7 @@ class JpaWebAutoConfigurationTests {
 	@Configuration(proxyBeanMethods = false)
 	@TestAutoConfigurationPackage(City.class)
 	@EnableWebMvc
-	protected static class TestConfiguration {
+	static class TestConfiguration {
 
 	}
 

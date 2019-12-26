@@ -22,7 +22,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.Engine;
@@ -53,6 +55,7 @@ import org.springframework.util.StringUtils;
  * {@link ReactiveWebServerFactory} that can be used to create a {@link TomcatWebServer}.
  *
  * @author Brian Clozel
+ * @author HaiTao Zhang
  * @since 2.0.0
  */
 public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFactory
@@ -71,11 +74,13 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 
 	private List<LifecycleListener> contextLifecycleListeners = getDefaultLifecycleListeners();
 
-	private List<TomcatContextCustomizer> tomcatContextCustomizers = new ArrayList<>();
+	private Set<TomcatContextCustomizer> tomcatContextCustomizers = new LinkedHashSet<>();
 
-	private List<TomcatConnectorCustomizer> tomcatConnectorCustomizers = new ArrayList<>();
+	private Set<TomcatConnectorCustomizer> tomcatConnectorCustomizers = new LinkedHashSet<>();
 
-	private List<TomcatProtocolHandlerCustomizer<?>> tomcatProtocolHandlerCustomizers = new ArrayList<>();
+	private Set<TomcatProtocolHandlerCustomizer<?>> tomcatProtocolHandlerCustomizers = new LinkedHashSet<>();
+
+	private final List<Connector> additionalTomcatConnectors = new ArrayList<>();
 
 	private String protocol = DEFAULT_PROTOCOL;
 
@@ -115,11 +120,15 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 		File baseDir = (this.baseDirectory != null) ? this.baseDirectory : createTempDir("tomcat");
 		tomcat.setBaseDir(baseDir.getAbsolutePath());
 		Connector connector = new Connector(this.protocol);
+		connector.setThrowOnFailure(true);
 		tomcat.getService().addConnector(connector);
 		customizeConnector(connector);
 		tomcat.setConnector(connector);
 		tomcat.getHost().setAutoDeploy(false);
 		configureEngine(tomcat.getEngine());
+		for (Connector additionalConnector : this.additionalTomcatConnectors) {
+			tomcat.getService().addConnector(additionalConnector);
+		}
 		TomcatHttpHandlerAdapter servlet = new TomcatHttpHandlerAdapter(httpHandler);
 		prepareContext(tomcat.getHost(), servlet);
 		return new TomcatWebServer(tomcat, getPort() >= 0);
@@ -167,7 +176,7 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 	}
 
 	protected void customizeConnector(Connector connector) {
-		int port = (getPort() >= 0) ? getPort() : 0;
+		int port = Math.max(getPort(), 0);
 		connector.setPort(port);
 		if (StringUtils.hasText(this.getServerHeader())) {
 			connector.setAttribute("server", this.getServerHeader());
@@ -227,7 +236,7 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 	 */
 	public void setTomcatContextCustomizers(Collection<? extends TomcatContextCustomizer> tomcatContextCustomizers) {
 		Assert.notNull(tomcatContextCustomizers, "TomcatContextCustomizers must not be null");
-		this.tomcatContextCustomizers = new ArrayList<>(tomcatContextCustomizers);
+		this.tomcatContextCustomizers = new LinkedHashSet<>(tomcatContextCustomizers);
 	}
 
 	/**
@@ -258,7 +267,7 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 	public void setTomcatConnectorCustomizers(
 			Collection<? extends TomcatConnectorCustomizer> tomcatConnectorCustomizers) {
 		Assert.notNull(tomcatConnectorCustomizers, "TomcatConnectorCustomizers must not be null");
-		this.tomcatConnectorCustomizers = new ArrayList<>(tomcatConnectorCustomizers);
+		this.tomcatConnectorCustomizers = new LinkedHashSet<>(tomcatConnectorCustomizers);
 	}
 
 	/**
@@ -290,7 +299,7 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 	public void setTomcatProtocolHandlerCustomizers(
 			Collection<? extends TomcatProtocolHandlerCustomizer<?>> tomcatProtocolHandlerCustomizers) {
 		Assert.notNull(tomcatProtocolHandlerCustomizers, "TomcatProtocolHandlerCustomizers must not be null");
-		this.tomcatProtocolHandlerCustomizers = new ArrayList<>(tomcatProtocolHandlerCustomizers);
+		this.tomcatProtocolHandlerCustomizers = new LinkedHashSet<>(tomcatProtocolHandlerCustomizers);
 	}
 
 	/**
@@ -313,6 +322,26 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 	 */
 	public Collection<TomcatProtocolHandlerCustomizer<?>> getTomcatProtocolHandlerCustomizers() {
 		return this.tomcatProtocolHandlerCustomizers;
+	}
+
+	/**
+	 * Add {@link Connector}s in addition to the default connector, e.g. for SSL or AJP
+	 * @param connectors the connectors to add
+	 * @since 2.2.0
+	 */
+	public void addAdditionalTomcatConnectors(Connector... connectors) {
+		Assert.notNull(connectors, "Connectors must not be null");
+		this.additionalTomcatConnectors.addAll(Arrays.asList(connectors));
+	}
+
+	/**
+	 * Returns a mutable collection of the {@link Connector}s that will be added to the
+	 * Tomcat.
+	 * @return the additionalTomcatConnectors
+	 * @since 2.2.0
+	 */
+	public List<Connector> getAdditionalTomcatConnectors() {
+		return this.additionalTomcatConnectors;
 	}
 
 	@Override

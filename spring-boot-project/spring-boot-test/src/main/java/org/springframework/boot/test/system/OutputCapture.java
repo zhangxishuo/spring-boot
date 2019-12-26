@@ -38,7 +38,7 @@ import org.springframework.util.ClassUtils;
  * @author Madhura Bhave
  * @author Phillip Webb
  * @author Andy Wilkinson
- * @since 2.2.0
+ * @author Sam Brannen
  * @see OutputCaptureExtension
  * @see OutputCaptureRule
  */
@@ -92,7 +92,7 @@ class OutputCapture implements CapturedOutput {
 
 	/**
 	 * Return all content (both {@link System#out System.out} and {@link System#err
-	 * System.err}) in the order that it was was captured.
+	 * System.err}) in the order that it was captured.
 	 * @return all captured output
 	 */
 	@Override
@@ -101,7 +101,7 @@ class OutputCapture implements CapturedOutput {
 	}
 
 	/**
-	 * Return {@link System#out System.out} content in the order that it was was captured.
+	 * Return {@link System#out System.out} content in the order that it was captured.
 	 * @return {@link System#out System.out} captured output
 	 */
 	@Override
@@ -110,7 +110,7 @@ class OutputCapture implements CapturedOutput {
 	}
 
 	/**
-	 * Return {@link System#err System.err} content in the order that it was was captured.
+	 * Return {@link System#err System.err} content in the order that it was captured.
 	 * @return {@link System#err System.err} captured output
 	 */
 	@Override
@@ -127,8 +127,7 @@ class OutputCapture implements CapturedOutput {
 
 	private String get(Predicate<Type> filter) {
 		Assert.state(!this.systemCaptures.isEmpty(),
-				"No system captures found. Check that you have used @RegisterExtension "
-						+ "or @ExtendWith and the fields are not private");
+				"No system captures found. Please check your output capture registration.");
 		StringBuilder builder = new StringBuilder();
 		for (SystemCapture systemCapture : this.systemCaptures) {
 			systemCapture.append(builder, filter);
@@ -157,7 +156,7 @@ class OutputCapture implements CapturedOutput {
 			System.setErr(this.err);
 		}
 
-		public void release() {
+		void release() {
 			System.setOut(this.out.getParent());
 			System.setErr(this.err.getParent());
 		}
@@ -174,7 +173,7 @@ class OutputCapture implements CapturedOutput {
 			}
 		}
 
-		public void append(StringBuilder builder, Predicate<Type> filter) {
+		void append(StringBuilder builder, Predicate<Type> filter) {
 			synchronized (this.monitor) {
 				for (CapturedString stringCapture : this.capturedStrings) {
 					if (filter.test(stringCapture.getType())) {
@@ -184,7 +183,7 @@ class OutputCapture implements CapturedOutput {
 			}
 		}
 
-		public void reset() {
+		void reset() {
 			synchronized (this.monitor) {
 				this.capturedStrings.clear();
 			}
@@ -204,13 +203,13 @@ class OutputCapture implements CapturedOutput {
 			this.parent = parent;
 		}
 
-		public PrintStream getParent() {
+		PrintStream getParent() {
 			return this.parent;
 		}
 
 		private static PrintStream getSystemStream(PrintStream printStream) {
 			while (printStream instanceof PrintStreamCapture) {
-				return ((PrintStreamCapture) printStream).getParent();
+				printStream = ((PrintStreamCapture) printStream).getParent();
 			}
 			return printStream;
 		}
@@ -263,7 +262,7 @@ class OutputCapture implements CapturedOutput {
 			this.string = string;
 		}
 
-		public Type getType() {
+		Type getType() {
 			return this.type;
 		}
 
@@ -295,11 +294,11 @@ class OutputCapture implements CapturedOutput {
 			AnsiOutput.setEnabled(Enabled.NEVER);
 		}
 
-		public void restore() {
+		void restore() {
 			AnsiOutput.setEnabled(this.saved);
 		}
 
-		public static AnsiOutputState saveAndDisable() {
+		static AnsiOutputState saveAndDisable() {
 			if (!ClassUtils.isPresent("org.springframework.boot.ansi.AnsiOutput",
 					OutputCapture.class.getClassLoader())) {
 				return null;

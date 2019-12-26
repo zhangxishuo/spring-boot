@@ -36,6 +36,7 @@ import org.springframework.boot.cli.compiler.grape.DependencyResolutionContext;
  *
  * @author Phillip Webb
  * @author Andy Wilkinson
+ * @since 1.0.0
  */
 public class DependencyCustomizer {
 
@@ -70,7 +71,6 @@ public class DependencyCustomizer {
 
 	public String getVersion(String artifactId) {
 		return getVersion(artifactId, "");
-
 	}
 
 	public String getVersion(String artifactId, String defaultVersion) {

@@ -38,7 +38,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Tests for {@link MeterRegistryConfigurer}.
@@ -70,7 +70,7 @@ class MeterRegistryConfigurerTests {
 	private Config mockConfig;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		MockitoAnnotations.initMocks(this);
 		given(this.mockRegistry.config()).willReturn(this.mockConfig);
 	}
@@ -128,7 +128,7 @@ class MeterRegistryConfigurerTests {
 		MeterRegistryConfigurer configurer = new MeterRegistryConfigurer(createObjectProvider(this.customizers),
 				createObjectProvider(this.filters), createObjectProvider(this.binders), false, true);
 		configurer.configure(this.mockRegistry);
-		verifyZeroInteractions(this.mockBinder);
+		verifyNoInteractions(this.mockBinder);
 	}
 
 	@Test

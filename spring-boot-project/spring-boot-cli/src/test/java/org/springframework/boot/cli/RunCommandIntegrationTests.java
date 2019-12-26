@@ -39,21 +39,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RunCommandIntegrationTests {
 
 	@RegisterExtension
-	private CliTester cli;
+	CliTester cli;
 
-	RunCommandIntegrationTests(CapturedOutput capturedOutput) {
-		this.cli = new CliTester("src/it/resources/run-command/", capturedOutput);
+	RunCommandIntegrationTests(CapturedOutput output) {
+		this.cli = new CliTester("src/it/resources/run-command/", output);
 	}
 
 	private Properties systemProperties = new Properties();
 
 	@BeforeEach
-	public void captureSystemProperties() {
+	void captureSystemProperties() {
 		this.systemProperties.putAll(System.getProperties());
 	}
 
 	@AfterEach
-	public void restoreSystemProperties() {
+	void restoreSystemProperties() {
 		System.setProperties(this.systemProperties);
 	}
 

@@ -47,7 +47,6 @@ import org.springframework.util.unit.DataSize;
  * @author Madhura Bhave
  * @author Vedran Pavic
  * @author Robert Thornton
- * @since 1.1.2
  */
 class DefaultLogbackConfiguration {
 
@@ -85,7 +84,7 @@ class DefaultLogbackConfiguration {
 		return environment;
 	}
 
-	public void apply(LogbackConfigurator config) {
+	void apply(LogbackConfigurator config) {
 		synchronized (config.getConfigurationLock()) {
 			base(config);
 			Appender<ILoggingEvent> consoleAppender = consoleAppender(config);
@@ -141,7 +140,8 @@ class DefaultLogbackConfiguration {
 		SizeAndTimeBasedRollingPolicy<ILoggingEvent> rollingPolicy = new SizeAndTimeBasedRollingPolicy<>();
 		rollingPolicy.setCleanHistoryOnStart(
 				this.patterns.getProperty("logging.file.clean-history-on-start", Boolean.class, false));
-		rollingPolicy.setFileNamePattern(logFile + ".%d{yyyy-MM-dd}.%i.gz");
+		rollingPolicy.setFileNamePattern(
+				this.patterns.getProperty("logging.pattern.rolling-file-name", logFile + ".%d{yyyy-MM-dd}.%i.gz"));
 		setMaxFileSize(rollingPolicy, getDataSize("logging.file.max-size", MAX_FILE_SIZE));
 		rollingPolicy
 				.setMaxHistory(this.patterns.getProperty("logging.file.max-history", Integer.class, MAX_FILE_HISTORY));

@@ -48,7 +48,7 @@ class ArtemisEmbeddedConfigurationFactory {
 		this.properties = properties.getEmbedded();
 	}
 
-	public Configuration createConfiguration() {
+	Configuration createConfiguration() {
 		ConfigurationImpl configuration = new ConfigurationImpl();
 		configuration.setSecurityEnabled(false);
 		configuration.setPersistenceEnabled(this.properties.isPersistent());
@@ -63,7 +63,7 @@ class ArtemisEmbeddedConfigurationFactory {
 		TransportConfiguration transportConfiguration = new TransportConfiguration(InVMAcceptorFactory.class.getName(),
 				this.properties.generateTransportParameters());
 		configuration.getAcceptorConfigurations().add(transportConfiguration);
-		if (this.properties.isDefaultClusterPassword()) {
+		if (this.properties.isDefaultClusterPassword() && logger.isDebugEnabled()) {
 			logger.debug("Using default Artemis cluster password: " + this.properties.getClusterPassword());
 		}
 		configuration.setClusterPassword(this.properties.getClusterPassword());

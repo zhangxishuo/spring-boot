@@ -53,7 +53,7 @@ class RestartApplicationListenerTests {
 
 	@BeforeEach
 	@AfterEach
-	public void cleanup() {
+	void cleanup() {
 		Restarter.clearInstance();
 		System.clearProperty(ENABLED_PROPERTY);
 	}
@@ -80,11 +80,11 @@ class RestartApplicationListenerTests {
 	}
 
 	@Test
-	void disableWithSystemProperty(CapturedOutput capturedOutput) {
+	void disableWithSystemProperty(CapturedOutput output) {
 		System.setProperty(ENABLED_PROPERTY, "false");
 		testInitialize(false);
 		assertThat(Restarter.getInstance()).hasFieldOrPropertyWithValue("enabled", false);
-		assertThat(capturedOutput).contains("Restart disabled due to System property");
+		assertThat(output).contains("Restart disabled due to System property");
 	}
 
 	private void testInitialize(boolean failed) {

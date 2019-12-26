@@ -62,7 +62,7 @@ class RootUriRequestExpectationManagerTests {
 	private ArgumentCaptor<ClientHttpRequest> requestCaptor;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		MockitoAnnotations.initMocks(this);
 		this.manager = new RootUriRequestExpectationManager(this.uri, this.delegate);
 	}
@@ -142,7 +142,7 @@ class RootUriRequestExpectationManagerTests {
 		RequestExpectationManager actual = RootUriRequestExpectationManager.forRestTemplate(restTemplate,
 				this.delegate);
 		assertThat(actual).isInstanceOf(RootUriRequestExpectationManager.class);
-		assertThat(actual).extracting("rootUri").containsExactly(this.uri);
+		assertThat(actual).extracting("rootUri").isEqualTo(this.uri);
 	}
 
 	@Test

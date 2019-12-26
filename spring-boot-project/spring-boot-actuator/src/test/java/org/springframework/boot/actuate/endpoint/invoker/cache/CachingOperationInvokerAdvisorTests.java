@@ -27,6 +27,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.boot.actuate.endpoint.EndpointId;
 import org.springframework.boot.actuate.endpoint.OperationType;
 import org.springframework.boot.actuate.endpoint.SecurityContext;
+import org.springframework.boot.actuate.endpoint.http.ApiVersion;
 import org.springframework.boot.actuate.endpoint.invoke.OperationInvoker;
 import org.springframework.boot.actuate.endpoint.invoke.OperationParameters;
 import org.springframework.boot.actuate.endpoint.invoke.reflect.OperationMethod;
@@ -55,7 +56,7 @@ class CachingOperationInvokerAdvisorTests {
 	private CachingOperationInvokerAdvisor advisor;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		MockitoAnnotations.initMocks(this);
 		this.advisor = new CachingOperationInvokerAdvisor(this.timeToLive);
 	}
@@ -117,6 +118,13 @@ class CachingOperationInvokerAdvisorTests {
 		assertAdviseIsApplied(parameters);
 	}
 
+	@Test
+	void applyWithApiVersionShouldAddAdvise() {
+		OperationParameters parameters = getParameters("getWithApiVersion", ApiVersion.class, String.class);
+		given(this.timeToLive.apply(any())).willReturn(100L);
+		assertAdviseIsApplied(parameters);
+	}
+
 	private void assertAdviseIsApplied(OperationParameters parameters) {
 		OperationInvoker advised = this.advisor.apply(EndpointId.of("foo"), OperationType.READ, parameters,
 				this.invoker);
@@ -134,21 +142,25 @@ class CachingOperationInvokerAdvisorTests {
 		return new OperationMethod(method, OperationType.READ);
 	}
 
-	public static class TestOperations {
+	static class TestOperations {
 
-		public String get() {
+		String get() {
 			return "";
 		}
 
-		public String getWithParameters(@Nullable String foo, String bar) {
+		String getWithParameters(@Nullable String foo, String bar) {
 			return "";
 		}
 
-		public String getWithAllOptionalParameters(@Nullable String foo, @Nullable String bar) {
+		String getWithAllOptionalParameters(@Nullable String foo, @Nullable String bar) {
 			return "";
 		}
 
-		public String getWithSecurityContext(SecurityContext securityContext, @Nullable String bar) {
+		String getWithSecurityContext(SecurityContext securityContext, @Nullable String bar) {
+			return "";
+		}
+
+		String getWithApiVersion(ApiVersion apiVersion, @Nullable String bar) {
 			return "";
 		}
 

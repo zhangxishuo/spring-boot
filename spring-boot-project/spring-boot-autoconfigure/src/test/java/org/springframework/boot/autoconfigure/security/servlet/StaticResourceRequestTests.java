@@ -27,7 +27,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.StaticWebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -54,6 +53,16 @@ class StaticResourceRequestTests {
 	}
 
 	@Test
+	void atCommonLocationsWhenManagementContextShouldNeverMatch() {
+		RequestMatcher matcher = this.resourceRequest.atCommonLocations();
+		assertMatcher(matcher, "management").doesNotMatch("/css/file.css");
+		assertMatcher(matcher, "management").doesNotMatch("/js/file.js");
+		assertMatcher(matcher, "management").doesNotMatch("/images/file.css");
+		assertMatcher(matcher, "management").doesNotMatch("/webjars/file.css");
+		assertMatcher(matcher, "management").doesNotMatch("/foo/favicon.ico");
+	}
+
+	@Test
 	void atCommonLocationsWithExcludeShouldNotMatchExcluded() {
 		RequestMatcher matcher = this.resourceRequest.atCommonLocations().excluding(StaticResourceLocation.CSS);
 		assertMatcher(matcher).doesNotMatch("/css/file.css");
@@ -70,8 +79,8 @@ class StaticResourceRequestTests {
 	@Test
 	void atLocationWhenHasServletPathShouldMatchLocation() {
 		RequestMatcher matcher = this.resourceRequest.at(StaticResourceLocation.CSS);
-		assertMatcher(matcher, "/foo").matches("/foo", "/css/file.css");
-		assertMatcher(matcher, "/foo").doesNotMatch("/foo", "/js/file.js");
+		assertMatcher(matcher, null, "/foo").matches("/foo", "/css/file.css");
+		assertMatcher(matcher, null, "/foo").doesNotMatch("/foo", "/js/file.js");
 	}
 
 	@Test
@@ -87,20 +96,21 @@ class StaticResourceRequestTests {
 	}
 
 	private RequestMatcherAssert assertMatcher(RequestMatcher matcher) {
-		DispatcherServletPath dispatcherServletPath = () -> "";
-		StaticWebApplicationContext context = new StaticWebApplicationContext();
-		context.registerBean(DispatcherServletPath.class, () -> dispatcherServletPath);
-		return assertThat(new RequestMatcherAssert(context, matcher));
+		return assertMatcher(matcher, null, "");
 	}
 
-	private RequestMatcherAssert assertMatcher(RequestMatcher matcher, String path) {
+	private RequestMatcherAssert assertMatcher(RequestMatcher matcher, String serverNamespace) {
+		return assertMatcher(matcher, serverNamespace, "");
+	}
+
+	private RequestMatcherAssert assertMatcher(RequestMatcher matcher, String serverNamespace, String path) {
 		DispatcherServletPath dispatcherServletPath = () -> path;
-		StaticWebApplicationContext context = new StaticWebApplicationContext();
+		TestWebApplicationContext context = new TestWebApplicationContext(serverNamespace);
 		context.registerBean(DispatcherServletPath.class, () -> dispatcherServletPath);
 		return assertThat(new RequestMatcherAssert(context, matcher));
 	}
 
-	private static class RequestMatcherAssert implements AssertDelegateTarget {
+	static class RequestMatcherAssert implements AssertDelegateTarget {
 
 		private final WebApplicationContext context;
 
@@ -111,11 +121,11 @@ class StaticResourceRequestTests {
 			this.matcher = matcher;
 		}
 
-		public void matches(String path) {
+		void matches(String path) {
 			matches(mockRequest(path));
 		}
 
-		public void matches(String servletPath, String path) {
+		void matches(String servletPath, String path) {
 			matches(mockRequest(servletPath, path));
 		}
 
@@ -123,11 +133,11 @@ class StaticResourceRequestTests {
 			assertThat(this.matcher.matches(request)).as("Matches " + getRequestPath(request)).isTrue();
 		}
 
-		public void doesNotMatch(String path) {
+		void doesNotMatch(String path) {
 			doesNotMatch(mockRequest(path));
 		}
 
-		public void doesNotMatch(String servletPath, String path) {
+		void doesNotMatch(String servletPath, String path) {
 			doesNotMatch(mockRequest(servletPath, path));
 		}
 

@@ -41,10 +41,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SampleIntegrationTests {
 
 	@RegisterExtension
-	private CliTester cli;
+	CliTester cli;
 
-	SampleIntegrationTests(CapturedOutput capturedOutput) {
-		this.cli = new CliTester("samples/", capturedOutput);
+	SampleIntegrationTests(CapturedOutput output) {
+		this.cli = new CliTester("samples/", output);
 	}
 
 	@Test

@@ -40,12 +40,13 @@ class JarResourceManagerTests {
 	private ResourceManager resourceManager;
 
 	@BeforeEach
-	public void createJar(@TempDir File tempDir) throws IOException {
+	void createJar(@TempDir File tempDir) throws IOException {
 		File jar = new File(tempDir, "test.jar");
-		JarOutputStream out = new JarOutputStream(new FileOutputStream(jar));
-		out.putNextEntry(new ZipEntry("hello.txt"));
-		out.write("hello".getBytes());
-		out.close();
+		try (JarOutputStream out = new JarOutputStream(new FileOutputStream(jar))) {
+			out.putNextEntry(new ZipEntry("hello.txt"));
+			out.write("hello".getBytes());
+			out.close();
+		}
 		this.resourceManager = new JarResourceManager(jar);
 	}
 

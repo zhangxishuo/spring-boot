@@ -16,6 +16,7 @@
 
 package org.springframework.boot.autoconfigure.web.client;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -28,14 +29,21 @@ import org.springframework.boot.test.context.runner.ReactiveWebApplicationContex
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.boot.web.client.RestTemplateCustomizer;
+import org.springframework.boot.web.client.RestTemplateRequestCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.mock.http.client.MockClientHttpRequest;
+import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -110,6 +118,20 @@ class RestTemplateAutoConfigurationTests {
 	}
 
 	@Test
+	void restTemplateShouldApplyRequestCustomizer() {
+		this.contextRunner.withUserConfiguration(RestTemplateRequestCustomizerConfig.class).run((context) -> {
+			RestTemplateBuilder builder = context.getBean(RestTemplateBuilder.class);
+			ClientHttpRequestFactory requestFactory = mock(ClientHttpRequestFactory.class);
+			MockClientHttpRequest request = new MockClientHttpRequest();
+			request.setResponse(new MockClientHttpResponse(new byte[0], HttpStatus.OK));
+			given(requestFactory.createRequest(any(), any())).willReturn(request);
+			RestTemplate restTemplate = builder.requestFactory(() -> requestFactory).build();
+			restTemplate.getForEntity("http://localhost:8080/test", String.class);
+			assertThat(request.getHeaders()).containsEntry("spring", Collections.singletonList("boot"));
+		});
+	}
+
+	@Test
 	void builderShouldBeFreshForEachUse() {
 		this.contextRunner.withUserConfiguration(DirtyRestTemplateConfig.class)
 				.run((context) -> assertThat(context).hasNotFailed());
@@ -132,7 +154,7 @@ class RestTemplateAutoConfigurationTests {
 	static class RestTemplateConfig {
 
 		@Bean
-		public RestTemplate restTemplate(RestTemplateBuilder builder) {
+		RestTemplate restTemplate(RestTemplateBuilder builder) {
 			return builder.build();
 		}
 
@@ -142,7 +164,7 @@ class RestTemplateAutoConfigurationTests {
 	static class DirtyRestTemplateConfig {
 
 		@Bean
-		public RestTemplate restTemplateOne(RestTemplateBuilder builder) {
+		RestTemplate restTemplateOne(RestTemplateBuilder builder) {
 			try {
 				return builder.build();
 			}
@@ -152,7 +174,7 @@ class RestTemplateAutoConfigurationTests {
 		}
 
 		@Bean
-		public RestTemplate restTemplateTwo(RestTemplateBuilder builder) {
+		RestTemplate restTemplateTwo(RestTemplateBuilder builder) {
 			try {
 				return builder.build();
 			}
@@ -173,7 +195,7 @@ class RestTemplateAutoConfigurationTests {
 	static class CustomRestTemplateBuilderConfig {
 
 		@Bean
-		public RestTemplateBuilder restTemplateBuilder() {
+		RestTemplateBuilder restTemplateBuilder() {
 			return new RestTemplateBuilder().messageConverters(new CustomHttpMessageConverter());
 		}
 
@@ -183,8 +205,18 @@ class RestTemplateAutoConfigurationTests {
 	static class RestTemplateCustomizerConfig {
 
 		@Bean
-		public RestTemplateCustomizer restTemplateCustomizer() {
+		RestTemplateCustomizer restTemplateCustomizer() {
 			return mock(RestTemplateCustomizer.class);
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	static class RestTemplateRequestCustomizerConfig {
+
+		@Bean
+		RestTemplateRequestCustomizer<?> restTemplateRequestCustomizer() {
+			return (request) -> request.getHeaders().add("spring", "boot");
 		}
 
 	}

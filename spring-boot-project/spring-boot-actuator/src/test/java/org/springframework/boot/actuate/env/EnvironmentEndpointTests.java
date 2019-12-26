@@ -49,11 +49,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Stephane Nicoll
  * @author Madhura Bhave
  * @author Andy Wilkinson
+ * @author HaiTao Zhang
  */
 class EnvironmentEndpointTests {
 
 	@AfterEach
-	public void close() {
+	void close() {
 		System.clearProperty("VCAP_SERVICES");
 	}
 
@@ -244,6 +245,14 @@ class EnvironmentEndpointTests {
 		assertThat(sources.get("two").getProperties().get("a").getValue()).isEqualTo("apple");
 	}
 
+	@Test
+	void uriPropertryWithSensitiveInfo() {
+		ConfigurableEnvironment environment = new StandardEnvironment();
+		TestPropertyValues.of("sensitive.uri=http://user:password@localhost:8080").applyTo(environment);
+		EnvironmentEntryDescriptor descriptor = new EnvironmentEndpoint(environment).environmentEntry("sensitive.uri");
+		assertThat(descriptor.getProperty().getValue()).isEqualTo("http://user:******@localhost:8080");
+	}
+
 	private static ConfigurableEnvironment emptyEnvironment() {
 		StandardEnvironment environment = new StandardEnvironment();
 		environment.getPropertySources().remove(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME);
@@ -285,7 +294,7 @@ class EnvironmentEndpointTests {
 	static class Config {
 
 		@Bean
-		public EnvironmentEndpoint environmentEndpoint(Environment environment) {
+		EnvironmentEndpoint environmentEndpoint(Environment environment) {
 			return new EnvironmentEndpoint(environment);
 		}
 

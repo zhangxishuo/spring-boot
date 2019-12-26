@@ -16,11 +16,16 @@
 
 package org.springframework.boot.web.embedded.tomcat;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.util.Arrays;
+import java.util.Map;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleListener;
+import org.apache.catalina.Service;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.AprLifecycleListener;
 import org.apache.catalina.core.StandardContext;
@@ -32,10 +37,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 
+import org.springframework.boot.web.reactive.server.AbstractReactiveWebServerFactory;
 import org.springframework.boot.web.reactive.server.AbstractReactiveWebServerFactoryTests;
+import org.springframework.boot.web.server.PortInUseException;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.util.SocketUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
@@ -47,6 +56,7 @@ import static org.mockito.Mockito.verify;
  *
  * @author Brian Clozel
  * @author Madhura Bhave
+ * @author HaiTao Zhang
  */
 class TomcatReactiveWebServerFactoryTests extends AbstractReactiveWebServerFactoryTests {
 
@@ -168,6 +178,24 @@ class TomcatReactiveWebServerFactoryTests extends AbstractReactiveWebServerFacto
 	}
 
 	@Test
+	void tomcatAdditionalConnectors() {
+		TomcatReactiveWebServerFactory factory = getFactory();
+		Connector[] connectors = new Connector[4];
+		Arrays.setAll(connectors, (i) -> new Connector());
+		factory.addAdditionalTomcatConnectors(connectors);
+		this.webServer = factory.getWebServer(mock(HttpHandler.class));
+		Map<Service, Connector[]> connectorsByService = ((TomcatWebServer) this.webServer).getServiceConnectors();
+		assertThat(connectorsByService.values().iterator().next()).hasSize(connectors.length + 1);
+	}
+
+	@Test
+	void addNullAdditionalConnectorsThrows() {
+		TomcatReactiveWebServerFactory factory = getFactory();
+		assertThatIllegalArgumentException().isThrownBy(() -> factory.addAdditionalTomcatConnectors((Connector[]) null))
+				.withMessageContaining("Connectors must not be null");
+	}
+
+	@Test
 	void useForwardedHeaders() {
 		TomcatReactiveWebServerFactory factory = getFactory();
 		RemoteIpValve valve = new RemoteIpValve();
@@ -186,6 +214,48 @@ class TomcatReactiveWebServerFactoryTests extends AbstractReactiveWebServerFacto
 		assertThat(context.getClearReferencesObjectStreamClassCaches()).isFalse();
 		assertThat(context.getClearReferencesRmiTargets()).isFalse();
 		assertThat(context.getClearReferencesThreadLocals()).isFalse();
+	}
+
+	@Test
+	void portClashOfPrimaryConnectorResultsInPortInUseException() throws IOException {
+		doWithBlockedPort((port) -> {
+			assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> {
+				AbstractReactiveWebServerFactory factory = getFactory();
+				factory.setPort(port);
+				this.webServer = factory.getWebServer(mock(HttpHandler.class));
+				this.webServer.start();
+			}).satisfies((ex) -> handleExceptionCausedByBlockedPortOnPrimaryConnector(ex, port));
+		});
+	}
+
+	private void doWithBlockedPort(BlockedPortAction action) throws IOException {
+		int port = SocketUtils.findAvailableTcpPort(40000);
+		ServerSocket serverSocket = new ServerSocket();
+		for (int i = 0; i < 10; i++) {
+			try {
+				serverSocket.bind(new InetSocketAddress(port));
+				break;
+			}
+			catch (Exception ex) {
+			}
+		}
+		try {
+			action.run(port);
+		}
+		finally {
+			serverSocket.close();
+		}
+	}
+
+	private void handleExceptionCausedByBlockedPortOnPrimaryConnector(RuntimeException ex, int blockedPort) {
+		assertThat(ex).isInstanceOf(PortInUseException.class);
+		assertThat(((PortInUseException) ex).getPort()).isEqualTo(blockedPort);
+	}
+
+	interface BlockedPortAction {
+
+		void run(int port);
+
 	}
 
 }

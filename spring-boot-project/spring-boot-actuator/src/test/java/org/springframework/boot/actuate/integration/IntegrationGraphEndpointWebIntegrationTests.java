@@ -36,7 +36,7 @@ class IntegrationGraphEndpointWebIntegrationTests {
 	void graph(WebTestClient client) {
 		client.get().uri("/actuator/integrationgraph").accept(MediaType.APPLICATION_JSON).exchange().expectStatus()
 				.isOk().expectBody().jsonPath("contentDescriptor.providerVersion").isNotEmpty()
-				.jsonPath("contentDescriptor.providerFormatVersion").isEqualTo(1.0f)
+				.jsonPath("contentDescriptor.providerFormatVersion").isEqualTo(1.1f)
 				.jsonPath("contentDescriptor.provider").isEqualTo("spring-integration");
 	}
 
@@ -48,15 +48,15 @@ class IntegrationGraphEndpointWebIntegrationTests {
 
 	@Configuration(proxyBeanMethods = false)
 	@EnableIntegration
-	public static class TestConfiguration {
+	static class TestConfiguration {
 
 		@Bean
-		public IntegrationGraphEndpoint endpoint(IntegrationGraphServer integrationGraphServer) {
+		IntegrationGraphEndpoint endpoint(IntegrationGraphServer integrationGraphServer) {
 			return new IntegrationGraphEndpoint(integrationGraphServer);
 		}
 
 		@Bean
-		public IntegrationGraphServer integrationGraphServer() {
+		IntegrationGraphServer integrationGraphServer() {
 			return new IntegrationGraphServer();
 		}
 

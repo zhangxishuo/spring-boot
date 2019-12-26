@@ -59,7 +59,7 @@ class ClassPathChangeUploaderTests {
 	private ClassPathChangeUploader uploader;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.requestFactory = new MockClientHttpRequestFactory();
 		this.uploader = new ClassPathChangeUploader("http://localhost/upload", this.requestFactory);
 	}
@@ -139,8 +139,7 @@ class ClassPathChangeUploaderTests {
 		files.add(new ChangedFile(sourceFolder, file3, Type.DELETE));
 		Set<ChangedFiles> changeSet = new LinkedHashSet<>();
 		changeSet.add(new ChangedFiles(sourceFolder, files));
-		ClassPathChangedEvent event = new ClassPathChangedEvent(this, changeSet, false);
-		return event;
+		return new ClassPathChangedEvent(this, changeSet, false);
 	}
 
 	private File createFile(File sourceFolder, String name) throws IOException {

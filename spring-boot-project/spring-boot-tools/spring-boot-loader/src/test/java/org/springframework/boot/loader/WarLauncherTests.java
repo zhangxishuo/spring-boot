@@ -18,6 +18,7 @@ package org.springframework.boot.loader;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -39,20 +40,31 @@ class WarLauncherTests extends AbstractExecutableArchiveLauncherTests {
 	void explodedWarHasOnlyWebInfClassesAndContentsOfWebInfLibOnClasspath() throws Exception {
 		File explodedRoot = explode(createJarArchive("archive.war", "WEB-INF"));
 		WarLauncher launcher = new WarLauncher(new ExplodedArchive(explodedRoot, true));
-		List<Archive> archives = launcher.getClassPathArchives();
+		List<Archive> archives = new ArrayList<>();
+		launcher.getClassPathArchivesIterator().forEachRemaining(archives::add);
 		assertThat(archives).hasSize(2);
 		assertThat(getUrls(archives)).containsOnly(new File(explodedRoot, "WEB-INF/classes").toURI().toURL(),
 				new File(explodedRoot, "WEB-INF/lib/foo.jar").toURI().toURL());
+		for (Archive archive : archives) {
+			archive.close();
+		}
 	}
 
 	@Test
 	void archivedWarHasOnlyWebInfClassesAndContentsOWebInfLibOnClasspath() throws Exception {
 		File jarRoot = createJarArchive("archive.war", "WEB-INF");
-		WarLauncher launcher = new WarLauncher(new JarFileArchive(jarRoot));
-		List<Archive> archives = launcher.getClassPathArchives();
-		assertThat(archives).hasSize(2);
-		assertThat(getUrls(archives)).containsOnly(new URL("jar:" + jarRoot.toURI().toURL() + "!/WEB-INF/classes!/"),
-				new URL("jar:" + jarRoot.toURI().toURL() + "!/WEB-INF/lib/foo.jar!/"));
+		try (JarFileArchive archive = new JarFileArchive(jarRoot)) {
+			WarLauncher launcher = new WarLauncher(archive);
+			List<Archive> classPathArchives = new ArrayList<>();
+			launcher.getClassPathArchivesIterator().forEachRemaining(classPathArchives::add);
+			assertThat(classPathArchives).hasSize(2);
+			assertThat(getUrls(classPathArchives)).containsOnly(
+					new URL("jar:" + jarRoot.toURI().toURL() + "!/WEB-INF/classes!/"),
+					new URL("jar:" + jarRoot.toURI().toURL() + "!/WEB-INF/lib/foo.jar!/"));
+			for (Archive classPathArchive : classPathArchives) {
+				classPathArchive.close();
+			}
+		}
 	}
 
 }

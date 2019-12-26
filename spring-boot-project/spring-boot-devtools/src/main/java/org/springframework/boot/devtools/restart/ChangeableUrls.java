@@ -22,6 +22,7 @@ import java.lang.management.ManagementFactory;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,6 +37,7 @@ import org.apache.commons.logging.Log;
 
 import org.springframework.boot.devtools.logger.DevToolsLogFactory;
 import org.springframework.boot.devtools.settings.DevToolsSettings;
+import org.springframework.core.log.LogMessage;
 import org.springframework.util.StringUtils;
 
 /**
@@ -73,15 +75,15 @@ final class ChangeableUrls implements Iterable<URL> {
 		return this.urls.iterator();
 	}
 
-	public int size() {
+	int size() {
 		return this.urls.size();
 	}
 
-	public URL[] toArray() {
+	URL[] toArray() {
 		return this.urls.toArray(new URL[0]);
 	}
 
-	public List<URL> toList() {
+	List<URL> toList() {
 		return Collections.unmodifiableList(this.urls);
 	}
 
@@ -90,7 +92,7 @@ final class ChangeableUrls implements Iterable<URL> {
 		return this.urls.toString();
 	}
 
-	public static ChangeableUrls fromClassLoader(ClassLoader classLoader) {
+	static ChangeableUrls fromClassLoader(ClassLoader classLoader) {
 		List<URL> urls = new ArrayList<>();
 		for (URL url : urlsFromClassLoader(classLoader)) {
 			urls.add(url);
@@ -117,29 +119,24 @@ final class ChangeableUrls implements Iterable<URL> {
 	}
 
 	private static List<URL> getUrlsFromClassPathOfJarManifestIfPossible(URL url) {
-		JarFile jarFile = getJarFileIfPossible(url);
-		if (jarFile == null) {
-			return Collections.emptyList();
-		}
-		try {
-			return getUrlsFromManifestClassPathAttribute(url, jarFile);
-		}
-		catch (IOException ex) {
-			throw new IllegalStateException("Failed to read Class-Path attribute from manifest of jar " + url, ex);
-		}
-	}
-
-	private static JarFile getJarFileIfPossible(URL url) {
 		try {
 			File file = new File(url.toURI());
 			if (file.isFile()) {
-				return new JarFile(file);
+				try (JarFile jarFile = new JarFile(file)) {
+					try {
+						return getUrlsFromManifestClassPathAttribute(url, jarFile);
+					}
+					catch (IOException ex) {
+						throw new IllegalStateException(
+								"Failed to read Class-Path attribute from manifest of jar " + url, ex);
+					}
+				}
 			}
 		}
 		catch (Exception ex) {
 			// Assume it's not a jar and continue
 		}
-		return null;
+		return Collections.emptyList();
 	}
 
 	private static List<URL> getUrlsFromManifestClassPathAttribute(URL jarUrl, JarFile jarFile) throws IOException {
@@ -161,7 +158,13 @@ final class ChangeableUrls implements Iterable<URL> {
 					urls.add(referenced);
 				}
 				else {
-					nonExistentEntries.add(referenced);
+					referenced = new URL(jarUrl, URLDecoder.decode(entry, "UTF-8"));
+					if (new File(referenced.getFile()).exists()) {
+						urls.add(referenced);
+					}
+					else {
+						nonExistentEntries.add(referenced);
+					}
 				}
 			}
 			catch (MalformedURLException ex) {
@@ -169,18 +172,18 @@ final class ChangeableUrls implements Iterable<URL> {
 			}
 		}
 		if (!nonExistentEntries.isEmpty()) {
-			logger.info("The Class-Path manifest attribute in " + jarFile.getName()
+			logger.info(LogMessage.of(() -> "The Class-Path manifest attribute in " + jarFile.getName()
 					+ " referenced one or more files that do not exist: "
-					+ StringUtils.collectionToCommaDelimitedString(nonExistentEntries));
+					+ StringUtils.collectionToCommaDelimitedString(nonExistentEntries)));
 		}
 		return urls;
 	}
 
-	public static ChangeableUrls fromUrls(Collection<URL> urls) {
+	static ChangeableUrls fromUrls(Collection<URL> urls) {
 		return fromUrls(new ArrayList<>(urls).toArray(new URL[urls.size()]));
 	}
 
-	public static ChangeableUrls fromUrls(URL... urls) {
+	static ChangeableUrls fromUrls(URL... urls) {
 		return new ChangeableUrls(urls);
 	}
 

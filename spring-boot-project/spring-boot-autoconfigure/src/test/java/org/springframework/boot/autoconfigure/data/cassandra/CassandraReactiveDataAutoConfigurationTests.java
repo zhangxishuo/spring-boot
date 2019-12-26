@@ -49,7 +49,7 @@ class CassandraReactiveDataAutoConfigurationTests {
 	private AnnotationConfigApplicationContext context;
 
 	@AfterEach
-	public void close() {
+	void close() {
 		if (this.context != null) {
 			this.context.close();
 		}
@@ -99,7 +99,7 @@ class CassandraReactiveDataAutoConfigurationTests {
 	static class TestConfiguration {
 
 		@Bean
-		public Session session() {
+		Session session() {
 			return mock(Session.class);
 		}
 

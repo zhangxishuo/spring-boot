@@ -29,19 +29,22 @@ import org.mockito.stubbing.Answer;
 import org.springframework.boot.actuate.endpoint.SecurityContext;
 import org.springframework.boot.actuate.endpoint.web.WebEndpointResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Tests for {@link HealthWebEndpointResponseMapper}.
  *
  * @author Stephane Nicoll
  */
+@Deprecated
 class HealthWebEndpointResponseMapperTests {
 
 	private final HealthStatusHttpMapper statusHttpMapper = new HealthStatusHttpMapper();
@@ -55,8 +58,8 @@ class HealthWebEndpointResponseMapperTests {
 		SecurityContext securityContext = mock(SecurityContext.class);
 		WebEndpointResponse<Health> response = mapper.mapDetails(supplier, securityContext);
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
-		verifyZeroInteractions(supplier);
-		verifyZeroInteractions(securityContext);
+		verifyNoInteractions(supplier);
+		verifyNoInteractions(securityContext);
 	}
 
 	@Test
@@ -67,12 +70,12 @@ class HealthWebEndpointResponseMapperTests {
 		WebEndpointResponse<Health> response = mapper.mapDetails(supplier, securityContext);
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
 		assertThat(response.getBody()).isNull();
-		verifyZeroInteractions(supplier);
+		verifyNoInteractions(supplier);
 		verify(securityContext).isUserInRole("ACTUATOR");
 	}
 
 	@Test
-	void mapDetailsWithAuthorizedUserInvokeSupplier() {
+	void mapDetailsWithAuthorizedUserInvokesSupplier() {
 		HealthWebEndpointResponseMapper mapper = createMapper(ShowDetails.WHEN_AUTHORIZED);
 		Supplier<Health> supplier = mockSupplier();
 		given(supplier.get()).willReturn(Health.down().build());
@@ -85,6 +88,39 @@ class HealthWebEndpointResponseMapperTests {
 	}
 
 	@Test
+	void mapDetailsWithRightAuthoritiesInvokesSupplier() {
+		HealthWebEndpointResponseMapper mapper = createMapper(ShowDetails.WHEN_AUTHORIZED);
+		Supplier<Health> supplier = mockSupplier();
+		given(supplier.get()).willReturn(Health.down().build());
+		SecurityContext securityContext = getSecurityContext("ACTUATOR");
+		WebEndpointResponse<Health> response = mapper.mapDetails(supplier, securityContext);
+		assertThat(response.getStatus()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE.value());
+		assertThat(response.getBody().getStatus()).isEqualTo(Status.DOWN);
+		verify(supplier).get();
+	}
+
+	@Test
+	void mapDetailsWithOtherAuthoritiesShouldNotInvokeSupplier() {
+		HealthWebEndpointResponseMapper mapper = createMapper(ShowDetails.WHEN_AUTHORIZED);
+		Supplier<Health> supplier = mockSupplier();
+		given(supplier.get()).willReturn(Health.down().build());
+		SecurityContext securityContext = getSecurityContext("OTHER");
+		WebEndpointResponse<Health> response = mapper.mapDetails(supplier, securityContext);
+		assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+		assertThat(response.getBody()).isNull();
+		verifyNoInteractions(supplier);
+	}
+
+	private SecurityContext getSecurityContext(String other) {
+		SecurityContext securityContext = mock(SecurityContext.class);
+		Authentication principal = mock(Authentication.class);
+		given(securityContext.getPrincipal()).willReturn(principal);
+		given(principal.getAuthorities())
+				.willAnswer((invocation) -> Collections.singleton(new SimpleGrantedAuthority(other)));
+		return securityContext;
+	}
+
+	@Test
 	void mapDetailsWithUnavailableHealth() {
 		HealthWebEndpointResponseMapper mapper = createMapper(ShowDetails.ALWAYS);
 		Supplier<Health> supplier = mockSupplier();
@@ -93,7 +129,7 @@ class HealthWebEndpointResponseMapperTests {
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
 		assertThat(response.getBody()).isNull();
 		verify(supplier).get();
-		verifyZeroInteractions(securityContext);
+		verifyNoInteractions(securityContext);
 	}
 
 	@SuppressWarnings("unchecked")

@@ -34,7 +34,7 @@ import static org.mockito.Mockito.mock;
  */
 class RSocketRequesterAutoConfigurationTests {
 
-	private ApplicationContextRunner contextRunner = new ApplicationContextRunner().withConfiguration(
+	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner().withConfiguration(
 			AutoConfigurations.of(RSocketStrategiesAutoConfiguration.class, RSocketRequesterAutoConfiguration.class));
 
 	@Test
@@ -63,7 +63,7 @@ class RSocketRequesterAutoConfigurationTests {
 	static class CustomRSocketRequesterBuilder {
 
 		@Bean
-		public MyRSocketRequesterBuilder myRSocketRequesterBuilder() {
+		MyRSocketRequesterBuilder myRSocketRequesterBuilder() {
 			return mock(MyRSocketRequesterBuilder.class);
 		}
 

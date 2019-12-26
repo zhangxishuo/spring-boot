@@ -61,7 +61,7 @@ class SslConnectorCustomizerTests {
 	private Connector connector;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.tomcat = new Tomcat();
 		this.connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
 		this.connector.setPort(0);
@@ -69,7 +69,7 @@ class SslConnectorCustomizerTests {
 	}
 
 	@AfterEach
-	public void stop() throws Exception {
+	void stop() throws Exception {
 		System.clearProperty("javax.net.ssl.trustStorePassword");
 		ReflectionTestUtils.setField(TomcatURLStreamHandlerFactory.class, "instance", null);
 		ReflectionTestUtils.setField(URL.class, "factory", null);
@@ -160,8 +160,7 @@ class SslConnectorCustomizerTests {
 	}
 
 	@Test
-	void customizeWhenSslStoreProviderPresentShouldIgnorePasswordFromSsl(CapturedOutput capturedOutput)
-			throws Exception {
+	void customizeWhenSslStoreProviderPresentShouldIgnorePasswordFromSsl(CapturedOutput output) throws Exception {
 		System.setProperty("javax.net.ssl.trustStorePassword", "trustStoreSecret");
 		Ssl ssl = new Ssl();
 		ssl.setKeyPassword("password");
@@ -174,7 +173,7 @@ class SslConnectorCustomizerTests {
 		customizer.customize(connector);
 		this.tomcat.start();
 		assertThat(connector.getState()).isEqualTo(LifecycleState.STARTED);
-		assertThat(capturedOutput).doesNotContain("Password verification failed");
+		assertThat(output).doesNotContain("Password verification failed");
 	}
 
 	@Test

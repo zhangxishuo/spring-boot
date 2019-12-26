@@ -47,7 +47,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Tests for {@link Restarter}.
@@ -59,12 +59,12 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 class RestarterTests {
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		RestarterInitializer.setRestarterInstance();
 	}
 
 	@AfterEach
-	public void cleanup() {
+	void cleanup() {
 		Restarter.clearInstance();
 	}
 
@@ -76,14 +76,13 @@ class RestarterTests {
 	}
 
 	@Test
-	void testRestart(CapturedOutput capturedOutput) throws Exception {
+	void testRestart(CapturedOutput output) throws Exception {
 		Restarter.clearInstance();
 		Thread thread = new Thread(SampleApplication::main);
 		thread.start();
 		Thread.sleep(2600);
-		String output = capturedOutput.toString();
-		assertThat(StringUtils.countOccurrencesOf(output, "Tick 0")).isGreaterThan(1);
-		assertThat(StringUtils.countOccurrencesOf(output, "Tick 1")).isGreaterThan(1);
+		assertThat(StringUtils.countOccurrencesOf(output.toString(), "Tick 0")).isGreaterThan(1);
+		assertThat(StringUtils.countOccurrencesOf(output.toString(), "Tick 1")).isGreaterThan(1);
 		assertThat(CloseCountingApplicationListener.closed).isGreaterThan(0);
 	}
 
@@ -137,7 +136,7 @@ class RestarterTests {
 		ObjectFactory objectFactory = mock(ObjectFactory.class);
 		Object attribute = Restarter.getInstance().getOrAddAttribute("x", objectFactory);
 		assertThat(attribute).isEqualTo("abc");
-		verifyZeroInteractions(objectFactory);
+		verifyNoInteractions(objectFactory);
 	}
 
 	@Test
@@ -171,26 +170,26 @@ class RestarterTests {
 
 	@Component
 	@EnableScheduling
-	public static class SampleApplication {
+	static class SampleApplication {
 
 		private int count = 0;
 
 		private static volatile boolean quit = false;
 
 		@Scheduled(fixedDelay = 200)
-		public void tickBean() {
+		void tickBean() {
 			System.out.println("Tick " + this.count++ + " " + Thread.currentThread());
 		}
 
 		@Scheduled(initialDelay = 500, fixedDelay = 500)
-		public void restart() {
+		void restart() {
 			System.out.println("Restart " + Thread.currentThread());
 			if (!SampleApplication.quit) {
 				Restarter.getInstance().restart();
 			}
 		}
 
-		public static void main(String... args) {
+		static void main(String... args) {
 			Restarter.initialize(args, false, new MockRestartInitializer(), true);
 			AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 					SampleApplication.class);
@@ -212,7 +211,7 @@ class RestarterTests {
 
 	}
 
-	private static class CloseCountingApplicationListener implements ApplicationListener<ContextClosedEvent> {
+	static class CloseCountingApplicationListener implements ApplicationListener<ContextClosedEvent> {
 
 		static int closed = 0;
 
@@ -223,7 +222,7 @@ class RestarterTests {
 
 	}
 
-	private static class TestableRestarter extends Restarter {
+	static class TestableRestarter extends Restarter {
 
 		private ClassLoader relaunchClassLoader;
 
@@ -257,7 +256,7 @@ class RestarterTests {
 		protected void stop() {
 		}
 
-		public ClassLoader getRelaunchClassLoader() {
+		ClassLoader getRelaunchClassLoader() {
 			return this.relaunchClassLoader;
 		}
 

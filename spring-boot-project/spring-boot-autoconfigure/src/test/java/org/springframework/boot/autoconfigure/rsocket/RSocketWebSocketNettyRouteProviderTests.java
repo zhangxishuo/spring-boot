@@ -28,6 +28,7 @@ import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.HttpHandlerAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.WebFluxAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAutoConfiguration;
+import org.springframework.boot.rsocket.server.ServerRSocketFactoryProcessor;
 import org.springframework.boot.test.context.runner.ReactiveWebApplicationContextRunner;
 import org.springframework.boot.web.embedded.netty.NettyReactiveWebServerFactory;
 import org.springframework.boot.web.reactive.context.AnnotationConfigReactiveWebServerApplicationContext;
@@ -51,7 +52,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Brian Clozel
  */
-
 class RSocketWebSocketNettyRouteProviderTests {
 
 	@Test
@@ -76,6 +76,7 @@ class RSocketWebSocketNettyRouteProviderTests {
 					WebTestClient client = createWebTestClient(serverContext.getWebServer());
 					client.get().uri("/protocol").exchange().expectStatus().isOk().expectBody().jsonPath("name",
 							"http");
+					assertThat(WebConfiguration.processorCallCount).isEqualTo(1);
 				});
 	}
 
@@ -86,22 +87,33 @@ class RSocketWebSocketNettyRouteProviderTests {
 	private RSocketRequester createRSocketRequester(ApplicationContext context, WebServer server) {
 		int port = server.getPort();
 		RSocketRequester.Builder builder = context.getBean(RSocketRequester.Builder.class);
-		return builder.connectWebSocket(URI.create("ws://localhost:" + port + "/rsocket")).block();
+		return builder.dataMimeType(MediaType.APPLICATION_CBOR)
+				.connectWebSocket(URI.create("ws://localhost:" + port + "/rsocket")).block();
 	}
 
 	@Configuration(proxyBeanMethods = false)
 	static class WebConfiguration {
 
+		static int processorCallCount = 0;
+
 		@Bean
-		public WebController webController() {
+		WebController webController() {
 			return new WebController();
 		}
 
 		@Bean
-		public NettyReactiveWebServerFactory customServerFactory(RSocketWebSocketNettyRouteProvider routeProvider) {
+		NettyReactiveWebServerFactory customServerFactory(RSocketWebSocketNettyRouteProvider routeProvider) {
 			NettyReactiveWebServerFactory serverFactory = new NettyReactiveWebServerFactory(0);
 			serverFactory.addRouteProviders(routeProvider);
 			return serverFactory;
+		}
+
+		@Bean
+		ServerRSocketFactoryProcessor myRSocketFactoryProcessor() {
+			return (server) -> {
+				processorCallCount++;
+				return server;
+			};
 		}
 
 	}
@@ -111,18 +123,18 @@ class RSocketWebSocketNettyRouteProviderTests {
 
 		@GetMapping(path = "/protocol", produces = MediaType.APPLICATION_JSON_VALUE)
 		@ResponseBody
-		public TestProtocol testWebEndpoint() {
+		TestProtocol testWebEndpoint() {
 			return new TestProtocol("http");
 		}
 
 		@MessageMapping("websocket")
-		public TestProtocol testRSocketEndpoint() {
+		TestProtocol testRSocketEndpoint() {
 			return new TestProtocol("rsocket");
 		}
 
 	}
 
-	static class TestProtocol {
+	public static class TestProtocol {
 
 		private String name;
 

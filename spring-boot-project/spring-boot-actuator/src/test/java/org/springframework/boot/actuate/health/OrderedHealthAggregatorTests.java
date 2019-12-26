@@ -30,12 +30,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Christian Dupuis
  */
+@Deprecated
 class OrderedHealthAggregatorTests {
 
 	private OrderedHealthAggregator healthAggregator;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.healthAggregator = new OrderedHealthAggregator();
 	}
 

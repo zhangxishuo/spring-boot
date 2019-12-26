@@ -61,7 +61,7 @@ class AutoConfigurationImportSelectorTests {
 	private List<AutoConfigurationImportFilter> filters = new ArrayList<>();
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		MockitoAnnotations.initMocks(this);
 		this.importSelector.setBeanFactory(this.beanFactory);
 		this.importSelector.setEnvironment(this.environment);
@@ -170,7 +170,7 @@ class AutoConfigurationImportSelectorTests {
 	@Test
 	void nonAutoConfigurationPropertyExclusionsWhenPresentOnClassPathShouldThrowException() {
 		this.environment.setProperty("spring.autoconfigure.exclude",
-				"org.springframework.boot.autoconfigure." + "AutoConfigurationImportSelectorTests.TestConfiguration");
+				"org.springframework.boot.autoconfigure.AutoConfigurationImportSelectorTests.TestConfiguration");
 		assertThatIllegalStateException().isThrownBy(() -> selectImports(BasicEnableAutoConfiguration.class));
 	}
 
@@ -224,13 +224,13 @@ class AutoConfigurationImportSelectorTests {
 			return Collections.singletonList((event) -> this.lastEvent = event);
 		}
 
-		public AutoConfigurationImportEvent getLastEvent() {
+		AutoConfigurationImportEvent getLastEvent() {
 			return this.lastEvent;
 		}
 
 	}
 
-	private static class TestAutoConfigurationImportFilter implements AutoConfigurationImportFilter, BeanFactoryAware {
+	static class TestAutoConfigurationImportFilter implements AutoConfigurationImportFilter, BeanFactoryAware {
 
 		private final Set<String> nonMatching = new HashSet<>();
 
@@ -256,7 +256,7 @@ class AutoConfigurationImportSelectorTests {
 			this.beanFactory = beanFactory;
 		}
 
-		public BeanFactory getBeanFactory() {
+		BeanFactory getBeanFactory() {
 			return this.beanFactory;
 		}
 

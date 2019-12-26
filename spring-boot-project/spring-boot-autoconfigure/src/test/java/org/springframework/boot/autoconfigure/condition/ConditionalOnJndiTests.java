@@ -54,13 +54,13 @@ class ConditionalOnJndiTests {
 	private MockableOnJndi condition = new MockableOnJndi();
 
 	@BeforeEach
-	public void setupThreadContextClassLoader() {
+	void setupThreadContextClassLoader() {
 		this.threadContextClassLoader = Thread.currentThread().getContextClassLoader();
 		Thread.currentThread().setContextClassLoader(new JndiPropertiesHidingClassLoader(getClass().getClassLoader()));
 	}
 
 	@AfterEach
-	public void close() {
+	void close() {
 		TestableInitialContextFactory.clearAll();
 		if (this.initialContextFactory != null) {
 			System.setProperty(Context.INITIAL_CONTEXT_FACTORY, this.initialContextFactory);
@@ -130,7 +130,7 @@ class ConditionalOnJndiTests {
 	static class JndiAvailableConfiguration {
 
 		@Bean
-		public String foo() {
+		String foo() {
 			return "foo";
 		}
 
@@ -141,13 +141,13 @@ class ConditionalOnJndiTests {
 	static class JndiConditionConfiguration {
 
 		@Bean
-		public String foo() {
+		String foo() {
 			return "foo";
 		}
 
 	}
 
-	private static class MockableOnJndi extends OnJndiCondition {
+	static class MockableOnJndi extends OnJndiCondition {
 
 		private boolean jndiAvailable = true;
 
@@ -168,7 +168,7 @@ class ConditionalOnJndiTests {
 			};
 		}
 
-		public void setFoundLocation(String foundLocation) {
+		void setFoundLocation(String foundLocation) {
 			this.foundLocation = foundLocation;
 		}
 

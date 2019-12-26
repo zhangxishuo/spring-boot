@@ -22,6 +22,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 
 import org.springframework.boot.loader.TestJarCreator;
@@ -33,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Andy Wilkinson
  */
+@ExtendWith(JarUrlProtocolHandler.class)
 class HandlerTests {
 
 	private final Handler handler = new Handler();
@@ -125,7 +127,7 @@ class HandlerTests {
 	@Test
 	void urlWithSpecReferencingParentDirectory() throws MalformedURLException {
 		assertStandardAndCustomHandlerUrlsAreEqual("file:/test.jar!/BOOT-INF/classes!/xsd/folderA/a.xsd",
-				"../folderB/b.xsd");
+				"../folderB/c/d/e.xsd");
 	}
 
 	@Test
@@ -137,7 +139,7 @@ class HandlerTests {
 	@Test
 	void urlWithSpecReferencingCurrentDirectory() throws MalformedURLException {
 		assertStandardAndCustomHandlerUrlsAreEqual("file:/test.jar!/BOOT-INF/classes!/xsd/folderA/a.xsd",
-				"./folderB/./b.xsd");
+				"./folderB/c/d/e.xsd");
 	}
 
 	@Test
@@ -154,12 +156,41 @@ class HandlerTests {
 	void fallbackToJdksJarUrlStreamHandler(@TempDir File tempDir) throws Exception {
 		File testJar = new File(tempDir, "test.jar");
 		TestJarCreator.createTestJar(testJar);
-		URLConnection connection = new URL(null, "jar:file:" + testJar.getAbsolutePath() + "!/nested.jar!/",
-				this.handler).openConnection();
+		URLConnection connection = new URL(null, "jar:" + testJar.toURI().toURL() + "!/nested.jar!/", this.handler)
+				.openConnection();
 		assertThat(connection).isInstanceOf(JarURLConnection.class);
-		URLConnection jdkConnection = new URL(null, "jar:file:file:" + testJar.getAbsolutePath() + "!/nested.jar!/",
+		((JarURLConnection) connection).getJarFile().close();
+		URLConnection jdkConnection = new URL(null, "jar:file:" + testJar.toURI().toURL() + "!/nested.jar!/",
 				this.handler).openConnection();
 		assertThat(jdkConnection).isNotInstanceOf(JarURLConnection.class);
+	}
+
+	@Test
+	void whenJarHasAPlusInItsPathConnectionJarFileMatchesOriginalJarFile(@TempDir File tempDir) throws Exception {
+		File testJar = new File(tempDir, "t+e+s+t.jar");
+		TestJarCreator.createTestJar(testJar);
+		URL url = new URL(null, "jar:" + testJar.toURI().toURL() + "!/nested.jar!/3.dat", this.handler);
+		JarURLConnection connection = (JarURLConnection) url.openConnection();
+		try {
+			assertThat(connection.getJarFile().getRootJarFile().getFile()).isEqualTo(testJar);
+		}
+		finally {
+			connection.getJarFile().close();
+		}
+	}
+
+	@Test
+	void whenJarHasASpaceInItsPathConnectionJarFileMatchesOriginalJarFile(@TempDir File tempDir) throws Exception {
+		File testJar = new File(tempDir, "t e s t.jar");
+		TestJarCreator.createTestJar(testJar);
+		URL url = new URL(null, "jar:" + testJar.toURI().toURL() + "!/nested.jar!/3.dat", this.handler);
+		JarURLConnection connection = (JarURLConnection) url.openConnection();
+		try {
+			assertThat(connection.getJarFile().getRootJarFile().getFile()).isEqualTo(testJar);
+		}
+		finally {
+			connection.getJarFile().close();
+		}
 	}
 
 	private void assertStandardAndCustomHandlerUrlsAreEqual(String context, String spec) throws MalformedURLException {

@@ -43,6 +43,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.jdbc.DataSourceUnwrapper;
 import org.springframework.boot.jdbc.metadata.DataSourcePoolMetadataProvider;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.log.LogMessage;
 import org.springframework.util.StringUtils;
 
 /**
@@ -66,7 +67,7 @@ public class DataSourcePoolMetricsAutoConfiguration {
 		private static final String DATASOURCE_SUFFIX = "dataSource";
 
 		@Autowired
-		public void bindDataSourcesToRegistry(Map<String, DataSource> dataSources, MeterRegistry registry,
+		void bindDataSourcesToRegistry(Map<String, DataSource> dataSources, MeterRegistry registry,
 				ObjectProvider<DataSourcePoolMetadataProvider> metadataProviders) {
 			List<DataSourcePoolMetadataProvider> metadataProvidersList = metadataProviders.stream()
 					.collect(Collectors.toList());
@@ -109,7 +110,7 @@ public class DataSourcePoolMetricsAutoConfiguration {
 		}
 
 		@Autowired
-		public void bindMetricsRegistryToHikariDataSources(Collection<DataSource> dataSources) {
+		void bindMetricsRegistryToHikariDataSources(Collection<DataSource> dataSources) {
 			for (DataSource dataSource : dataSources) {
 				HikariDataSource hikariDataSource = DataSourceUnwrapper.unwrap(dataSource, HikariDataSource.class);
 				if (hikariDataSource != null) {
@@ -124,7 +125,7 @@ public class DataSourcePoolMetricsAutoConfiguration {
 					hikari.setMetricsTrackerFactory(new MicrometerMetricsTrackerFactory(this.registry));
 				}
 				catch (Exception ex) {
-					logger.warn("Failed to bind Hikari metrics: " + ex.getMessage());
+					logger.warn(LogMessage.format("Failed to bind Hikari metrics: %s", ex.getMessage()));
 				}
 			}
 		}

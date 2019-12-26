@@ -37,7 +37,7 @@ class EnvironmentEndpointWebIntegrationTests {
 	private WebTestClient client;
 
 	@BeforeEach
-	public void prepareEnvironment(ConfigurableApplicationContext context, WebTestClient client) {
+	void prepareEnvironment(ConfigurableApplicationContext context, WebTestClient client) {
 		TestPropertyValues.of("foo:bar", "fool:baz").applyTo(context);
 		this.client = client;
 		this.context = context;
@@ -128,12 +128,12 @@ class EnvironmentEndpointWebIntegrationTests {
 	static class TestConfiguration {
 
 		@Bean
-		public EnvironmentEndpoint endpoint(Environment environment) {
+		EnvironmentEndpoint endpoint(Environment environment) {
 			return new EnvironmentEndpoint(environment);
 		}
 
 		@Bean
-		public EnvironmentEndpointWebExtension environmentEndpointWebExtension(EnvironmentEndpoint endpoint) {
+		EnvironmentEndpointWebExtension environmentEndpointWebExtension(EnvironmentEndpoint endpoint) {
 			return new EnvironmentEndpointWebExtension(endpoint);
 		}
 

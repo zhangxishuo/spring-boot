@@ -59,12 +59,12 @@ class GroovyTemplateAutoConfigurationTests {
 	private AnnotationConfigServletWebApplicationContext context = new AnnotationConfigServletWebApplicationContext();
 
 	@BeforeEach
-	public void setupContext() {
+	void setupContext() {
 		this.context.setServletContext(new MockServletContext());
 	}
 
 	@AfterEach
-	public void close() {
+	void close() {
 		LocaleContextHolder.resetLocaleContext();
 		if (this.context != null) {
 			this.context.close();
@@ -80,8 +80,7 @@ class GroovyTemplateAutoConfigurationTests {
 	@Test
 	void emptyTemplateLocation() {
 		new File(this.buildOutput.getTestResourcesLocation(), "empty-templates/empty-directory").mkdirs();
-		registerAndRefreshContext(
-				"spring.groovy.template.resource-loader-path:" + "classpath:/templates/empty-directory/");
+		registerAndRefreshContext("spring.groovy.template.resource-loader-path:classpath:/templates/empty-directory/");
 	}
 
 	@Test

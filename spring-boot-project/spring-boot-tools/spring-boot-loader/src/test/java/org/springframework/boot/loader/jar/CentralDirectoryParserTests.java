@@ -17,10 +17,12 @@
 package org.springframework.boot.loader.jar;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -40,13 +42,18 @@ class CentralDirectoryParserTests {
 
 	private File jarFile;
 
-	private RandomAccessData jarData;
+	private RandomAccessDataFile jarData;
 
 	@BeforeEach
-	public void setup(@TempDir File tempDir) throws Exception {
+	void setup(@TempDir File tempDir) throws Exception {
 		this.jarFile = new File(tempDir, "test.jar");
 		TestJarCreator.createTestJar(this.jarFile);
 		this.jarData = new RandomAccessDataFile(this.jarFile);
+	}
+
+	@AfterEach
+	void tearDown() throws IOException {
+		this.jarData.close();
 	}
 
 	@Test
@@ -81,7 +88,7 @@ class CentralDirectoryParserTests {
 		assertThat(headers.hasNext()).isFalse();
 	}
 
-	private static class Collector implements CentralDirectoryVisitor {
+	static class Collector implements CentralDirectoryVisitor {
 
 		private List<CentralDirectoryFileHeader> headers = new ArrayList<>();
 
@@ -98,13 +105,13 @@ class CentralDirectoryParserTests {
 		public void visitEnd() {
 		}
 
-		public List<CentralDirectoryFileHeader> getHeaders() {
+		List<CentralDirectoryFileHeader> getHeaders() {
 			return this.headers;
 		}
 
 	}
 
-	private static class MockCentralDirectoryVisitor implements CentralDirectoryVisitor {
+	static class MockCentralDirectoryVisitor implements CentralDirectoryVisitor {
 
 		private final List<String> invocations = new ArrayList<>();
 
@@ -123,7 +130,7 @@ class CentralDirectoryParserTests {
 			this.invocations.add("visitEnd");
 		}
 
-		public List<String> getInvocations() {
+		List<String> getInvocations() {
 			return this.invocations;
 		}
 

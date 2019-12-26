@@ -34,6 +34,7 @@ import org.springframework.util.SystemPropertyUtils;
  *
  * @author Phillip Webb
  * @author Dave Syer
+ * @since 1.0.0
  */
 public abstract class AbstractLoggingSystem extends LoggingSystem {
 
@@ -193,12 +194,8 @@ public abstract class AbstractLoggingSystem extends LoggingSystem {
 		}
 
 		public void map(LogLevel system, T nativeLevel) {
-			if (!this.systemToNative.containsKey(system)) {
-				this.systemToNative.put(system, nativeLevel);
-			}
-			if (!this.nativeToSystem.containsKey(nativeLevel)) {
-				this.nativeToSystem.put(nativeLevel, system);
-			}
+			this.systemToNative.putIfAbsent(system, nativeLevel);
+			this.nativeToSystem.putIfAbsent(nativeLevel, system);
 		}
 
 		public LogLevel convertNativeToSystem(T level) {

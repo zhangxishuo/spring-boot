@@ -55,13 +55,13 @@ class CommandRunnerTests {
 	private ClassLoader loader;
 
 	@AfterEach
-	public void close() {
+	void close() {
 		Thread.currentThread().setContextClassLoader(this.loader);
 		System.clearProperty("debug");
 	}
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.loader = Thread.currentThread().getContextClassLoader();
 		MockitoAnnotations.initMocks(this);
 		this.commandRunner = new CommandRunner("spring") {
@@ -143,15 +143,6 @@ class CommandRunnerTests {
 	void handlesRegularExceptionWithoutMessage() throws Exception {
 		willThrow(new NullPointerException()).given(this.regularCommand).run();
 		int status = this.commandRunner.runAndHandleErrors("command");
-		assertThat(status).isEqualTo(1);
-		assertThat(this.calls).containsOnly(Call.ERROR_MESSAGE, Call.PRINT_STACK_TRACE);
-	}
-
-	@Test
-	void handlesExceptionWithDashD() throws Exception {
-		willThrow(new RuntimeException()).given(this.regularCommand).run();
-		int status = this.commandRunner.runAndHandleErrors("command", "-d");
-		assertThat(System.getProperty("debug")).isEqualTo("true");
 		assertThat(status).isEqualTo(1);
 		assertThat(this.calls).containsOnly(Call.ERROR_MESSAGE, Call.PRINT_STACK_TRACE);
 	}

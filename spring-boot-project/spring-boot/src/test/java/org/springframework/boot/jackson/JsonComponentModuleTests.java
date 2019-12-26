@@ -44,7 +44,7 @@ class JsonComponentModuleTests {
 	private AnnotationConfigApplicationContext context;
 
 	@AfterEach
-	public void closeContext() {
+	void closeContext() {
 		if (this.context != null) {
 			this.context.close();
 		}
@@ -181,7 +181,7 @@ class JsonComponentModuleTests {
 	@JsonComponent
 	static class ComponentWithInnerAbstractClass {
 
-		private abstract static class AbstractSerializer extends NameAndAgeJsonComponent.Serializer {
+		static class AbstractSerializer extends NameAndAgeJsonComponent.Serializer {
 
 		}
 

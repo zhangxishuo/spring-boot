@@ -34,10 +34,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ClassLoaderIntegrationTests {
 
 	@RegisterExtension
-	private CliTester cli;
+	CliTester cli;
 
-	ClassLoaderIntegrationTests(CapturedOutput capturedOutput) {
-		this.cli = new CliTester("src/test/resources/", capturedOutput);
+	ClassLoaderIntegrationTests(CapturedOutput output) {
+		this.cli = new CliTester("src/test/resources/", output);
 	}
 
 	@Test

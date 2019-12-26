@@ -60,6 +60,36 @@ class NewRelicMetricsExportAutoConfigurationTests {
 	}
 
 	@Test
+	void failsToAutoConfigureWithoutEventType() {
+		this.contextRunner.withUserConfiguration(BaseConfiguration.class)
+				.withPropertyValues("management.metrics.export.newrelic.api-key=abcde",
+						"management.metrics.export.newrelic.account-id=12345",
+						"management.metrics.export.newrelic.event-type=")
+				.run((context) -> assertThat(context).hasFailed());
+	}
+
+	@Test
+	void autoConfiguresWithEventTypeOverriden() {
+		this.contextRunner.withUserConfiguration(BaseConfiguration.class)
+				.withPropertyValues("management.metrics.export.newrelic.api-key=abcde",
+						"management.metrics.export.newrelic.account-id=12345",
+						"management.metrics.export.newrelic.event-type=wxyz")
+				.run((context) -> assertThat(context).hasSingleBean(NewRelicMeterRegistry.class)
+						.hasSingleBean(Clock.class).hasSingleBean(NewRelicConfig.class));
+	}
+
+	@Test
+	void autoConfiguresWithMeterNameEventTypeEnabledAndWithoutEventType() {
+		this.contextRunner.withUserConfiguration(BaseConfiguration.class)
+				.withPropertyValues("management.metrics.export.newrelic.api-key=abcde",
+						"management.metrics.export.newrelic.account-id=12345",
+						"management.metrics.export.newrelic.event-type=",
+						"management.metrics.export.newrelic.meter-name-event-type-enabled=true")
+				.run((context) -> assertThat(context).hasSingleBean(NewRelicMeterRegistry.class)
+						.hasSingleBean(Clock.class).hasSingleBean(NewRelicConfig.class));
+	}
+
+	@Test
 	void autoConfiguresWithAccountIdAndApiKey() {
 		this.contextRunner.withUserConfiguration(BaseConfiguration.class)
 				.withPropertyValues("management.metrics.export.newrelic.api-key=abcde",
@@ -110,7 +140,7 @@ class NewRelicMetricsExportAutoConfigurationTests {
 	static class BaseConfiguration {
 
 		@Bean
-		public Clock customClock() {
+		Clock customClock() {
 			return Clock.SYSTEM;
 		}
 
@@ -121,7 +151,7 @@ class NewRelicMetricsExportAutoConfigurationTests {
 	static class CustomConfigConfiguration {
 
 		@Bean
-		public NewRelicConfig customConfig() {
+		NewRelicConfig customConfig() {
 			return (key) -> {
 				if ("newrelic.accountId".equals(key)) {
 					return "abcde";
@@ -140,7 +170,7 @@ class NewRelicMetricsExportAutoConfigurationTests {
 	static class CustomRegistryConfiguration {
 
 		@Bean
-		public NewRelicMeterRegistry customRegistry(NewRelicConfig config, Clock clock) {
+		NewRelicMeterRegistry customRegistry(NewRelicConfig config, Clock clock) {
 			return new NewRelicMeterRegistry(config, clock);
 		}
 

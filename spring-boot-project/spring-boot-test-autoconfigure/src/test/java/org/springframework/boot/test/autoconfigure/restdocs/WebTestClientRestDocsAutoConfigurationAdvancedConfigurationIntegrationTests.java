@@ -55,7 +55,7 @@ class WebTestClientRestDocsAutoConfigurationAdvancedConfigurationIntegrationTest
 	private File generatedSnippets;
 
 	@BeforeEach
-	public void deleteSnippets() {
+	void deleteSnippets() {
 		this.generatedSnippets = new File(new BuildOutput(getClass()).getRootLocation(), "generated-snippets");
 		FileSystemUtils.deleteRecursively(this.generatedSnippets);
 	}
@@ -72,21 +72,21 @@ class WebTestClientRestDocsAutoConfigurationAdvancedConfigurationIntegrationTest
 		assertThat(new File(defaultSnippetsDir, "response-fields.md")).isFile();
 	}
 
-	@TestConfiguration
-	public static class CustomizationConfiguration {
+	@TestConfiguration(proxyBeanMethods = false)
+	static class CustomizationConfiguration {
 
 		@Bean
-		public RestDocumentationResultHandler restDocumentation() {
+		RestDocumentationResultHandler restDocumentation() {
 			return MockMvcRestDocumentation.document("{method-name}");
 		}
 
 		@Bean
-		public RestDocsWebTestClientConfigurationCustomizer templateFormatCustomizer() {
+		RestDocsWebTestClientConfigurationCustomizer templateFormatCustomizer() {
 			return (configurer) -> configurer.snippets().withTemplateFormat(TemplateFormats.markdown());
 		}
 
 		@Bean
-		public RestDocsWebTestClientConfigurationCustomizer defaultSnippetsCustomizer() {
+		RestDocsWebTestClientConfigurationCustomizer defaultSnippetsCustomizer() {
 			return (configurer) -> configurer.snippets()
 					.withAdditionalDefaults(responseFields(fieldWithPath("_links.self").description("Main URL")));
 		}
